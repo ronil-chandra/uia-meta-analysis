@@ -27,7 +27,7 @@ library(metafor)
 
 ```{r load data, echo=TRUE, include = TRUE}
 
-maindata <- read_csv("psash-170420-test.csv")
+maindata <- read_csv("data/psash-170420-test.csv")
 
 ```
 
