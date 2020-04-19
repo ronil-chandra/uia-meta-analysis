@@ -1,0 +1,13 @@
+﻿auth,pub,authpub,start,end,country,type,num_tot,fem_tot,fam_tot,multi_tot,age_mean,age_med,num_anr_tot,psah_tot,smoke_tot,fu_mean_tot,fu_med_tot,size,num,num_anr,psah,fu,rupt,rupt_psah,rupt_fatal,nos_select,nos_compare,nos_outcome,nos_total
+Bor,2015,Bor 2015,,,International,prospective,363,280,72,163,55,,468,98,131,33.6,25.2,3,,33,,,1,,,,,,
+Bor,2015,Bor 2015,,,International,prospective,363,280,72,163,55,,468,98,131,33.6,25.2,5,,269,,,2,,,,,,
+Bor,2015,Bor 2015,,,International,prospective,363,280,72,163,55,,468,98,131,33.6,25.2,7,,403,,,2,,,,,,
+Bor,2015,Bor 2015,,,International,prospective,363,280,72,163,55,,468,98,131,33.6,25.2,10,,403,,,3,,,,,,
+Broderick,2009,Broderick 2009,,,International,prospective,113,75,113,,51.4,,148,0,94,,,3,72,,,,1,0,0,,,,
+Broderick,2009,Broderick 2009,,,International,prospective,113,75,113,,51.4,,148,0,94,,,5,72,,,,1,0,0,,,,
+Broderick,2009,Broderick 2009,,,International,prospective,113,75,113,,51.4,,148,0,94,,,7,108,,,,2,0,0,,,,
+Broderick,2009,Broderick 2009,,,International,prospective,113,75,113,,51.4,,148,0,94,,,10,108,,,,2,0,0,,,,
+Burns,2009,Burns 2009,1987,2006,United States,retrospective,165,120,20,46,64,,191,12,91,,47,3,,,,,,,,,,,
+Burns,2009,Burns 2009,1987,2006,United States,retrospective,165,120,20,46,64,,191,12,91,,47,5,,,,,,,,,,,
+Burns,2009,Burns 2009,1987,2006,United States,retrospective,165,120,20,46,64,,191,12,91,,47,7,,,,,,,,,,,
+Burns,2009,Burns 2009,1987,2006,United States,retrospective,165,120,20,46,64,,191,12,91,,47,10,,173,,,1,,,,,,
