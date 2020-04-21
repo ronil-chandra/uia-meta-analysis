@@ -271,10 +271,13 @@ A simple forest plot with DL and CP method for CIs
 ```{r simple forest with DL and CP method for CIs, fig.width = 10}
 
 pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "CP") 
-forest(pes.summary,
-       pscale = 100,
-       xlim=c(0,10),
-       digits = 4)
+forest(pes.summary, xlim=c(-1.6,1.6), atransf=transf.ztor,
+       at=transf.rtoz(c(-.4,-.2,0,.2,.4,.6)), 
+       digits=c(2,1), cex=.8)
+text(-1.6, 18, "Author(s), Year", pos=4, cex=.8)
+text( 1.6, 18, "Correlation [95% CI]", pos=2, cex=.8)
+
+
 
 ```
 
@@ -367,8 +370,25 @@ funnel(pes.da.sj, xlab = "Double arcine transformed rupture risk")
 ```
 
 
+# Test for bias - Eggers and Rank Correlation
 
+## Eggers test
 
+```{r eggers}
+
+regtest(pes.da.sj)
+
+```
+
+Eggers regression test is not sigificant, so there is no evidence of publication bias. 
+
+## Rank Correlation test
+
+```{r rank correlation}
+ranktest(pes.da.sj)
+```
+
+Rank correlation test is not significant, so there is no evidence of publication bias. 
 
 
 # Create sub-group proportions and perform moderator analysis
