@@ -271,13 +271,10 @@ A simple forest plot with DL and CP method for CIs
 ```{r simple forest with DL and CP method for CIs, fig.width = 10}
 
 pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "CP") 
-forest(pes.summary, xlim=c(-1.6,1.6), atransf=transf.ztor,
-       at=transf.rtoz(c(-.4,-.2,0,.2,.4,.6)), 
-       digits=c(2,1), cex=.8)
-text(-1.6, 18, "Author(s), Year", pos=4, cex=.8)
-text( 1.6, 18, "Correlation [95% CI]", pos=2, cex=.8)
-
-
+forest(pes.summary,
+       pscale = 100,
+       xlim=c(0,10),
+       digits = 4)
 
 ```
 
@@ -303,6 +300,7 @@ A simple forest plot with SJ and Wilson method for CIs
 
 pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
 forest(pes.summary, 
+       layout = "JAMA",
        pscale = 100,
        xlim=c(0,10),
        digits = 4)
@@ -315,28 +313,30 @@ forest(pes.summary,
 
 pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
 forest(pes.summary,
+       transf=transf.ipft.hm, targ=list(ni=dat$total_10),
+       layout = "JAMA",
        xlim=c(0,10),
        pscale=100,
        rightcols=FALSE,
        leftcols=c("authpub", "rupt", "total_10", "effect", "ci"),
-       leftlabs=c("Study", "Ruptures", "Total", "Percent Risk", "95% C.I."), 
-       xlab="Overall Rupture Risk", smlab="",
-       weight.study="random", squaresize=0.5, col.square="navy",
-       col.square.lines="navy",
-       col.diamond="maroon", col.diamond.lines="maroon",
-       text.random = TRUE,
-       pooled.events = TRUE,
-       pooled.totals = TRUE, 
-       comb.fixed = FALSE,
-       comb.random = TRUE, 
-       fs.hetstat = 10, 
-       print.tau2 = TRUE, 
-       print.Q = TRUE, 
-       print.pval.Q = TRUE, 
-       print.I2 = TRUE,
-       digits = 2)
+       leftlabs=c("Study", "Ruptures", "Total", "Percent Risk", "95% C.I."),
+       xlab="Percent Rupture Risk", smlab="",
+       weight.study="random",
+       text.random="Random effects model",
+       pooled.totals = TRUE,
+       comb.fixed=FALSE,
+       print.I2=TRUE, 
+       print.tau2=TRUE, 
+       print.Q=TRUE, 
+       print.pval.Q=TRUE,
+       hetlab="Heterogeneity: ", 
+       fs.hetstat=10,
+       digits = 4)
 
 ```
+
+
+
 
 # Identify outliers and consider whether these outlier studies are influential. 
 
@@ -390,8 +390,27 @@ ranktest(pes.da.sj)
 
 Rank correlation test is not significant, so there is no evidence of publication bias. 
 
+# Perform moderator analysis
 
-# Create sub-group proportions and perform moderator analysis
+## Moderator analysis for study type
+
+```{r moderator study type}
+
+pes.modtype=rma(yi, vi, mods = ~ type, data=ies.da.sj, method = "SJ", level = 95)
+pes.modtype
+
+```
+
+As the p value is greater than 0.05, this means that study type did not moderate the pooled proportion. 
+
+## Moderator analysis for country
+
+```{r moderator country}
+
+pes.modcountry=rma(yi, vi, mods = ~ country, data=ies.da.sj, method = "SJ", level = 95)
+pes.modcountry
+
+```
 
 ## Sub-group proportions
 
