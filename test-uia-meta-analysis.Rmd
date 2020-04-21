@@ -64,6 +64,15 @@ view()
 
 ```
 
+# create study IDs
+
+```{r study IDs as first column}
+
+tendata <- mutate(tendata, id = 1:3)
+tendata <- tendata %>% select(id, auth:nos_total)
+
+```
+
 If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr
 
 ```{r coalesce patients into aneurysms}
