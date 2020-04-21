@@ -182,6 +182,31 @@ print(pes.da.sj, digits = 4)
 confint(pes.da.sj, digits = 2)
 ```
 
+# Understand the output of the random-effect model  
+
+Random-Effects Model (k = 3; tau^2 estimator: SJ)
+
+This line tells us that a random effects model was used, k = 3 means that 3 studies were included and that the estimation used was the SJ method ie Sidik-Jonkman 
+
+tau^2 (estimated amount of total heterogeneity): 0.0003 (SE = 0.0006)
+
+This line tells us the value of tau squared which estimates the total amount of study heterogeniety. When Tau-squared is zero this is indicative of no heterogeneity.
+
+I^2 (total heterogeneity / total variability):   20.83%
+
+This line tells us the value of I squared. I^2 represents the proportion of observed variation that can be attributed to the actual between-study variance. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively.
+
+Q(df = 2) = 1.2594, p-val = 0.5327
+
+This line shows the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. 
+
+
+Model results 
+estimate      se    zval    pval   ci.lb   ci.ub 
+  0.1037  0.0225  4.6174  <.0001  0.0597  0.1478  *** 
+  
+This shows the results of the random-effects model, and the estimate of the effect size with the standard error, z statistics, p values, and 95% CIs
+
 
 # Create simple forest plots 
 
