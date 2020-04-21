@@ -64,14 +64,6 @@ view()
 
 ```
 
-# create study IDs
-
-```{r study IDs as first column}
-
-tendata <- mutate(tendata, id = 1:3)
-tendata <- tendata %>% select(id, auth:nos_total)
-
-```
 
 If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr
 
@@ -162,7 +154,7 @@ Although the DerSimonian and Laird (DL) method is most popular, this under-estim
 ```{r individual proportions with DA transformation using SJ method}
 
 ies.da.sj=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0) 
-pes.da.sj=rma(yi, vi, data=ies.da, method = "SJ", level = 95)
+pes.da.sj=rma(yi, vi, data=ies.da.sj, method = "SJ", level = 95)
 pes2=predict(pes.da.sj, transf=transf.ipft.hm, targ=list(ni=dat$total_10)) 
 print(pes2)
 
@@ -213,11 +205,64 @@ In our case of meta-analysis of proportions, this is not correct, as the result 
 
 ```{r baujat plots}
 
-b_plot <- rma(yi, vi, data = dat, method = "SJ", level = 95)
+b_plot <- rma(yi, vi, data = ies.da, method = "SJ", level = 95)
 baujat(b_plot)
+
 ```
 
+We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity 
 
+## Next carry out formal tests to identify outliers and influential studies
+
+Screen studies by checking their externally studentized residuals (z-value) . Studentized residuals are more effective for detecting outliers than standardized residuals. If an observation has an externally studentized residual that is larger than 2 it may be an outlier, if it is larger than 3, it is an outlier. 
+
+```{r externally studentized residuals}
+
+stud.res=rstudent(pes.da.sj) 
+abs.z=abs(stud.res$z) 
+stud.res[order(-abs.z)]
+
+```
+
+Once we have screened studies, include all potential outliers with z-values of 2 or more for leave-one-out analysis
+
+```{r table of leave-one-out testing}
+
+l1o = leave1out(pes.da.sj, transf=transf.ipft.hm, targ=list(ni=dat$total_10))
+print(l1o, digits = 4)
+
+```
+
+The summary estimate at line 1 is the summary proportion when the first study is removed, and the summary proportion recalculated. 
+
+This can be displayed as a forest plot as well for visual analysis. 
+
+yi = individual effect size ie individual proportion in this study
+vi = sampling variances
+
+```{r forest of leave-out-testing}
+
+l1o=leave1out(pes.da.sj)
+yi=l1o$estimate; vi=l1o$se^2
+forest(yi, vi, transf=transf.ipft.hm,
+       targ=list(ni=dat$total_10), 
+       slab=paste(dat$authpub), 
+       refline=pes$pred,
+       xlab="Summary proportions leaving out each study",
+       digits = 4)
+
+```
+
+Verify this information with likely influential studies, using metafor testing. 
+
+```{r influence testing}
+
+inf=influence(pes.da.sj)
+print(inf)
+plot(inf)
+```
+
+In this 3 study sample, no influential studies have been identified. 
 
 # Create simple forest plots 
 
@@ -312,58 +357,6 @@ forest(pes.summary,
 
 This shows that the point estimate and confidence intervals are lower when the studies are larger. This might indicate publication bias, or instead a true difference in the effect size because of differences in the underlying populations included. 
 
-
-## Next carry out formal tests to identify outliers and influential studies
-
-Screen studies by checking their externally studentized residuals (z-value) . Studentized residuals are more effective for detecting outliers than standardized residuals. If an observation has an externally studentized residual that is larger than 2 it may be an outlier, if it is larger than 3, it is an outlier. 
-
-```{r externally studentized residuals}
-
-stud.res=rstudent(pes.da.sj) 
-abs.z=abs(stud.res$z) 
-stud.res[order(-abs.z)]
-
-```
-
-Once we have screened studies, include all potential outliers with z-values of 2 or more for leave-one-out analysis
-
-```{r table of leave-one-out testing}
-
-l1o = leave1out(pes.da.sj, transf=transf.ipft.hm, targ=list(ni=dat$total_10))
-print(l1o, digits = 4)
-
-```
-
-The summary estimate at line 1 is the summary proportion when the first study is removed, and the summary proportion recalculated. 
-
-This can be displayed as a forest plot as well for visual analysis. 
-
-yi = individual effect size ie individual proportion in this study
-vi = sampling variances
-
-```{r forest of leave-out-testing}
-
-l1o=leave1out(pes.da.sj)
-yi=l1o$estimate; vi=l1o$se^2
-forest(yi, vi, transf=transf.ipft.hm,
-       targ=list(ni=dat$total_10), 
-       slab=paste(dat$authpub), 
-       refline=pes$pred,
-       xlab="Summary proportions leaving out each study",
-       digits = 4)
-
-```
-
-Verify this information with likely influential studies, using metafor testing. 
-
-```{r influence testing}
-
-inf=influence(pes.da.sj)
-print(inf)
-plot(inf)
-```
-
-In this 3 study sample, no influential studies have been identified. 
 
 # create a funnel plot
 
