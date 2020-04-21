@@ -205,7 +205,18 @@ Model results
 estimate      se    zval    pval   ci.lb   ci.ub 
   0.1037  0.0225  4.6174  <.0001  0.0597  0.1478  *** 
   
-This shows the results of the random-effects model, and the estimate of the effect size with the standard error, z statistics, p values, and 95% CIs
+This shows the results of the random-effects model, and the estimate of the effect size with the standard error, z statistics, p values, and 95% CIs. 
+
+In our case of meta-analysis of proportions, this is not correct, as the result of the random effects meta-analysis has not been back tranformed into the summary proportion. 
+
+# Baujat plots to visually assess which studies contribute most to heterogeniety
+
+```{r baujat plots}
+
+b_plot <- rma(yi, vi, data = dat, method = "SJ", level = 95)
+baujat(b_plot)
+```
+
 
 
 # Create simple forest plots 
@@ -352,8 +363,15 @@ print(inf)
 plot(inf)
 ```
 
-In this 3 study sample, no influential studies have been identified. tt
+In this 3 study sample, no influential studies have been identified. 
 
+# create a funnel plot
+
+```{r funnel plot}
+
+funnel(pes.da.sj, xlab = "Double arcine transformed rupture risk")
+
+```
 
 
 
