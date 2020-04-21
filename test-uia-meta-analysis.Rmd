@@ -156,7 +156,7 @@ Although the DerSimonian and Laird (DL) method is most popular, this under-estim
 ies.da.sj=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0) 
 pes.da.sj=rma(yi, vi, data=ies.da.sj, method = "SJ", level = 95)
 pes2=predict(pes.da.sj, transf=transf.ipft.hm, targ=list(ni=dat$total_10)) 
-print(pes2)
+print(pes2, digits = 6)
 
 ```
 
