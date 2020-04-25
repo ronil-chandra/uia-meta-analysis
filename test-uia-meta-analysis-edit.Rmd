@@ -1,0 +1,422 @@
+---
+title: "meta-analysis of proportions"
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'uia-meta-analysis-working.html'))})
+author: "Ronil V. Chandra"
+date: "18/04/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load required packages
+
+```{r load packages, echo=TRUE, include = TRUE}
+library(tidyverse)
+library(meta)
+library(metafor)
+
+```
+
+# Load required data
+
+```{r load data, echo=TRUE, include = TRUE}
+
+maindata <- read_csv("data/psash-170420-test.csv")
+
+```
+
+# Correct vector types
+
+```{r correct vectors, echo=TRUE}
+maindata %>% 
+  mutate(pub = as.integer(pub),
+         start = as.integer(start),
+         end = as.integer(end), 
+         psah = as.double(psah),
+         fu = as.double(fu),
+         nos_select = as.double(nos_select),
+         nos_outcome = as.double(nos_outcome),
+         nos_compare = as.double(nos_compare),
+         nos_outcome = as.double(nos_outcome),
+         country = as.factor(country),
+         type = as.factor(type))
+```
+
+# Confirm new data structure with correct vector types
+
+```{r glimpse new, echo=TRUE}
+glimpse(maindata)
+view(maindata)
+```
+
+# Analyse 10 mm or less aneurysms
+
+```{r select size cohort}
+
+tendata <- filter(maindata, size == 10) %>%
+view()
+
+```
+
+
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr
+
+```{r coalesce patients into aneurysms}
+dat <- tendata %>%
+  mutate(total_10 = coalesce(num_anr,num)) %>%
+  drop_na(total_10) %>%
+  select(1:21, total_10, everything())
+view(dat)
+
+```
+
+
+## calculate individual and pooled study proportions without transformation 
+
+xi = cases ie number of ruptures during all follow up 
+ni = total ie number of aneurysms at study entry
+yi = individual effect size ie individual proportion in this study
+vi = sampling variances
+
+ies = object that holds results of individual effect sizes and corresponding sampling variances
+
+escalc() is a metafor function to estimate individual effect sizes and sampling variances
+
+rma() is a metafor function to fit a random-effects model. This is utilised to take both intra-study and inter-study variances, to increase generalisability. This is because these samples are drawn from different populations, with different comorbidities that may influence outcome, and undergo observation in different conditions. This leads to variation in the outcomes due to random samping error.
+
+pes = object that holds results of pooled effect size and pooled sampling variances. Note that the pooled effect size is the weighted average of the observed effect sizes in the individual studies that are weighted by the inverse of the total variance in that study. 
+
+```{r pooled proportions without transformation}
+
+ies=escalc(xi=rupt, ni=total_10, data=dat, measure = "PR")
+pes=rma(yi, vi, data=ies)
+print(pes)
+```
+
+This is not recommended because of the skewed distribution of the observed proportions.
+
+Thus we need to transform the data using either the logit or double arcine methods to make it follow a normal distribution and thus enhance the validity of statistical analysis. We can change this using the measure = argument. 
+
+## calculate individual and pooled study proportions with logit transformation
+
+this converts the observed proportion into the natural log of the proportions. Once transformed, they are more likely to follow a normal distribution, and statistical analysis can be performed. After analysis, the logits are converted back to poportions for reporting. 
+
+
+```{r individual proportions with logit transformation}
+
+ies.logit=escalc(xi=rupt, ni=total_10, data=dat, measure = "PLO")
+pes.logit=rma(yi, vi, data=ies.logit)
+pes=predict(pes.logit, transf=transf.ilogit)
+print(pes)
+```
+
+Note the differences in the results compared to the pooled untransformed proportion. 
+
+the logit method should not be used if the event of interest is very rare like aneurysm rupture because it fails to stabilise the variance ie very high variance if proportion is close to zero or 1. 
+
+if the proportion is 0 or 1, then variance becomes undefined and an arbitrary continuity correction of 0.5 is typically added, which can bias the results. 
+
+## calculate individual and pooled study proportions with double arcine transformation
+
+
+```{r individual proportions with DA transformation using DL method}
+
+ies.da=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0) 
+pes.da=rma(yi, vi, data=ies.da, method = "DL", level = 95)
+pes=predict(pes.da, transf=transf.ipft.hm, targ=list(ni=dat$total_10)) 
+print(pes)
+
+```
+
+The DA method proposed by Freeman-Tukey stabilises the sampling variance. This is important when conducting a meta-analysis of proportions, since the proportions generated from each study are weighted by the inverse of their sample variance to create a pooled proportion.
+
+Note that if the proportion is 0, then a constant may be added. Ensure that there is no adjustment to observed proportions by specifying add=0
+
+## Assess and quantify heterogeniety - both between-study variance and within-study variance
+
+This is required to assess whether the pooled proportion provides an accurate summary of the finding of interest. If there is high heterogeneity then interpretation of the data synthesis should be taken with caution. 
+
+Heterogeniety arises from both between-study and within-study variance. 
+
+Between-study variance arises from differences in the baseline populations, participant characteristics, study designs and study environment. Intra-study variance arises from random sampling error.
+
+The between-study variance is calculated as the statistic tau-squared, and can be estimated using different random-effects models. 
+
+Although the DerSimonian and Laird (DL) method is most popular, this under-estimates between-study variance, and produces overly narrow CIs when between-study variance is high. DL estimates of tau-squared are particularly inaccurate when number of included studies is small. The HKSJ method consistently results in more adequate error rates and better performance when the number of studies is small, and when there are unequal sample sizes. 
+
+
+```{r individual proportions with DA transformation using SJ method}
+
+ies.da.sj=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0) 
+pes.da.sj=rma(yi, vi, data=ies.da.sj, method = "SJ", level = 95)
+pes2=predict(pes.da.sj, transf=transf.ipft.hm, targ=list(ni=dat$total_10)) 
+print(pes2, digits = 6)
+
+```
+
+
+This is important because the estimated amount of the between-study variance influences the weights assigned to each study and hence the overall summary effect size and the precision of the effect size. 
+
+
+# Calculate Higgins I2 to quantify heterogeneity (model = SJ).
+
+This is important because if there is moderate to substantial heterogeneity, then the summary effect is of little value. 
+
+```{r heterogeniety SJ calculation}
+
+print(pes.da.sj, digits = 4) 
+confint(pes.da.sj, digits = 2)
+```
+
+# Understand the output of the random-effect model  
+
+Random-Effects Model (k = 3; tau^2 estimator: SJ)
+
+This line tells us that a random effects model was used, k = 3 means that 3 studies were included and that the estimation used was the SJ method ie Sidik-Jonkman 
+
+tau^2 (estimated amount of total heterogeneity): 0.0003 (SE = 0.0006)
+
+This line tells us the value of tau squared which estimates the total amount of study heterogeniety. When Tau-squared is zero this is indicative of no heterogeneity.
+
+I^2 (total heterogeneity / total variability):   20.83%
+
+This line tells us the value of I squared. I^2 represents the proportion of observed variation that can be attributed to the actual between-study variance. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively.
+
+Q(df = 2) = 1.2594, p-val = 0.5327
+
+This line shows the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. 
+
+
+Model results 
+estimate      se    zval    pval   ci.lb   ci.ub 
+  0.1037  0.0225  4.6174  <.0001  0.0597  0.1478  *** 
+  
+This shows the results of the random-effects model, and the estimate of the effect size with the standard error, z statistics, p values, and 95% CIs. 
+
+In our case of meta-analysis of proportions, this is not correct, as the result of the random effects meta-analysis has not been back tranformed into the summary proportion. 
+
+# Baujat plots to visually assess which studies contribute most to heterogeniety
+
+```{r baujat plots}
+
+b_plot <- rma(yi, vi, data = ies.da, method = "SJ", level = 95)
+baujat(b_plot)
+
+```
+
+We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity 
+
+## Next carry out formal tests to identify outliers and influential studies
+
+Screen studies by checking their externally studentized residuals (z-value) . Studentized residuals are more effective for detecting outliers than standardized residuals. If an observation has an externally studentized residual that is larger than 2 it may be an outlier, if it is larger than 3, it is an outlier. 
+
+```{r externally studentized residuals}
+
+stud.res=rstudent(pes.da.sj) 
+abs.z=abs(stud.res$z) 
+stud.res[order(-abs.z)]
+
+```
+
+Once we have screened studies, include all potential outliers with z-values of 2 or more for leave-one-out analysis
+
+```{r table of leave-one-out testing}
+
+l1o = leave1out(pes.da.sj, transf=transf.ipft.hm, targ=list(ni=dat$total_10))
+print(l1o, digits = 4)
+
+```
+
+The summary estimate at line 1 is the summary proportion when the first study is removed, and the summary proportion recalculated. 
+
+This can be displayed as a forest plot as well for visual analysis. 
+
+yi = individual effect size ie individual proportion in this study
+vi = sampling variances
+
+```{r forest of leave-out-testing}
+
+l1o=leave1out(pes.da.sj)
+yi=l1o$estimate; vi=l1o$se^2
+forest(yi, vi, transf=transf.ipft.hm,
+       targ=list(ni=dat$total_10), 
+       slab=paste(dat$authpub), 
+       refline=pes$pred,
+       xlab="Summary proportions leaving out each study",
+       digits = 4)
+
+```
+
+Verify this information with likely influential studies, using metafor testing. 
+
+```{r influence testing}
+
+inf=influence(pes.da.sj)
+print(inf)
+plot(inf)
+```
+
+In this 3 study sample, no influential studies have been identified. 
+
+# Create simple forest plots 
+
+A simple forest plot with DL and CP method for CIs
+
+```{r simple forest with DL and CP method for CIs, fig.width = 10}
+
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "CP") 
+forest(pes.summary,
+       pscale = 100,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+
+
+A simple forest plot with DL and Wilson method for CIs
+
+```{r simple forest with DL and Wilson method for CIs, fig.width = 10}
+
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "WS") 
+forest(pes.summary,
+       pscale = 100,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+
+
+A simple forest plot with SJ and Wilson method for CIs
+
+```{r simple forest with SJ and Wilson method for CIs, fig.width = 10}
+
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
+forest(pes.summary, 
+       layout = "JAMA",
+       pscale = 100,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+# Publication quality forest plots - still working on this 
+
+```{r forest with SJ and Wilson method for CIs, fig.width = 10}
+
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
+forest(pes.summary,
+       transf=transf.ipft.hm, targ=list(ni=dat$total_10),
+       layout = "JAMA",
+       xlim=c(0,10),
+       pscale=100,
+       rightcols=FALSE,
+       leftcols=c("authpub", "rupt", "total_10", "effect", "ci"),
+       leftlabs=c("Study", "Ruptures", "Total", "Percent Risk", "95% C.I."),
+       xlab="Percent Rupture Risk", smlab="",
+       weight.study="random",
+       text.random="Random effects model",
+       pooled.totals = TRUE,
+       comb.fixed=FALSE,
+       print.I2=TRUE, 
+       print.tau2=TRUE, 
+       print.Q=TRUE, 
+       print.pval.Q=TRUE,
+       hetlab="Heterogeneity: ", 
+       fs.hetstat=10,
+       digits = 4)
+
+```
+
+
+
+
+# Identify outliers and consider whether these outlier studies are influential. 
+
+This helps identify potential moderating variables to account for between study heterogeneity. 
+
+Perform a leave-one-out analysis by removing each study in turn, and then re-estimating the summary proportion based on n-1 studies. 
+
+## Start by ordering studies by precision and assessing visually 
+
+```{r assess precision and re-do simple forest plot}
+
+precision=sqrt(ies.da.sj$vi) 
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
+forest(pes.summary,
+       pscale = 100,
+       sortvar = precision,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+This shows that the point estimate and confidence intervals are lower when the studies are larger. This might indicate publication bias, or instead a true difference in the effect size because of differences in the underlying populations included. 
+
+
+# create a funnel plot
+
+```{r funnel plot}
+
+funnel(pes.da.sj, xlab = "Double arcine transformed rupture risk")
+
+```
+
+
+# Test for bias - Eggers and Rank Correlation
+
+## Eggers test
+
+```{r eggers}
+
+regtest(pes.da.sj)
+
+```
+
+Eggers regression test is not sigificant, so there is no evidence of publication bias. 
+
+## Rank Correlation test
+
+```{r rank correlation}
+ranktest(pes.da.sj)
+```
+
+Rank correlation test is not significant, so there is no evidence of publication bias. 
+
+# Perform moderator analysis
+
+## Moderator analysis for study type
+
+```{r moderator study type}
+
+pes.modtype=rma(yi, vi, mods = ~ type, data=ies.da.sj, method = "SJ", level = 95)
+pes.modtype
+
+```
+
+As the p value is greater than 0.05, this means that study type did not moderate the pooled proportion. 
+
+## Moderator analysis for country
+
+```{r moderator country}
+
+pes.modcountry=rma(yi, vi, mods = ~ country, data=ies.da.sj, method = "SJ", level = 95)
+pes.modcountry
+
+```
+
+## Sub-group proportions
+
+Firstly, we should assume that between-study variance may differ across the sub-groups. Thus we need to apply a mixed-effects model. First apply a random effects models to each subgroup, to allow the between-study variances to be different, and then fit a fixed effect model to combine studies within each sub-group to produce the summary effect size estimate. 
+
+Note that at least 5 studies each are required for each moderator in a multivariate meta-regression model. Thus to begin moderator analysis, you'll need at least 10 studies. In our example, given the total of 15 studies in the 3 mm or less cohort, and 31 studies total, only 2 moderators were chosen which are aneurysm size at study entry and previous exposure to subarachnoid haemorrhage. 
+
+
+
