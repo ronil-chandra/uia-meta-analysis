@@ -76,11 +76,11 @@ view(dat)
 
 ```
 
-
-## calculate individual and pooled study proportions without transformation 
+## calculate individual and pooled study proportions 
 
 xi = cases ie number of ruptures during all follow up 
 ni = total ie number of aneurysms at study entry
+pi = raw proportions ie xi / ni 
 yi = individual effect size ie individual proportion in this study
 vi = sampling variances
 
@@ -92,35 +92,13 @@ rma() is a metafor function to fit a random-effects model. This is utilised to t
 
 pes = object that holds results of pooled effect size and pooled sampling variances. Note that the pooled effect size is the weighted average of the observed effect sizes in the individual studies that are weighted by the inverse of the total variance in that study. 
 
-```{r pooled proportions without transformation}
+The distribution of the observed proportions is skewed, and thus we need to transform the data using either the logit or double arcine methods to make it follow a normal distribution and thus enhance the validity of statistical analysis. It will need to be backtransformed later into proportions. 
 
-ies=escalc(xi=rupt, ni=total_10, data=dat, measure = "PR")
-pes=rma(yi, vi, data=ies)
-print(pes)
-```
+If the proportion is 0 or 1, the variance is undefined in a logit transformation, and often a continuity correction of 0.5 is applied. 
 
-This is not recommended because of the skewed distribution of the observed proportions.
-
-Thus we need to transform the data using either the logit or double arcine methods to make it follow a normal distribution and thus enhance the validity of statistical analysis. We can change this using the measure = argument. 
-
-## calculate individual and pooled study proportions with logit transformation
-
-this converts the observed proportion into the natural log of the proportions. Once transformed, they are more likely to follow a normal distribution, and statistical analysis can be performed. After analysis, the logits are converted back to poportions for reporting. 
+To better stabilise the variance, and to normalise the distribution especially for small sample sizes, the double arcine method of Freeman-Tukey (Reference Freeman and Tukey 1950) is recommended. This can be later backtransformed using the equation derived by Miller (Reference Miller 1978)
 
 
-```{r individual proportions with logit transformation}
-
-ies.logit=escalc(xi=rupt, ni=total_10, data=dat, measure = "PLO")
-pes.logit=rma(yi, vi, data=ies.logit)
-pes=predict(pes.logit, transf=transf.ilogit)
-print(pes)
-```
-
-Note the differences in the results compared to the pooled untransformed proportion. 
-
-the logit method should not be used if the event of interest is very rare like aneurysm rupture because it fails to stabilise the variance ie very high variance if proportion is close to zero or 1. 
-
-if the proportion is 0 or 1, then variance becomes undefined and an arbitrary continuity correction of 0.5 is typically added, which can bias the results. 
 
 ## calculate individual and pooled study proportions with double arcine transformation
 
