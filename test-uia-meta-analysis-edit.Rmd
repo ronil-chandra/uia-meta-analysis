@@ -71,7 +71,7 @@ If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie v
 dat <- tendata %>%
   mutate(total_10 = coalesce(num_anr,num)) %>%
   drop_na(total_10) %>%
-  select(1:21, total_10, everything())
+  select(auth, pub, rupt, total_10) %>%
 view(dat)
 
 ```
@@ -98,23 +98,84 @@ If the proportion is 0 or 1, the variance is undefined in a logit transformation
 
 To better stabilise the variance, and to normalise the distribution especially for small sample sizes, the double arcine method of Freeman-Tukey (Reference Freeman and Tukey 1950) is recommended. This can be later backtransformed using the equation derived by Miller (Reference Miller 1978)
 
+# calculate individual transformed study proportions using DA method
 
 
-## calculate individual and pooled study proportions with double arcine transformation
+```{r individual DA transformed proportions}
+ies.da=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0)
+dat <- ies.da
+view(dat)
+
+```
+
+# double check if back transform individual transformed values that we should get the original raw proportions
+
+```{r cross check individual back transformation}
+transf.ipft(dat$yi, dat$total_10)
+```
+
+# pool the transformed values using a weighted mean according to inverse variance method
 
 
-```{r individual proportions with DA transformation using DL method}
+```{r pooled DA transformed proportion}
 
-ies.da=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0) 
 pes.da=rma(yi, vi, data=ies.da, method = "DL", level = 95)
-pes=predict(pes.da, transf=transf.ipft.hm, targ=list(ni=dat$total_10)) 
-print(pes)
+pes.da
 
 ```
 
 The DA method proposed by Freeman-Tukey stabilises the sampling variance. This is important when conducting a meta-analysis of proportions, since the proportions generated from each study are weighted by the inverse of their sample variance to create a pooled proportion.
 
-Note that if the proportion is 0, then a constant may be added. Ensure that there is no adjustment to observed proportions by specifying add=0
+Note that if the proportion is 0, then a constant may be added. Ensure that there is no adjustment to observed proportions by specifying add=0. 
+
+The DerSimonian and Laird model is used to estimate between-study variance using the statistic tau-squared, and can be estimated using different random-effects models. 
+
+# back transformation is required to obtain the summary proportion. 
+
+```{r pooled proportion}
+
+pes <- predict(pes.da, transf=transf.ipft.hm, targs=list(ni=dat$total_10))
+pes
+
+```
+
+
+
+Simply using the harmonic mean of the sample sizes as suggested by Miller et al 1978 and applying this to all the individual studies creates misleading results for each individual study.
+
+Instead, the back transformation to the pooled proportion needs to be carried out using study-specific sample sizes. 
+
+# create a new tibble for individual study back transformation
+
+```{r individual back transformation}
+
+dat.back <- summary(dat, transf = transf.ipft, ni = dat$total_10)
+
+```
+
+# display the individual and pooled proportions as a forest plot
+
+```{r simple forest after back transformation}
+
+forest(dat.back$yi, ci.lb=dat.back$ci.lb, ci.ub=dat.back$ci.ub, 
+       psize=1,
+       xlim=c(-0.5,1.8), alim=c(0,1), ylim=c(-1,8), refline=NA, digits=3L,
+       xlab="Proportion", header=c("Study", "Proportion [95% CI]"))
+addpoly(pes$pred, ci.lb=pes$ci.lb, ci.ub=pes$ci.ub, row=-0.5, digits=3,
+        mlab="RE Model", efac=1.3) 
+abline(h=0.5)
+
+```
+
+
+
+
+
+
+
+
+
+
 
 ## Assess and quantify heterogeniety - both between-study variance and within-study variance
 
