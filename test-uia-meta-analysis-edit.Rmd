@@ -120,16 +120,20 @@ transf.ipft(dat$yi, dat$total_10)
 
 ```{r pooled DA transformed proportion}
 
-pes.da=rma(yi, vi, data=ies.da, method = "DL", level = 95)
+pes.da=rma.uni(yi, vi, data=ies.da, 
+               method = "DL",
+               level = 95)
 pes.da
 
 ```
 
-The DA method proposed by Freeman-Tukey stabilises the sampling variance. This is important when conducting a meta-analysis of proportions, since the proportions generated from each study are weighted by the inverse of their sample variance to create a pooled proportion.
+The DA method proposed by Freeman-Tukey transforms the data, stabilises the sampling variance, and allows us to carry out statistical analysis. Using the transformed data, we can then fit our chosen statistical models.  
+
+rma.uni fits a linear (random/fixed or mixed) model without moderaters. Here, we have chosen a DerSimonian and Laird model (DL) method, and the summary proportion is calculated by weighting the studies using the inverse variance method. Note that the condfidence intervals are calculated using the Wald method ie assuming a normal distribution. 
 
 Note that if the proportion is 0, then a constant may be added. Ensure that there is no adjustment to observed proportions by specifying add=0. 
 
-The DerSimonian and Laird model is used to estimate between-study variance using the statistic tau-squared, and can be estimated using different random-effects models. 
+The DL method is also used to estimate between-study variance using the statistic tau-squared, and can be estimated using different random-effects models. 
 
 # back transformation is required to obtain the summary proportion. 
 
@@ -139,8 +143,6 @@ pes <- predict(pes.da, transf=transf.ipft.hm, targs=list(ni=dat$total_10))
 pes
 
 ```
-
-
 
 Simply using the harmonic mean of the sample sizes as suggested by Miller et al 1978 and applying this to all the individual studies creates misleading results for each individual study.
 
@@ -169,15 +171,22 @@ abline(h=0.5)
 ```
 
 
-#Utilise metaprop function to cross check results
+#Utilise metaprop function from meta
 
-# Create simple forest plots 
+Metaprop can be used to caclulate an overall proportion from studies reporting a single proportion. Pooling methods are the inverse variance and generalised linear mixed models (GLMM).
+
+Our options are to pool untransformed proportions or pool transformed proportions according to logit or DA methods. For reasons mentioned above, we will tranform the data using DA methods, fit our model using the transformed proportions, and backtranform to create the summary proportion.
+
+The choice of meta-analytic method for transformed proportions is controversial. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed. 
 
 A simple forest plot with DL and CP method for CIs
 
 ```{r simple forest with DL and CP method for CIs, fig.width = 10}
 
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "CP") 
+pes.summary=metaprop(rupt, total_10, data=dat, 
+                     sm = "PFT", 
+                     method.tau = "DL",
+                     method.ci = "CP") 
 forest(pes.summary,
        pscale = 100,
        xlim=c(0,10),
@@ -185,6 +194,11 @@ forest(pes.summary,
 
 ```
 
+
+
+In addition, the choice of CI is important given the rarity of the outcome event ie p=0 is common which creates a highly skewed distribution. 
+
+The Wilson method is chosen for 2 main reasons, as recommended byVollset 1993, Agresti 1998, and Newcombe 1998 and Brown 2001. Firstly, as compared to the exact Clopper-Pearson method, the Wilson method is more accurate when the sample size is small, can be applied to all sample sizes, and derives an interval that more accurately reflects the true interval in the population of interest. For this situation of aneurysm rupture in small unruptured aneurysms, p is very close to 0, and thus the Clopper-Pearson exact method results in overcoverage since n is small, and even when n is large, the derived CI does not accurately reflect the true population CI. 
 
 
 A simple forest plot with DL and Wilson method for CIs
