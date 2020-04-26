@@ -177,9 +177,9 @@ Metaprop can be used to caclulate an overall proportion from studies reporting a
 
 Our options are to pool untransformed proportions or pool transformed proportions according to logit or DA methods. For reasons mentioned above, we will tranform the data using DA methods, fit our model using the transformed proportions, and backtranform to create the summary proportion.
 
-The choice of meta-analytic method for transformed proportions is controversial. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed. 
+The choice of meta-analytic method for transformed proportions is controversial. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially. 
 
-# Meta-analysis of proportions using DL method and CP method for CIs
+# Meta-analysis of proportions using inverse variance DL method and CP method for CIs
 
 ```{r meta-analysis of proportions with DL and CP method for CIs}
 
@@ -190,9 +190,11 @@ pes.summary.cp = metaprop(rupt, total_10, data=dat,
                      pscale = 100) 
 pes.summary.cp
 
+
+
 ```
 
-# Display meta-analysis as a simple forest using DL and CP
+# Display meta-analysis as a simple forest using inverser variance DL and CP
 
 ```{r simple forest with DL and CP method for CIs, fig.width = 10}
 
@@ -210,7 +212,7 @@ The Wilson method is chosen for 2 main reasons, as recommended by Vollset 1993, 
 
 
 
-# Meta-analysis of proportions using DL method Wilson method for CIs
+# Meta-analysis of proportions using inverse variance DL method Wilson method for CIs
 
 ```{r meta-analysis of proportions using DL method Wilson method for CIs}
 
@@ -228,7 +230,7 @@ pes.summary.wilson
 Note the differences in the CIs between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
 
 
-# A simple forest plot with DL and Wilson method for CIs
+# A simple forest plot with inverse variance DL and Wilson method for CIs
 
 ```{r simple forest with DL and Wilson method for CIs, fig.width = 10}
 
@@ -238,18 +240,51 @@ forest(pes.summary.wilson,
 
 ```
 
+# Using generalised linear mixed methods models (GLMMs).
+
+Single proportions that have binomial structure are generally transformed using logit, arcine or DA methods. These are then backtransformed to the original scale. 
+
+While all back transformations are possible, the methodology of Miller 1978 is typically utilised using the harmonic mean of the sample sizes. However, for highly skewed distribution of sample sizes, the harmonic mean is affected, and this can affect the backtransformed proportions. 
+
+This anomaly has been confirmed by Schwarzer 2019 and use of a GLMM (random intercept logistic regression model) is recommended. Although there are shortcomings of the logit transformation with classic random-effects meta-analysis methods as highlighted above (issues with p=0 and continuity corrections), they do not apply to the GLMM.
+
+This is because the classic meta-analysis methods assume that the effect follows a normal distribution, while the GLMM takes into account the binomial structure of the data as noted by Stinjen 2010. 
+
+
+```{r meta-analysis of proportions using glmm}
+
+pes.summary.glmm = metaprop(rupt, total_10, data=dat, 
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm
+
+```
+
+Note the diffences in the GLMM model compared to classic meta-analytic methods. This produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010.
+
+# Display GLMM result using a simple forest plot
+
+
+```{r simple forst using glmm}
+
+forest(pes.summary.glmm,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+
 # Publication quality forest plots - still working on this 
 
-```{r forest for publication with DL and Wilson method for CIs, fig.width = 10}
+```{r forest for publication using GLMM, fig.width = 10}
 
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "WS", pscale = 100) 
 
-forest(pes.summary,
+forest(pes.summary.glmm,
        layout = "JAMA",
-       xlim = c(0,10),
-       xlab = "Percent Rupture Risk")
-
-
+       xlim=c(0,10),
+       xlab = "Percent Rupture Risk") 
 
 ```
 
