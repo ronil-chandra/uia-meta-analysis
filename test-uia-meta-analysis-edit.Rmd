@@ -275,8 +275,16 @@ forest(pes.summary.glmm,
 
 ```
 
+Note individual CIs are using Wilson, does the summary proportion also use Wilson for CIs?
 
-# Publication quality forest plots - still working on this 
+
+
+
+# Publication quality forest plots
+
+# Still working on everything below this line
+
+
 
 ```{r forest for publication using GLMM, fig.width = 10}
 
