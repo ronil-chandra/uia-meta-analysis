@@ -68,10 +68,11 @@ view()
 If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr
 
 ```{r coalesce patients into aneurysms}
+
 dat <- tendata %>%
   mutate(total_10 = coalesce(num_anr,num)) %>%
   drop_na(total_10) %>%
-  select(auth, pub, rupt, total_10) %>%
+  select(auth, pub, rupt, total_10)
 view(dat)
 
 ```
@@ -164,6 +165,80 @@ forest(dat.back$yi, ci.lb=dat.back$ci.lb, ci.ub=dat.back$ci.ub,
 addpoly(pes$pred, ci.lb=pes$ci.lb, ci.ub=pes$ci.ub, row=-0.5, digits=3,
         mlab="RE Model", efac=1.3) 
 abline(h=0.5)
+
+```
+
+
+#Utilise metaprop function to cross check results
+
+# Create simple forest plots 
+
+A simple forest plot with DL and CP method for CIs
+
+```{r simple forest with DL and CP method for CIs, fig.width = 10}
+
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "CP") 
+forest(pes.summary,
+       pscale = 100,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+
+
+A simple forest plot with DL and Wilson method for CIs
+
+```{r simple forest with DL and Wilson method for CIs, fig.width = 10}
+
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "WS") 
+forest(pes.summary,
+       pscale = 100,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+
+
+A simple forest plot with SJ and Wilson method for CIs
+
+```{r simple forest with SJ and Wilson method for CIs, fig.width = 10}
+
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
+forest(pes.summary, 
+       layout = "JAMA",
+       pscale = 100,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+# Publication quality forest plots - still working on this 
+
+```{r forest with SJ and Wilson method for CIs, fig.width = 10}
+
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
+forest(pes.summary,
+       transf=transf.ipft.hm, targ=list(ni=dat$total_10),
+       layout = "JAMA",
+       xlim=c(0,10),
+       pscale=100,
+       rightcols=FALSE,
+       leftcols=c("authpub", "rupt", "total_10", "effect", "ci"),
+       leftlabs=c("Study", "Ruptures", "Total", "Percent Risk", "95% C.I."),
+       xlab="Percent Rupture Risk", smlab="",
+       weight.study="random",
+       text.random="Random effects model",
+       pooled.totals = TRUE,
+       comb.fixed=FALSE,
+       print.I2=TRUE, 
+       print.tau2=TRUE, 
+       print.Q=TRUE, 
+       print.pval.Q=TRUE,
+       hetlab="Heterogeneity: ", 
+       fs.hetstat=10,
+       digits = 4)
 
 ```
 
@@ -302,79 +377,6 @@ plot(inf)
 ```
 
 In this 3 study sample, no influential studies have been identified. 
-
-# Create simple forest plots 
-
-A simple forest plot with DL and CP method for CIs
-
-```{r simple forest with DL and CP method for CIs, fig.width = 10}
-
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "CP") 
-forest(pes.summary,
-       pscale = 100,
-       xlim=c(0,10),
-       digits = 4)
-
-```
-
-
-
-A simple forest plot with DL and Wilson method for CIs
-
-```{r simple forest with DL and Wilson method for CIs, fig.width = 10}
-
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "WS") 
-forest(pes.summary,
-       pscale = 100,
-       xlim=c(0,10),
-       digits = 4)
-
-```
-
-
-
-A simple forest plot with SJ and Wilson method for CIs
-
-```{r simple forest with SJ and Wilson method for CIs, fig.width = 10}
-
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
-forest(pes.summary, 
-       layout = "JAMA",
-       pscale = 100,
-       xlim=c(0,10),
-       digits = 4)
-
-```
-
-# Publication quality forest plots - still working on this 
-
-```{r forest with SJ and Wilson method for CIs, fig.width = 10}
-
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
-forest(pes.summary,
-       transf=transf.ipft.hm, targ=list(ni=dat$total_10),
-       layout = "JAMA",
-       xlim=c(0,10),
-       pscale=100,
-       rightcols=FALSE,
-       leftcols=c("authpub", "rupt", "total_10", "effect", "ci"),
-       leftlabs=c("Study", "Ruptures", "Total", "Percent Risk", "95% C.I."),
-       xlab="Percent Rupture Risk", smlab="",
-       weight.study="random",
-       text.random="Random effects model",
-       pooled.totals = TRUE,
-       comb.fixed=FALSE,
-       print.I2=TRUE, 
-       print.tau2=TRUE, 
-       print.Q=TRUE, 
-       print.pval.Q=TRUE,
-       hetlab="Heterogeneity: ", 
-       fs.hetstat=10,
-       digits = 4)
-
-```
-
-
 
 
 # Identify outliers and consider whether these outlier studies are influential. 
