@@ -179,75 +179,79 @@ Our options are to pool untransformed proportions or pool transformed proportion
 
 The choice of meta-analytic method for transformed proportions is controversial. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed. 
 
-A simple forest plot with DL and CP method for CIs
+# Meta-analysis of proportions using DL method and CP method for CIs
+
+```{r meta-analysis of proportions with DL and CP method for CIs}
+
+pes.summary.cp = metaprop(rupt, total_10, data=dat, 
+                     sm = "PFT", 
+                     method.tau = "DL",
+                     method.ci = "CP",
+                     pscale = 100) 
+pes.summary.cp
+
+```
+
+# Display meta-analysis as a simple forest using DL and CP
 
 ```{r simple forest with DL and CP method for CIs, fig.width = 10}
 
-pes.summary=metaprop(rupt, total_10, data=dat, 
-                     sm = "PFT", 
-                     method.tau = "DL",
-                     method.ci = "CP") 
-forest(pes.summary,
+forest(pes.summary.cp,
        pscale = 100,
        xlim=c(0,10),
        digits = 4)
 
 ```
-
 
 
 In addition, the choice of CI is important given the rarity of the outcome event ie p=0 is common which creates a highly skewed distribution. 
 
-The Wilson method is chosen for 2 main reasons, as recommended byVollset 1993, Agresti 1998, and Newcombe 1998 and Brown 2001. Firstly, as compared to the exact Clopper-Pearson method, the Wilson method is more accurate when the sample size is small, can be applied to all sample sizes, and derives an interval that more accurately reflects the true interval in the population of interest. For this situation of aneurysm rupture in small unruptured aneurysms, p is very close to 0, and thus the Clopper-Pearson exact method results in overcoverage since n is small, and even when n is large, the derived CI does not accurately reflect the true population CI. 
+The Wilson method is chosen for 2 main reasons, as recommended by Vollset 1993, Agresti 1998, and Newcombe 1998 and Brown 2001. Firstly, as compared to the exact Clopper-Pearson method, the Wilson method is more accurate when the sample size is small, can be applied to all sample sizes, and derives an interval that more accurately reflects the true interval in the population of interest. For this situation of aneurysm rupture in small unruptured aneurysms, p is very close to 0, and thus the Clopper-Pearson exact method can result in overcoverage since n is small, and even when n is large, the derived CI does not accurately reflect the true population CI when p is very close to 0. 
 
-A simple forest plot with DL and Wilson method for CIs
+
+
+# Meta-analysis of proportions using DL method Wilson method for CIs
+
+```{r meta-analysis of proportions using DL method Wilson method for CIs}
+
+pes.summary.wilson=metaprop(rupt, total_10, data=dat, 
+                     sm="PFT",
+                     method.tau = "DL", 
+                     method.ci = "WS",
+                     pscale = 100) 
+pes.summary.wilson
+
+
+
+```
+
+Note the differences in the CIs between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
+
+
+# A simple forest plot with DL and Wilson method for CIs
 
 ```{r simple forest with DL and Wilson method for CIs, fig.width = 10}
 
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "WS") 
-forest(pes.summary,
-       pscale = 100,
+forest(pes.summary.wilson,
        xlim=c(0,10),
        digits = 4)
 
 ```
-
-
 
 # Publication quality forest plots - still working on this 
 
-```{r forest with SJ and Wilson method for CIs, fig.width = 10}
+```{r forest for publication with DL and Wilson method for CIs, fig.width = 10}
 
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
+pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "DL", method.ci = "WS", pscale = 100) 
+
 forest(pes.summary,
-       transf=transf.ipft.hm, targ=list(ni=dat$total_10),
        layout = "JAMA",
-       xlim=c(0,10),
-       pscale=100,
-       rightcols=FALSE,
-       leftcols=c("authpub", "rupt", "total_10", "effect", "ci"),
-       leftlabs=c("Study", "Ruptures", "Total", "Percent Risk", "95% C.I."),
-       xlab="Percent Rupture Risk", smlab="",
-       weight.study="random",
-       text.random="Random effects model",
-       pooled.totals = TRUE,
-       comb.fixed=FALSE,
-       print.I2=TRUE, 
-       print.tau2=TRUE, 
-       print.Q=TRUE, 
-       print.pval.Q=TRUE,
-       hetlab="Heterogeneity: ", 
-       fs.hetstat=10,
-       digits = 4)
+       xlim = c(0,10),
+       xlab = "Percent Rupture Risk")
+
+
 
 ```
-
-
-
-
-
-
-
 
 
 
