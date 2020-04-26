@@ -200,7 +200,6 @@ In addition, the choice of CI is important given the rarity of the outcome event
 
 The Wilson method is chosen for 2 main reasons, as recommended byVollset 1993, Agresti 1998, and Newcombe 1998 and Brown 2001. Firstly, as compared to the exact Clopper-Pearson method, the Wilson method is more accurate when the sample size is small, can be applied to all sample sizes, and derives an interval that more accurately reflects the true interval in the population of interest. For this situation of aneurysm rupture in small unruptured aneurysms, p is very close to 0, and thus the Clopper-Pearson exact method results in overcoverage since n is small, and even when n is large, the derived CI does not accurately reflect the true population CI. 
 
-
 A simple forest plot with DL and Wilson method for CIs
 
 ```{r simple forest with DL and Wilson method for CIs, fig.width = 10}
@@ -214,19 +213,6 @@ forest(pes.summary,
 ```
 
 
-
-A simple forest plot with SJ and Wilson method for CIs
-
-```{r simple forest with SJ and Wilson method for CIs, fig.width = 10}
-
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
-forest(pes.summary, 
-       layout = "JAMA",
-       pscale = 100,
-       xlim=c(0,10),
-       digits = 4)
-
-```
 
 # Publication quality forest plots - still working on this 
 
