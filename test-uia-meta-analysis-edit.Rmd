@@ -314,6 +314,21 @@ forest(pes.summary.glmm,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Assess and quantify heterogeniety - both between-study variance and within-study variance
 
 This is required to assess whether the pooled proportion provides an accurate summary of the finding of interest. If there is high heterogeneity then interpretation of the data synthesis should be taken with caution. 
@@ -329,9 +344,9 @@ Although the DerSimonian and Laird (DL) method is most popular, this under-estim
 
 ```{r individual proportions with DA transformation using SJ method}
 
-ies.da.sj=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0) 
+ies.da.sj=escalc(xi=rupt, ni=total_size, data=dat, measure="PFT", add=0) 
 pes.da.sj=rma(yi, vi, data=ies.da.sj, method = "SJ", level = 95)
-pes2=predict(pes.da.sj, transf=transf.ipft.hm, targ=list(ni=dat$total_10)) 
+pes2=predict(pes.da.sj, transf=transf.ipft.hm, targ=list(ni=dat$total_size)) 
 print(pes2, digits = 6)
 
 ```
@@ -421,7 +436,7 @@ vi = sampling variances
 l1o=leave1out(pes.da.sj)
 yi=l1o$estimate; vi=l1o$se^2
 forest(yi, vi, transf=transf.ipft.hm,
-       targ=list(ni=dat$total_10), 
+       targ=list(ni=dat$total_size), 
        slab=paste(dat$authpub), 
        refline=pes$pred,
        xlab="Summary proportions leaving out each study",
@@ -452,7 +467,7 @@ Perform a leave-one-out analysis by removing each study in turn, and then re-est
 ```{r assess precision and re-do simple forest plot}
 
 precision=sqrt(ies.da.sj$vi) 
-pes.summary=metaprop(rupt, total_10, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
+pes.summary=metaprop(rupt, total_size, data=dat, sm="PFT", method.tau = "SJ", method.ci = "WS") 
 forest(pes.summary,
        pscale = 100,
        sortvar = precision,
