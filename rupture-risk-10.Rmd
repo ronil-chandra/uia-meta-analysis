@@ -160,7 +160,7 @@ view(dat.back)
 
 forest(dat.back$yi, ci.lb=dat.back$ci.lb, ci.ub=dat.back$ci.ub, 
        psize=1,
-       xlim=c(-0.5,1.8), alim=c(0,1), ylim=c(-1,8), refline=NA, digits=3L,
+       xlim=c(-0.5,1.8), alim=c(0,1), ylim=c(-1,32), refline=NA, digits=3L,
        xlab="Proportion", header=c("Study", "Proportion [95% CI]"))
 addpoly(pes$pred, ci.lb=pes$ci.lb, ci.ub=pes$ci.ub, row=-0.5, digits=3,
         mlab="RE Model", efac=1.3) 
@@ -275,6 +275,8 @@ pes.summary.glmm
 Note that the GLMM ie a random intercept logistic regression model is the default method for the logit transformation. Also the the maximum-likelihood method is utilized for GLMMs.
 
 
+
+
 # Display GLMM result using a simple forest plot
 
 
@@ -306,4 +308,46 @@ forest(pes.summary.glmm,
        xlab = "Percent Rupture Risk") 
 
 ```
+
+
+## Assess and quantify heterogeniety 
+
+This is required to assess whether the pooled proportion provides an accurate summary of the finding of interest. If there is high heterogeneity then interpretation of the data synthesis should be taken with caution. 
+
+Heterogeniety arises from both between-study and within-study variance. 
+
+Between-study variance arises from differences in the baseline populations, participant characteristics, study designs and study environment. Intra-study variance arises from random sampling error.
+
+The between-study variance is calculated as the statistic tau-squared, and can be estimated.
+
+This is important because the estimated amount of the between-study variance influences the weights assigned to each study and hence the overall summary effect size and the precision of the effect size. 
+
+
+```{r heterogeniety}
+
+pes.summary.glmm
+
+```
+
+
+here we can see that tau-squared = 0.9098. This is the estimated amount of total heterogeneity. When Tau-squared is zero this is indicative of no heterogeneity.
+
+I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively.
+
+The next measure is the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. 
+
+
+# Baujat plots to visually assess which studies contribute most to heterogeniety
+
+```{r baujat plot}
+
+baujat(pes.summary.glmm)
+
+```
+
+This shows that study 12 ie Juvela et al, is a source of between study heterogeniety
+
+
+
+
 
