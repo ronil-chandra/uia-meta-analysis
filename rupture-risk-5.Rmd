@@ -1,5 +1,5 @@
 ---
-title: "rupture-risk-10"
+title: "rupture-risk-5"
 author: "Ronil V. Chandra"
 date: "29/04/2020"
 output: html_document
@@ -55,7 +55,7 @@ view(maindata)
 
 ```{r select size cohort}
 
-sizedata <- filter(maindata, size == 10) %>%
+sizedata <- filter(maindata, size == 5) %>%
 view()
 
 ```
