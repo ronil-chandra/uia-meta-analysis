@@ -59,7 +59,7 @@ view(maindata)
 
 ```{r select size cohort}
 
-tendata <- filter(maindata, size == 10) %>%
+sizedata <- filter(maindata, size == 10) %>%
 view()
 
 ```
@@ -69,10 +69,10 @@ If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie v
 
 ```{r coalesce patients into aneurysms}
 
-dat <- tendata %>%
-  mutate(total_10 = coalesce(num_anr,num)) %>%
-  drop_na(total_10) %>%
-  select(auth, pub, rupt, total_10)
+dat <- sizedata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>%
+  select(auth, pub, rupt, total_size)
 view(dat)
 
 ```
@@ -103,7 +103,7 @@ To better stabilise the variance, and to normalise the distribution especially f
 
 
 ```{r individual DA transformed proportions}
-ies.da=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0)
+ies.da=escalc(xi=rupt, ni=total_size, data=dat, measure="PFT", add=0)
 view(ies.da)
 
 ```
@@ -111,7 +111,7 @@ view(ies.da)
 # double check if back transform individual transformed values that we should get the original raw proportions
 
 ```{r cross check individual back transformation}
-transf.ipft(ies.da$yi, ies.da$total_10)
+transf.ipft(ies.da$yi, ies.da$total_size)
 ```
 
 # pool the transformed values using a weighted mean according to inverse variance method
@@ -139,7 +139,7 @@ The DL method is also used to estimate between-study variance using the statisti
 
 ```{r pooled proportion}
 
-pes <- predict(pes.da, transf=transf.ipft.hm, targs=list(ni=dat$total_10))
+pes <- predict(pes.da, transf=transf.ipft.hm, targs=list(ni=dat$total_size))
 pes
 
 ```
@@ -152,7 +152,7 @@ Instead, the back transformation to the pooled proportion needs to be carried ou
 
 ```{r individual back transformation}
 
-dat.back <- summary(ies.da, transf = transf.ipft, ni = dat$total_10)
+dat.back <- summary(ies.da, transf = transf.ipft, ni = dat$total_size)
 view(dat.back)
 
 ```
@@ -183,53 +183,61 @@ The choice of meta-analytic method for transformed proportions is controversial.
 
 However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially prior to GLMM.
 
+# Meta-analysis of proportions using inverse variance DL method and Normal approximimation method for CIs
+
+```{r meta-analysis of proportions with DL and NAsm method for CIs}
+
+pes.summary.nasm = metaprop(rupt, total_size, data=dat, 
+                     sm = "PFT", 
+                     method.tau = "DL",
+                     method.ci = "NAsm",
+                     pscale = 1) 
+pes.summary.nasm
+
+
+
+```
+
+Note that this is the same result as performing the individual steps using the metafor package. 
+
+
 # Meta-analysis of proportions using inverse variance DL method and CP method for CIs
 
 ```{r meta-analysis of proportions with DL and CP method for CIs}
 
-pes.summary.cp = metaprop(rupt, total_10, data=dat, 
-                     sm = "PFT", 
-                     method.tau = "DL",
-                     method.ci = "CP",
-                     pscale = 100) 
+pes.summary.cp = metaprop(rupt, total_size, 
+                          data=dat, 
+                          sm = "PFT", 
+                          method.tau = "DL",
+                          method.ci = "CP",
+                          pscale = 1) 
 pes.summary.cp
 
-
-
 ```
 
-# Display meta-analysis as a simple forest using inverser variance DL and CP
-
-```{r simple forest with DL and CP method for CIs, fig.width = 10}
-
-forest(pes.summary.cp,
-       pscale = 100,
-       xlim=c(0,10),
-       digits = 4)
-
-```
+# Meta-analysis of proportions using inverse variance DL method and Wilson score interval method for CIs
 
 
-In addition, the choice of CI is important given the rarity of the outcome event ie p=0 is common which creates a highly skewed distribution. 
+```{r meta-analysis of proportions with DL and Wilson method for CIs}
 
-The Wilson method is chosen for 2 main reasons, as recommended by Vollset 1993, Agresti 1998, and Newcombe 1998 and Brown 2001. Firstly, as compared to the exact Clopper-Pearson method, the Wilson method is more accurate when the sample size is small, can be applied to all sample sizes, and derives an interval that more accurately reflects the true interval in the population of interest. For this situation of aneurysm rupture in small unruptured aneurysms, p is very close to 0, and thus the Clopper-Pearson exact method can result in overcoverage since n is small, and even when n is large, the derived CI does not accurately reflect the true population CI when p is very close to 0. 
-
-
-
-# Meta-analysis of proportions using inverse variance DL method Wilson method for CIs
-
-```{r meta-analysis of proportions using DL method Wilson method for CIs}
-
-pes.summary.wilson=metaprop(rupt, total_10, data=dat, 
-                     sm="PFT",
-                     method.tau = "DL", 
-                     method.ci = "WS",
-                     pscale = 100) 
+pes.summary.wilson = metaprop(rupt, total_size,
+                              data=dat, 
+                              sm = "PFT", 
+                              method.tau = "DL",
+                              method.ci = "WS",
+                              pscale = 1) 
 pes.summary.wilson
 
-
-
 ```
+
+
+The choice of CI is important given the rarity of the outcome event ie p=0 is common which creates a highly skewed distribution. 
+
+The Wilson method is chosen for 2 main reasons, as recommended by Vollset 1993, Agresti 1998, and Newcombe 1998 and Brown 2001. 
+
+Firstly, as compared to the exact Clopper-Pearson method, the Wilson method is more accurate when the sample size is small, can be applied to all sample sizes, and derives an interval that more accurately reflects the true interval in the population of interest. 
+
+For this situation of aneurysm rupture in small unruptured aneurysms, p is very close to 0, and thus the Clopper-Pearson exact method can result in overcoverage since n is small, and even when n is large, the derived CI does not accurately reflect the true population CI when p is very close to 0. 
 
 Note the differences in the CIs between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
 
@@ -240,6 +248,7 @@ Note the differences in the CIs between the CP and Wilson method, particulary on
 
 forest(pes.summary.wilson,
        xlim=c(0,10),
+       pscale = 100,
        digits = 4)
 
 ```
@@ -257,7 +266,8 @@ This is because the classic meta-analysis methods assume that the effect follows
 
 ```{r meta-analysis of proportions using glmm}
 
-pes.summary.glmm = metaprop(rupt, total_10, data=dat, 
+pes.summary.glmm = metaprop(rupt, total_size,
+                            data=dat,
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
@@ -266,7 +276,8 @@ pes.summary.glmm
 
 ```
 
-Note the diffences in the GLMM model compared to classic meta-analytic methods. This produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010.
+Note that the GLMM ie a random intercept logistic regression model is the default method for the logit transformation. Also the the maximum-likelihood method is utilized for GLMMs.
+
 
 # Display GLMM result using a simple forest plot
 
@@ -279,9 +290,9 @@ forest(pes.summary.glmm,
 
 ```
 
-Note individual CIs are using Wilson, does the summary proportion also use Wilson for CIs?
+Note the diffences in the GLMM model compared to classic meta-analytic methods. This produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010.
 
-
+Note CIs are using Wilson score method
 
 
 # Publication quality forest plots
