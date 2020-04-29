@@ -1,0 +1,309 @@
+---
+title: "rupture-risk-5"
+author: "Ronil V. Chandra"
+date: "29/04/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load required packages
+
+```{r load packages, echo=TRUE, include = TRUE}
+library(tidyverse)
+library(meta)
+library(metafor)
+
+```
+
+# Load required data
+
+```{r load data, echo=TRUE, include = TRUE}
+
+maindata <- read_csv("data/psash-290420.csv")
+
+```
+
+# Correct vector types
+
+```{r correct vectors, echo=TRUE}
+maindata %>% 
+  mutate(pub = as.integer(pub),
+         start = as.integer(start),
+         end = as.integer(end), 
+         psah = as.double(psah),
+         fu = as.double(fu),
+         nos_select = as.double(nos_select),
+         nos_outcome = as.double(nos_outcome),
+         nos_compare = as.double(nos_compare),
+         nos_outcome = as.double(nos_outcome),
+         country = as.factor(country),
+         type = as.factor(type))
+```
+
+# Confirm new data structure with correct vector types
+
+```{r glimpse new, echo=TRUE}
+glimpse(maindata)
+view(maindata)
+```
+
+# Analyse 10 mm or less aneurysms
+
+```{r select size cohort}
+
+sizedata <- filter(maindata, size == 5) %>%
+view()
+
+```
+
+
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size
+
+```{r coalesce patients into aneurysms}
+
+dat <- sizedata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>%
+  select(auth, pub, rupt, total_size)
+view(dat)
+
+```
+
+## calculate individual and pooled study proportions 
+
+xi = cases ie number of ruptures during all follow up 
+ni = total ie number of aneurysms at study entry
+pi = raw proportions ie xi / ni 
+yi = individual effect size ie individual proportion in this study
+vi = sampling variances
+
+ies = object that holds results of individual effect sizes and corresponding sampling variances
+
+escalc() is a metafor function to estimate individual effect sizes and sampling variances
+
+rma() is a metafor function to fit a random-effects model. This is utilised to take both intra-study and inter-study variances, to increase generalisability. This is because these samples are drawn from different populations, with different comorbidities that may influence outcome, and undergo observation in different conditions. This leads to variation in the outcomes due to random samping error.
+
+pes = object that holds results of pooled effect size and pooled sampling variances. Note that the pooled effect size is the weighted average of the observed effect sizes in the individual studies that are weighted by the inverse of the total variance in that study. 
+
+The distribution of the observed proportions is skewed, and thus we need to transform the data using either the logit or double arcine methods to make it follow a normal distribution and thus enhance the validity of statistical analysis. It will need to be backtransformed later into proportions. 
+
+If the proportion is 0 or 1, the variance is undefined in a logit transformation, and often a continuity correction of 0.5 is applied. 
+
+To better stabilise the variance, and to normalise the distribution especially for small sample sizes, the double arcine method of Freeman-Tukey (Reference Freeman and Tukey 1950) is recommended. This can be later backtransformed using the equation derived by Miller (Reference Miller 1978)
+
+# calculate individual transformed study proportions using DA method
+
+
+```{r individual DA transformed proportions}
+ies.da=escalc(xi=rupt, ni=total_size, data=dat, measure="PFT", add=0)
+view(ies.da)
+
+```
+
+# double check if back transform individual transformed values that we should get the original raw proportions
+
+```{r cross check individual back transformation}
+transf.ipft(ies.da$yi, ies.da$total_size)
+```
+
+# pool the transformed values using a weighted mean according to inverse variance method
+
+
+```{r pooled DA transformed proportion}
+
+pes.da=rma.uni(yi, vi, data=ies.da, 
+               add = 0,
+               method = "DL",
+               level = 95)
+pes.da
+
+```
+
+The DA method proposed by Freeman-Tukey transforms the data, stabilises the sampling variance, and allows us to carry out statistical analysis. Using the transformed data, we can then fit our chosen statistical models.  
+
+rma.uni fits a linear (random/fixed or mixed) model without moderaters. Here, we have chosen a DerSimonian and Laird model (DL) method, and the summary proportion is calculated by weighting the studies using the inverse variance method. Note that the condfidence intervals are calculated using the Wald method ie assuming a normal distribution. 
+
+Note that if the proportion is 0, then a constant may be added. Ensure that there is no adjustment to observed proportions by specifying add=0. 
+
+The DL method is also used to estimate between-study variance using the statistic tau-squared, and can be estimated using different random-effects models. 
+
+# back transformation is required to obtain the summary proportion. 
+
+```{r pooled proportion}
+
+pes <- predict(pes.da, transf=transf.ipft.hm, targs=list(ni=dat$total_size))
+pes
+
+```
+
+Simply using the harmonic mean of the sample sizes as suggested by Miller et al 1978 and applying this to all the individual studies creates misleading results for each individual study.
+
+Instead, the back transformation to the pooled proportion needs to be carried out using study-specific sample sizes. 
+
+# create a new tibble for individual study back transformation
+
+```{r individual back transformation}
+
+dat.back <- summary(ies.da, transf = transf.ipft, ni = dat$total_size)
+view(dat.back)
+
+```
+
+
+# display the individual and pooled proportions as a forest plot
+
+```{r simple forest after back transformation, fig.height= 10, fig.width = 10}
+
+forest(dat.back$yi, ci.lb=dat.back$ci.lb, ci.ub=dat.back$ci.ub, 
+       psize=1,
+       xlim=c(-0.5,1.8), alim=c(0,1), ylim=c(-1,8), refline=NA, digits=3L,
+       xlab="Proportion", header=c("Study", "Proportion [95% CI]"))
+addpoly(pes$pred, ci.lb=pes$ci.lb, ci.ub=pes$ci.ub, row=-0.5, digits=3,
+        mlab="RE Model", efac=1.3) 
+abline(h=0.5)
+
+```
+
+
+#Utilise metaprop function from meta
+
+Metaprop can be used to caclulate an overall proportion from studies reporting a single proportion. Pooling methods are the inverse variance and generalised linear mixed models (GLMM).
+
+Our options are to pool untransformed proportions or pool transformed proportions according to logit or DA methods. 
+
+The choice of meta-analytic method for transformed proportions is controversial. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. 
+
+However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially prior to GLMM.
+
+# Meta-analysis of proportions using inverse variance DL method and Normal approximimation method for CIs
+
+```{r meta-analysis of proportions with DL and NAsm method for CIs}
+
+pes.summary.nasm = metaprop(rupt, total_size, data=dat, 
+                     sm = "PFT", 
+                     method.tau = "DL",
+                     method.ci = "NAsm",
+                     pscale = 1) 
+pes.summary.nasm
+
+
+
+```
+
+Note that this is the same result as performing the individual steps using the metafor package. 
+
+
+# Meta-analysis of proportions using inverse variance DL method and CP method for CIs
+
+```{r meta-analysis of proportions with DL and CP method for CIs}
+
+pes.summary.cp = metaprop(rupt, total_size, 
+                          data=dat, 
+                          sm = "PFT", 
+                          method.tau = "DL",
+                          method.ci = "CP",
+                          pscale = 1) 
+pes.summary.cp
+
+```
+
+# Meta-analysis of proportions using inverse variance DL method and Wilson score interval method for CIs
+
+
+```{r meta-analysis of proportions with DL and Wilson method for CIs}
+
+pes.summary.wilson = metaprop(rupt, total_size,
+                              data=dat, 
+                              sm = "PFT", 
+                              method.tau = "DL",
+                              method.ci = "WS",
+                              pscale = 1) 
+pes.summary.wilson
+
+```
+
+
+The choice of CI is important given the rarity of the outcome event ie p=0 is common which creates a highly skewed distribution. 
+
+The Wilson method is chosen for 2 main reasons, as recommended by Vollset 1993, Agresti 1998, and Newcombe 1998 and Brown 2001. 
+
+Firstly, as compared to the exact Clopper-Pearson method, the Wilson method is more accurate when the sample size is small, can be applied to all sample sizes, and derives an interval that more accurately reflects the true interval in the population of interest. 
+
+For this situation of aneurysm rupture in small unruptured aneurysms, p is very close to 0, and thus the Clopper-Pearson exact method can result in overcoverage since n is small, and even when n is large, the derived CI does not accurately reflect the true population CI when p is very close to 0. 
+
+Note the differences in the CIs between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
+
+
+# A simple forest plot with inverse variance DL and Wilson method for CIs
+
+```{r simple forest with DL and Wilson method for CIs, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.wilson,
+       xlim=c(0,10),
+       pscale = 100,
+       digits = 4)
+
+```
+
+# Using generalised linear mixed methods models (GLMMs).
+
+Single proportions that have binomial structure are generally transformed using logit, arcine or DA methods. These are then backtransformed to the original scale. 
+
+While all back transformations are possible, the methodology of Miller 1978 is typically utilised using the harmonic mean of the sample sizes. However, for highly skewed distribution of sample sizes, the harmonic mean is affected, and this can affect the backtransformed proportions. 
+
+This anomaly has been confirmed by Schwarzer 2019 and use of a GLMM (random intercept logistic regression model) is recommended. Although there are shortcomings of the logit transformation with classic random-effects meta-analysis methods as highlighted above (issues with p=0 and continuity corrections), they do not apply to the GLMM.
+
+This is because the classic meta-analysis methods assume that the effect follows a normal distribution, while the GLMM takes into account the binomial structure of the data as noted by Stinjen 2010. 
+
+
+```{r meta-analysis of proportions using glmm}
+
+pes.summary.glmm = metaprop(rupt, total_size,
+                            data=dat,
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm
+
+```
+
+Note that the GLMM ie a random intercept logistic regression model is the default method for the logit transformation. Also the the maximum-likelihood method is utilized for GLMMs.
+
+
+# Display GLMM result using a simple forest plot
+
+
+```{r simple forst using glmm, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm,
+       xlim=c(0,10),
+       digits = 4)
+
+```
+
+Note the diffences in the GLMM model compared to classic meta-analytic methods. This produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010.
+
+Note CIs are using Wilson score method
+
+
+# Publication quality forest plots
+
+# Still working on everything below this line
+
+
+
+```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+
+
+forest(pes.summary.glmm,
+       layout = "JAMA",
+       xlim=c(0,10),
+       xlab = "Percent Rupture Risk") 
+
+```
+
