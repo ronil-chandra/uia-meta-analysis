@@ -65,7 +65,7 @@ view()
 ```
 
 
-If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size
 
 ```{r coalesce patients into aneurysms}
 
@@ -104,15 +104,14 @@ To better stabilise the variance, and to normalise the distribution especially f
 
 ```{r individual DA transformed proportions}
 ies.da=escalc(xi=rupt, ni=total_10, data=dat, measure="PFT", add=0)
-dat <- ies.da
-view(dat)
+view(ies.da)
 
 ```
 
 # double check if back transform individual transformed values that we should get the original raw proportions
 
 ```{r cross check individual back transformation}
-transf.ipft(dat$yi, dat$total_10)
+transf.ipft(ies.da$yi, ies.da$total_10)
 ```
 
 # pool the transformed values using a weighted mean according to inverse variance method
@@ -121,6 +120,7 @@ transf.ipft(dat$yi, dat$total_10)
 ```{r pooled DA transformed proportion}
 
 pes.da=rma.uni(yi, vi, data=ies.da, 
+               add = 0,
                method = "DL",
                level = 95)
 pes.da
@@ -152,9 +152,11 @@ Instead, the back transformation to the pooled proportion needs to be carried ou
 
 ```{r individual back transformation}
 
-dat.back <- summary(dat, transf = transf.ipft, ni = dat$total_10)
+dat.back <- summary(ies.da, transf = transf.ipft, ni = dat$total_10)
+view(dat.back)
 
 ```
+
 
 # display the individual and pooled proportions as a forest plot
 
@@ -175,9 +177,11 @@ abline(h=0.5)
 
 Metaprop can be used to caclulate an overall proportion from studies reporting a single proportion. Pooling methods are the inverse variance and generalised linear mixed models (GLMM).
 
-Our options are to pool untransformed proportions or pool transformed proportions according to logit or DA methods. For reasons mentioned above, we will tranform the data using DA methods, fit our model using the transformed proportions, and backtranform to create the summary proportion.
+Our options are to pool untransformed proportions or pool transformed proportions according to logit or DA methods. 
 
-The choice of meta-analytic method for transformed proportions is controversial. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially. 
+The choice of meta-analytic method for transformed proportions is controversial. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. 
+
+However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially prior to GLMM.
 
 # Meta-analysis of proportions using inverse variance DL method and CP method for CIs
 
