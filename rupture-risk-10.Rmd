@@ -345,7 +345,12 @@ baujat(pes.summary.glmm)
 
 ```
 
-This shows that study 12 ie Juvela et al, is a source of between study heterogeniety
+This shows that study 12 ie Juvela et al, is a source of between study heterogeneity. 
+
+We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity.
+
+
+
 
 
 
