@@ -406,18 +406,67 @@ psah.or <- sizedata %>%
   rename(Ne = num_anr_psah) %>%
   mutate(Nc = total_anr - Ne) %>%
   select(auth, Ee, Ne, Ec, Nc) %>%
-  drop_na(Ee, Ne)
+  drop_na(Ee, Ne) %>%
+  mutate_if(is.numeric, round, 0)
 view(psah.or)
 
 ```
 
+ai = prior SAH and rupture +ve 
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve
+di = no prior SAH, and rupture -ve
+
+
+```{r structure data for OR estimate for prior SAH}
+
+view(sizedata)
+psah.or <- sizedata %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai = rupt_psah) %>%
+  mutate(ci = rupt - ai) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_anr) %>%
+  mutate(bi = num_anr_psah - ai) %>%
+  mutate(di = total_anr - ci) %>%
+  select(auth, ai, bi, ci, di) %>%
+  drop_na(ai, ci) %>%
+  mutate_if(is.numeric, round, 0)
+view(psah.or)
+
+```
+
+
+```{r structure data for OR estimate for prior SAH}
+
+view(sizedata)
+psah.or <- sizedata %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai.psah = rupt_psah) %>%
+  mutate(ci.psah = rupt - ai.psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_anr) %>%
+  mutate(bi.psah = num_anr_psah - ai.psah) %>%
+  mutate(di.psah = total_anr - ci.psah) %>%
+  select(auth, ai.psah, bi.psah, ci.psah, di.psah) %>%
+  drop_na(ai.psah, ci.psah) %>%
+  mutate_if(is.numeric, round, 0)
+view(psah.or)
+
+```
+
+
+
 ```{r metabin}
 
-psah.meta <- metabin(Ee, Ne, Ec, Nc,
-                     data = psah.or,
-                     method = "glmm",
-                     model.glmm = "CM.EL",
-                     sm = "OR")
+res <- rma.glmm(measure = "OR", ai = ai.psah, bi = bi.psah, ci = ci.psah, di = di.psah, 
+                data = psah.or, 
+                drop00 = FALSE,
+                model = "CM.EL",
+                method = "ML")
+res
 ```
 
 
