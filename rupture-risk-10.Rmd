@@ -378,11 +378,50 @@ A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-a
 
 Mete-regression can also be included easily by extending the model to include a study level covariate. 
 
-# Using the metabin function from meta package to asess the OR for prior SAH 
+# Using the metabin function from meta package to asess the OR for prior SAH
 
-```{r metabin prior sah}
+Structure the data in this format
+
+Author	This signifies the column for the study label (i.e., the first author)
+
+Ee	Number of events in the exposure/treatment arm = rupture in PSAH cohort 
+Ne	Number of participants in exposure/treatment arm arm = number of aneurysms in PSAH cohort
+Ec	Number of events in the non-exposure/control arm = ruptures in non-PSAH cohort
+Nc	Number of participants in the non-exposure/control arm = number of aneurysms in non-PSAH cohort. 
+
+For num_anr is not known, then num (of patients) is brought forward assuming 1 patient has 1 aneurysm.
+
+For aneurysms in size cohort with prior SAH, this is estimated by using same proportion of patients with prior SAH in the total observed cohort, and applying this to the number of aneurysms in that specific size cohort. 
+
+```{r structure data for OR estimate for prior SAH}
+
+view(sizedata)
+psah.or <- sizedata %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(Ee = rupt_psah) %>%
+  mutate(Ec = rupt - Ee) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_anr) %>%
+  rename(Ne = num_anr_psah) %>%
+  mutate(Nc = total_anr - Ne) %>%
+  select(auth, Ee, Ne, Ec, Nc) %>%
+  drop_na(Ee, Ne)
+view(psah.or)
 
 ```
+
+```{r metabin}
+
+psah.meta <- metabin(Ee, Ne, Ec, Nc,
+                     data = psah.or,
+                     method = "glmm",
+                     model.glmm = "CM.EL",
+                     sm = "OR")
+```
+
+
+
 
 
 
