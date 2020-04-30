@@ -364,15 +364,32 @@ Rupture of the aneurysm is considered a rare event ie <1%, and the data are spar
 
 This is methodologically challenging, and the choice of meta-analyis method is important. The most common methods of MA is the inverse variance method, using the DerSimonian and Laird random effects model. 
 
-The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when one of the cells has a 0 which is common with rare events, the inverse variance cannot be used. 
+The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when one of the cells has a 0 which is common with rare events, the inverse variance cannot be used because the variances become undefined. 
 
-There are 2 options for correction: use of a continuity correction ie adding a fixed value usually 0.5, or using calculating the risk difference. However using a continuity correction leads to excess bias in the effect, and risk differences have poor statistical properties with too wide intervals when events are rare. 
+There are 2 options for correction: use of a continuity correction ie adding a fixed value usually 0.5 or using calculating the risk difference. However using a continuity correction leads to excess bias in the effect, and can influence the result and conclusions (Stinjen 2010). Risk differences have poor statistical properties with too wide intervals when events are rare, and are also not recommended (Bradburn 2007)
 
-There are also issues on how to handle double 0 studies, since these may also carry some meaningful data due to their sample size. 
+There are also issues on how to handle double 0 studies, since these may also carry some meaningful data due to their sample size (Keus 2009). 
 
-In summary, there is debate on what is the best model to meta-analyse rare events. Use of Peto's method to estimate the OR is often suggested for rare events, since this includes single zero studies without a continuity correction. However, double zero studies are excluded, and the following three conditions need to hold true ie a rare event <1%, the exposure / treatment groups are balanced, and the effects are not very large. Unless all three are true, then Peto's method also may give biased results. In our dataset, the groups with and without prior SAH are unbalanced ie >1:3, so Peto's method is not appropriate. 
+In summary, there is debate on what is the best model to meta-analyse rare events. Use of Peto's method to estimate the OR is often suggested for rare events, since this includes single zero studies without a continuity correction. However, double zero studies are excluded, and the following three conditions need to hold true ie a rare event <1%, the exposure / treatment groups are balanced, and the effects are not very large (Cochrane handbook). Unless all three are true, then Peto's method also may give biased results. In our dataset, the groups with and without prior SAH are unbalanced ie >1:3, so Peto's method is not appropriate. 
 
-Alternatively,the Mantel-haenszel without zero cell continuity correction can be used for unbalanced exposure / treatment groups. This method provides a fixed effects meta-anlysis so is best used in the absence of heterogeniety and does exclude double zero studies. 
+Alternatively,the Mantel-haenszel without zero cell continuity correction can be used for unbalanced exposure / treatment groups.(Efthimiou 2018) This method provides a fixed effects meta-anlysis so is best used in the absence of heterogeniety and does exclude double zero studies. In our dataset, there is heterogeniety, and thus a random effects meta-analysis is preferred. 
+
+A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-analysis for rare outcomes, specifically by utilising a hypergeometric-normal (HN) model for the meta-analysis of odds ratios (Stinjen 2010). Recent developments in statistical packages, including in R, make these computationaly intensive methods practical and feasible. The HN model performs well, with minimal bias, and satsifactory coverage of the 95% CIs with rare events. 
+
+Mete-regression can also be included easily by extending the model to include a study level covariate. 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
