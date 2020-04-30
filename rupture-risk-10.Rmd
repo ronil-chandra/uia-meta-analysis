@@ -378,6 +378,13 @@ A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-a
 
 Mete-regression can also be included easily by extending the model to include a study level covariate. 
 
+# Using the metabin function from meta package to asess the OR for prior SAH 
+
+```{r metabin prior sah}
+
+```
+
+
 
 
 
