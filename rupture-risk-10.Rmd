@@ -418,6 +418,21 @@ Use the rma function from metafor to meta-analysis log odds ratio using conditio
 For measure="OR", this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a (mixed-effects) conditional logistic model.
 
 
+
+
+```{r OR for prior SAH}
+
+pes.summary.glmm = metaprop(rupt, total_size,
+                            data=dat,
+                            sm="PLOGIT",
+                            byvar = pub,
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm
+```
+
+
 ```{r OR for prior SAH}
 
 res <- rma.glmm(measure = "OR", ai = ai.psah, bi = bi.psah, ci = ci.psah, di = di.psah, 
