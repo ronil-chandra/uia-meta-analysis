@@ -386,15 +386,111 @@ baujat(pes.summary.glmm.juvela, xlim=c(0,15), ylim=c(0,15))
 
 # create new meta-analysis of proportions for risk of rutpure in patients with and without exposure to prior SAH
 
-```{r}
+Firstly structure the data with authors in a 2 x 2 table
 
-dat <- sizedata %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
-  drop_na(total_size) %>%
-  select(auth, pub, rupt, total_size)
-view(dat)
+ai = prior SAH and rupture +ve 
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve
+di = no prior SAH, and rupture -ve 
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+
+```{r restructure to 2 x 2 table for PSAH}
+
+view(sizedata)
+dat.psah <- sizedata %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai.psah = rupt_psah) %>%
+  mutate(ci.psah = rupt - ai.psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_anr) %>%
+  mutate(bi.psah = num_anr_psah - ai.psah) %>%
+  mutate(di.psah = total_anr - ci.psah) %>%
+  select(auth, ai.psah, bi.psah, ci.psah, di.psah) %>%
+  drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
+  mutate(n1i.psah = ai.psah + bi.psah) %>%
+  mutate(n2i.psah = ci.psah + di.psah) %>%
+  filter(n1i.psah!=0) %>%
+  mutate_if(is.numeric, round, 0)
+view(dat.psah)
+
 ```
 
+run new GLMM (random intercept logistic regression model) for patients with history of PSAH
+
+```{r glmm for summary proportion with history of PSAH}
+
+pes.summary.glmm.psahpos = metaprop(ai.psah, n1i.psah,
+                            data=dat.psah,
+                            sm = "PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm.psahpos
+
+```
+
+Then run new GLMM (random intercept logistic regression model) for patients withour history of PSAH
+
+
+```{r glmm for summary proportion without history of prior SAH}
+
+pes.summary.glmm.psahneg = metaprop(ci.psah, n2i.psah,
+                            data=dat.psah,
+                            sm = "PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm.psahneg
+
+```
+
+This exploratory analysis does show different risk of rupture for patients with and without prior SAH for aneurysms <10 mm. How can we compare the model outputs for statistical difference?
+
+We can also remove Juvela et al from the first analysis and re-run the summary proportion excluding Juvela. 
+
+
+```{r glmm for summary proportion with history of PSAH without Juvela}
+
+dat.psah.juvela <- slice(dat.psah, -2)
+pes.summary.glmm.psahpos.juvela = metaprop(ai.psah,
+                                           n1i.psah,
+                                           data=dat.psah.juvela,
+                                           sm = "PLOGIT",
+                                           method.tau = "ML", 
+                                           method.ci = "WS",
+                                           pscale = 100) 
+pes.summary.glmm.psahpos.juvela
+
+
+```
+
+This shows that when we exclude Juvela, and concentrate on prior SAH only, the rupture risk is still higher than witout prior SAH, but now the studies are homogeneous. Limitation is of course the small number of rutpures in this cohort. 
+
+#Dispay the information as simple forest plots
+
+
+
+```{r simple forest using glmm model for summary proportion with history of PSAH}
+
+forest(pes.summary.glmm.psahpos,
+       layout = "JAMA",
+       xlim=c(0,30),
+       xlab = "Percent Rupture Risk") 
+
+```
+
+```{r simple forest using glmm model for summary proportion with history of PSAH without Juvela }
+
+forest(pes.summary.glmm.psahpos.juvela,
+       layout = "JAMA",
+       xlim=c(0,30),
+       xlab = "Percent Rupture Risk") 
+
+```
 
 
 
@@ -437,6 +533,10 @@ ai = prior SAH and rupture +ve
 bi = prior SAH and rupture -ve
 ci = no prior SAH and rupture +ve
 di = no prior SAH, and rupture -ve 
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
 
 For num_anr is not known, then num (of patients) is brought forward assuming 1 patient has 1 aneurysm.
 
