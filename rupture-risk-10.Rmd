@@ -48,15 +48,15 @@ maindata %>%
 
 ```{r glimpse new, echo=TRUE}
 glimpse(maindata)
-view(maindata)
+#view(maindata)
 ```
 
 # Analyse 10 mm or less aneurysms
 
 ```{r select size cohort}
 
-sizedata <- filter(maindata, size == 10) %>%
-view()
+sizedata <- filter(maindata, size == 10) 
+#view()
 
 ```
 
@@ -69,7 +69,7 @@ dat <- sizedata %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
   drop_na(total_size) %>%
   select(auth, pub, rupt, total_size)
-view(dat)
+#view(dat)
 
 ```
 
@@ -100,7 +100,7 @@ To better stabilise the variance, and to normalise the distribution especially f
 
 ```{r individual DA transformed proportions}
 ies.da=escalc(xi=rupt, ni=total_size, data=dat, measure="PFT", add=0)
-view(ies.da)
+#view(ies.da)
 
 ```
 
@@ -149,7 +149,7 @@ Instead, the back transformation to the pooled proportion needs to be carried ou
 ```{r individual back transformation}
 
 dat.back <- summary(ies.da, transf = transf.ipft, ni = dat$total_size)
-view(dat.back)
+#view(dat.back)
 
 ```
 
@@ -399,7 +399,7 @@ n2i = ci + di = total aneurysms without prior SAH
 
 ```{r restructure to 2 x 2 table for PSAH}
 
-view(sizedata)
+#view(sizedata)
 dat.psah <- sizedata %>%
   mutate(total_anr = coalesce(num_anr,num)) %>%
   drop_na(total_anr) %>%
@@ -415,7 +415,7 @@ dat.psah <- sizedata %>%
   mutate(n2i.psah = ci.psah + di.psah) %>%
   filter(n1i.psah!=0) %>%
   mutate_if(is.numeric, round, 0)
-view(dat.psah)
+#view(dat.psah)
 
 ```
 
@@ -548,7 +548,7 @@ For aneurysms in size cohort with prior SAH, this is estimated by using same pro
 
 ```{r structure data for OR estimate for prior SAH}
 
-view(sizedata)
+#view(sizedata)
 psah.or <- sizedata %>%
   mutate(total_anr = coalesce(num_anr,num)) %>%
   drop_na(total_anr) %>%
@@ -561,7 +561,7 @@ psah.or <- sizedata %>%
   select(auth, ai.psah, bi.psah, ci.psah, di.psah) %>%
   drop_na(ai.psah, ci.psah) %>%
   mutate_if(is.numeric, round, 0)
-view(psah.or)
+#view(psah.or)
 
 ```
 
@@ -571,7 +571,7 @@ For measure="OR", this leads to a non-central hypergeometric distribution for th
 
 
 ```{r log OR for prior SAH}
-
+library(BiasedUrn)
 res <- rma.glmm(measure = "OR", ai = ai.psah, bi = bi.psah, ci = ci.psah, di = di.psah, data = dat.psah,
                 model = "CM.EL",
                 method = "ML")
