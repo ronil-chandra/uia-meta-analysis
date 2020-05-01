@@ -470,7 +470,7 @@ pes.summary.glmm.psahpos.juvela
 
 This shows that when we exclude Juvela, and concentrate on prior SAH only, the rupture risk is still higher than witout prior SAH, but now the studies are homogeneous. Limitation is of course the small number of rutpures in this cohort. 
 
-#Dispay the information as simple forest plots
+#Dispay the information as simple forest plots - first one including Juvela and second without Juvela
 
 
 
