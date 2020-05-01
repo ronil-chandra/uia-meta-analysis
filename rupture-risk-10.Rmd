@@ -365,7 +365,9 @@ pes.summary.glmm.juvela = metaprop(rupt, total_size,
 pes.summary.glmm.juvela
 ```
 
-This exploratory analaysis demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic
+This exploratory analaysis demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic. 
+
+The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
 
 
 # Rerun Baujat plots excluing Juvela to visually assess which studies contribute most to heterogeniety
@@ -383,6 +385,9 @@ Keeping the influence axis the same, the significant improvement in heterogeniet
 baujat(pes.summary.glmm.juvela, xlim=c(0,15), ylim=c(0,15))
 
 ```
+
+Overall, there seems to be an acceptable level of heterogeniety given the samples that are available. 
+
 
 # create new meta-analysis of proportions for risk of rutpure in patients with and without exposure to prior SAH
 
@@ -433,7 +438,7 @@ pes.summary.glmm.psahpos
 
 ```
 
-Then run new GLMM (random intercept logistic regression model) for patients withour history of PSAH
+Then run new GLMM (random intercept logistic regression model) for patients without history of PSAH
 
 
 ```{r glmm for summary proportion without history of prior SAH}
@@ -448,7 +453,9 @@ pes.summary.glmm.psahneg
 
 ```
 
-This exploratory analysis does show different risk of rupture for patients with and without prior SAH for aneurysms <10 mm. How can we compare the model outputs for statistical difference?
+This exploratory analysis does show different risk of rupture for patients with and without prior SAH for aneurysms <10 mm. 
+
+How can we compare the model outputs for statistical difference?
 
 We can also remove Juvela et al from the first analysis and re-run the summary proportion excluding Juvela. 
 
@@ -468,7 +475,7 @@ pes.summary.glmm.psahpos.juvela
 
 ```
 
-This shows that when we exclude Juvela, and concentrate on prior SAH only, the rupture risk is still higher than witout prior SAH, but now the studies are homogeneous. Limitation is of course the small number of rutpures in this cohort. 
+This shows that when we exclude Juvela, and concentrate on prior SAH only, the rupture risk is still higher in patients with exposure to prior SAH than those without this exposure, but now the studies are homogeneous. Limitation is of course the small number of rutpures in this cohort. 
 
 #Dispay the information as simple forest plots - first one including Juvela and second without Juvela
 
