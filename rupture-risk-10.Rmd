@@ -405,14 +405,16 @@ n2i = ci + di = total aneurysms without prior SAH
 ```{r restructure to 2 x 2 table for PSAH}
 
 view(sizedata)
-dat.psah <- sizedata %>%
+dat.psah3 <- sizedata %>%
   mutate(total_anr = coalesce(num_anr,num)) %>%
   drop_na(total_anr) %>%
   rename(ai.psah = rupt_psah) %>%
   mutate(ci.psah = rupt - ai.psah) %>%
+  mutate(bi.temp.psah = psah) %>%
   mutate(prop_psah = psah_tot / num_tot) %>%
   mutate(num_anr_psah = prop_psah * total_anr) %>%
-  mutate(bi.psah = num_anr_psah - ai.psah) %>%
+  mutate(total_anr_psah = coalesce(bi.temp.psah,num_anr_psah)) %>%
+  mutate(bi.psah = total_anr_psah - ai.psah) %>%
   mutate(di.psah = total_anr - ci.psah) %>%
   select(auth, ai.psah, bi.psah, ci.psah, di.psah) %>%
   drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
@@ -420,7 +422,7 @@ dat.psah <- sizedata %>%
   mutate(n2i.psah = ci.psah + di.psah) %>%
   filter(n1i.psah!=0) %>%
   mutate_if(is.numeric, round, 0)
-view(dat.psah)
+view(dat.psah3)
 
 ```
 
