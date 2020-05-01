@@ -339,6 +339,8 @@ The next measure is the Q-statistic with degrees of freedom. This also assesses 
 
 # Baujat plots to visually assess which studies contribute most to heterogeniety
 
+These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. Baujat et al. (2002) 
+
 ```{r baujat plot}
 
 baujat(pes.summary.glmm)
@@ -349,6 +351,284 @@ This shows that study 12 ie Juvela et al, is a source of between study heterogen
 
 We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity.
 
+# Re-run analysis excluding Juvela - exploratory analysis
+
+```{r exclude Juvela from total proportion}
+
+dat.juvela <- slice(dat, -12)
+pes.summary.glmm.juvela = metaprop(rupt, total_size,
+                            data=dat.juvela,
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm.juvela
+```
+
+This exploratory analaysis demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic
+
+
+# Rerun Baujat plots excluing Juvela to visually assess which studies contribute most to heterogeniety
+
+```{r baujat plot minus Juvela}
+
+baujat(pes.summary.glmm.juvela, xlim=c(0,40), ylim=c(0,40))
+
+```
+
+Keeping the influence axis the same, the significant improvement in heterogeniety is noted. This can be re-processed with smaller scales to more closely explore the result. 
+
+```{r baujat plot minus Juvela 2}
+
+baujat(pes.summary.glmm.juvela, xlim=c(0,15), ylim=c(0,15))
+
+```
+
+# create new meta-analysis of proportions for risk of rutpure in patients with and without exposure to prior SAH
+
+Firstly structure the data with authors in a 2 x 2 table
+
+ai = prior SAH and rupture +ve 
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve
+di = no prior SAH, and rupture -ve 
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+
+```{r restructure to 2 x 2 table for PSAH}
+
+view(sizedata)
+dat.psah <- sizedata %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai.psah = rupt_psah) %>%
+  mutate(ci.psah = rupt - ai.psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_anr) %>%
+  mutate(bi.psah = num_anr_psah - ai.psah) %>%
+  mutate(di.psah = total_anr - ci.psah) %>%
+  select(auth, ai.psah, bi.psah, ci.psah, di.psah) %>%
+  drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
+  mutate(n1i.psah = ai.psah + bi.psah) %>%
+  mutate(n2i.psah = ci.psah + di.psah) %>%
+  filter(n1i.psah!=0) %>%
+  mutate_if(is.numeric, round, 0)
+view(dat.psah)
+
+```
+
+run new GLMM (random intercept logistic regression model) for patients with history of PSAH
+
+```{r glmm for summary proportion with history of PSAH}
+
+pes.summary.glmm.psahpos = metaprop(ai.psah, n1i.psah,
+                            data=dat.psah,
+                            sm = "PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm.psahpos
+
+```
+
+Then run new GLMM (random intercept logistic regression model) for patients withour history of PSAH
+
+
+```{r glmm for summary proportion without history of prior SAH}
+
+pes.summary.glmm.psahneg = metaprop(ci.psah, n2i.psah,
+                            data=dat.psah,
+                            sm = "PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm.psahneg
+
+```
+
+This exploratory analysis does show different risk of rupture for patients with and without prior SAH for aneurysms <10 mm. How can we compare the model outputs for statistical difference?
+
+We can also remove Juvela et al from the first analysis and re-run the summary proportion excluding Juvela. 
+
+
+```{r glmm for summary proportion with history of PSAH without Juvela}
+
+dat.psah.juvela <- slice(dat.psah, -2)
+pes.summary.glmm.psahpos.juvela = metaprop(ai.psah,
+                                           n1i.psah,
+                                           data=dat.psah.juvela,
+                                           sm = "PLOGIT",
+                                           method.tau = "ML", 
+                                           method.ci = "WS",
+                                           pscale = 100) 
+pes.summary.glmm.psahpos.juvela
+
+
+```
+
+This shows that when we exclude Juvela, and concentrate on prior SAH only, the rupture risk is still higher than witout prior SAH, but now the studies are homogeneous. Limitation is of course the small number of rutpures in this cohort. 
+
+#Dispay the information as simple forest plots - first one including Juvela and second without Juvela
+
+
+
+```{r simple forest using glmm model for summary proportion with history of PSAH}
+
+forest(pes.summary.glmm.psahpos,
+       layout = "JAMA",
+       xlim=c(0,30),
+       xlab = "Percent Rupture Risk") 
+
+```
+
+```{r simple forest using glmm model for summary proportion with history of PSAH without Juvela }
+
+forest(pes.summary.glmm.psahpos.juvela,
+       layout = "JAMA",
+       xlim=c(0,30),
+       xlab = "Percent Rupture Risk") 
+
+```
+
+
+# How do we assess the effect of exposure to prior SAH for these  aneurysms ?
+
+Consider the data in the form of a 2 x 2 table, prior SAH as the exposure and rupture as the outcome. 
+
+ai = prior SAH and rupture +ve 
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve
+di = no prior SAH, and rupture -ve
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+Rupture of the aneurysm is considered a rare event ie <1%, and the data are sparse with single 0s or double 0s in the 2 x 2 table. 
+
+This is methodologically challenging, and the choice of meta-analyis method is important. The most common methods of MA is the inverse variance method, using the DerSimonian and Laird random effects model. 
+
+The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when one of the cells has a 0 which is common with rare events, the inverse variance cannot be used because the variances become undefined. 
+
+There are 2 options for correction: use of a continuity correction ie adding a fixed value usually 0.5 or using calculating the risk difference. However using a continuity correction leads to excess bias in the effect, and can influence the result and conclusions (Stinjen 2010). Risk differences have poor statistical properties with too wide intervals when events are rare, and are also not recommended (Bradburn 2007)
+
+There are also issues on how to handle double 0 studies, since these may also carry some meaningful data due to their sample size (Keus 2009). 
+
+In summary, there is debate on what is the best model to meta-analyse rare events. Use of Peto's method to estimate the OR is often suggested for rare events, since this includes single zero studies without a continuity correction. Double zero studies are excluded. 
+
+However, to use Peto's method, the following three conditions need to hold true ie a rare event <1%, the exposure / treatment groups are balanced, and the effects are not very large (Cochrane handbook). Unless all three are true, then Peto's method also may give biased results. In our dataset, the groups with and without prior SAH are unbalanced ie >1:3, so Peto's method is not appropriate. 
+
+Alternatively,the Mantel-haenszel without zero cell continuity correction can be used for unbalanced exposure / treatment groups.(Efthimiou 2018) This method provides a fixed effects meta-anlysis so is best used in the absence of heterogeniety and does exclude double zero studies. In our dataset, there is heterogeniety, and thus a random effects meta-analysis is preferred. 
+
+A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-analysis for rare outcomes, specifically by utilising a hypergeometric-normal (HN) model for the meta-analysis of odds ratios (Stinjen 2010). Recent developments in statistical packages, including in R, make these computationaly intensive methods practical and feasible. The HN model performs well, with minimal bias, and satsifactory coverage of the 95% CIs with rare events. 
+
+Mete-regression can also be included easily by extending the model to include a study level covariate. 
+
+# Using metafor to asess the OR for prior SAH using a GLMM
+
+Structure the data in this format
+
+Author	This signifies the column for the study label (i.e., the first author)
+
+ai = prior SAH and rupture +ve 
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve
+di = no prior SAH, and rupture -ve 
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+Assumptions
+
+For num_anr is not known, then num (of patients) is brought forward assuming 1 patient has 1 aneurysm.
+
+For aneurysms in size cohort with prior SAH, this is estimated by using same proportion of patients with prior SAH in the total observed cohort, and applying this to the number of aneurysms in that specific size cohort. 
+
+
+```{r structure data for OR estimate for prior SAH}
+
+view(sizedata)
+psah.or <- sizedata %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai.psah = rupt_psah) %>%
+  mutate(ci.psah = rupt - ai.psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_anr) %>%
+  mutate(bi.psah = num_anr_psah - ai.psah) %>%
+  mutate(di.psah = total_anr - ci.psah) %>%
+  select(auth, ai.psah, bi.psah, ci.psah, di.psah) %>%
+  drop_na(ai.psah, ci.psah) %>%
+  mutate_if(is.numeric, round, 0)
+view(psah.or)
+
+```
+
+Use the rma function from metafor to meta-analyse log odds ratio using conditional logistic regression model (random effects). The conditional model (model="CM.EL") avoids having to model study level variability by conditioning on the total numbers of cases/events in each study. 
+
+For measure="OR", this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a mixed-effects conditional logistic model.
+
+
+```{r log OR for prior SAH}
+
+res <- rma.glmm(measure = "OR", ai = ai.psah, bi = bi.psah, ci = ci.psah, di = di.psah, data = dat.psah,
+                model = "CM.EL",
+                method = "ML")
+res
+
+```
+
+
+View the results as a forest
+
+```{r forest log OR for prior SAH}
+
+forest(res)
+
+```
+
+transform the log OR to OR
+
+```{r}
+res2 <- predict(res, transf=exp, digits=2)
+res2
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Meta-analysis of rare events
 
 
 
