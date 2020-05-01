@@ -493,10 +493,7 @@ forest(pes.summary.glmm.psahpos.juvela,
 ```
 
 
-
-# How should we consider these moderating variables?
-
-# How do we assess the effect of exposure to prior SAH for these small aneurysms ?
+# How do we assess the effect of exposure to prior SAH for these  aneurysms ?
 
 Consider the data in the form of a 2 x 2 table, prior SAH as the exposure and rupture as the outcome. 
 
@@ -504,6 +501,9 @@ ai = prior SAH and rupture +ve
 bi = prior SAH and rupture -ve
 ci = no prior SAH and rupture +ve
 di = no prior SAH, and rupture -ve
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
 
 Rupture of the aneurysm is considered a rare event ie <1%, and the data are sparse with single 0s or double 0s in the 2 x 2 table. 
 
@@ -515,7 +515,9 @@ There are 2 options for correction: use of a continuity correction ie adding a f
 
 There are also issues on how to handle double 0 studies, since these may also carry some meaningful data due to their sample size (Keus 2009). 
 
-In summary, there is debate on what is the best model to meta-analyse rare events. Use of Peto's method to estimate the OR is often suggested for rare events, since this includes single zero studies without a continuity correction. However, double zero studies are excluded, and the following three conditions need to hold true ie a rare event <1%, the exposure / treatment groups are balanced, and the effects are not very large (Cochrane handbook). Unless all three are true, then Peto's method also may give biased results. In our dataset, the groups with and without prior SAH are unbalanced ie >1:3, so Peto's method is not appropriate. 
+In summary, there is debate on what is the best model to meta-analyse rare events. Use of Peto's method to estimate the OR is often suggested for rare events, since this includes single zero studies without a continuity correction. Double zero studies are excluded. 
+
+However, to use Peto's method, the following three conditions need to hold true ie a rare event <1%, the exposure / treatment groups are balanced, and the effects are not very large (Cochrane handbook). Unless all three are true, then Peto's method also may give biased results. In our dataset, the groups with and without prior SAH are unbalanced ie >1:3, so Peto's method is not appropriate. 
 
 Alternatively,the Mantel-haenszel without zero cell continuity correction can be used for unbalanced exposure / treatment groups.(Efthimiou 2018) This method provides a fixed effects meta-anlysis so is best used in the absence of heterogeniety and does exclude double zero studies. In our dataset, there is heterogeniety, and thus a random effects meta-analysis is preferred. 
 
@@ -523,7 +525,7 @@ A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-a
 
 Mete-regression can also be included easily by extending the model to include a study level covariate. 
 
-# Using metafor to asess the OR for prior SAH
+# Using metafor to asess the OR for prior SAH using a GLMM
 
 Structure the data in this format
 
@@ -537,6 +539,7 @@ di = no prior SAH, and rupture -ve
 n1i = ai + bi = total aneurysms with prior SAH
 n2i = ci + di = total aneurysms without prior SAH
 
+Assumptions
 
 For num_anr is not known, then num (of patients) is brought forward assuming 1 patient has 1 aneurysm.
 
@@ -562,35 +565,36 @@ view(psah.or)
 
 ```
 
-Use the rma function from metafor to meta-analysis log odds ratio using conditional logistic regression model (random effects). The conditional model (model="CM.EL") avoids having to model study level variability by conditioning on the total numbers of cases/events in each study. 
+Use the rma function from metafor to meta-analyse log odds ratio using conditional logistic regression model (random effects). The conditional model (model="CM.EL") avoids having to model study level variability by conditioning on the total numbers of cases/events in each study. 
 
-For measure="OR", this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a (mixed-effects) conditional logistic model.
-
-
+For measure="OR", this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a mixed-effects conditional logistic model.
 
 
-```{r OR for prior SAH}
+```{r log OR for prior SAH}
 
-pes.summary.glmm = metaprop(rupt, total_size,
-                            data=dat,
-                            sm="PLOGIT",
-                            byvar = pub,
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100) 
-pes.summary.glmm
-```
-
-
-```{r OR for prior SAH}
-
-res <- rma.glmm(measure = "OR", ai = ai.psah, bi = bi.psah, ci = ci.psah, di = di.psah, 
-                data = psah.or, 
-                drop00 = FALSE,
+res <- rma.glmm(measure = "OR", ai = ai.psah, bi = bi.psah, ci = ci.psah, di = di.psah, data = dat.psah,
                 model = "CM.EL",
                 method = "ML")
 res
+
 ```
+
+
+View the results as a forest
+
+```{r forest log OR for prior SAH}
+
+forest(res)
+
+```
+
+transform the log OR to OR
+
+```{r}
+res2 <- predict(res, transf=exp, digits=2)
+res2
+```
+
 
 
 
