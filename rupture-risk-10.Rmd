@@ -415,11 +415,11 @@ dat.psah3 <- sizedata %>%
   mutate(num_anr_psah = prop_psah * total_anr) %>%
   mutate(total_anr_psah = coalesce(bi.temp.psah,num_anr_psah)) %>%
   mutate(bi.psah = total_anr_psah - ai.psah) %>%
-  mutate(di.psah = total_anr - ci.psah) %>%
-  select(auth, ai.psah, bi.psah, ci.psah, di.psah) %>%
-  drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
+  mutate(n2i.psah = num - psah) %>%
+  mutate(di.psah = n2i.psah - ci.psah) %>%
   mutate(n1i.psah = ai.psah + bi.psah) %>%
-  mutate(n2i.psah = ci.psah + di.psah) %>%
+  select(auth, ai.psah, bi.psah, ci.psah, di.psah, n1i.psah, n2i.psah) %>%
+  drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
   filter(n1i.psah!=0) %>%
   mutate_if(is.numeric, round, 0)
 view(dat.psah3)
