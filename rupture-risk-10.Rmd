@@ -339,6 +339,8 @@ The next measure is the Q-statistic with degrees of freedom. This also assesses 
 
 # Baujat plots to visually assess which studies contribute most to heterogeniety
 
+These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. Baujat et al. (2002) 
+
 ```{r baujat plot}
 
 baujat(pes.summary.glmm)
@@ -348,6 +350,53 @@ baujat(pes.summary.glmm)
 This shows that study 12 ie Juvela et al, is a source of between study heterogeneity. 
 
 We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity.
+
+# Re-run analysis excluding Juvela - exploratory analysis
+
+```{r exclude Juvela from total proportion}
+
+dat.juvela <- slice(dat, -12)
+pes.summary.glmm.juvela = metaprop(rupt, total_size,
+                            data=dat.juvela,
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100) 
+pes.summary.glmm.juvela
+```
+
+This exploratory analaysis demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic
+
+
+# Rerun Baujat plots excluing Juvela to visually assess which studies contribute most to heterogeniety
+
+```{r baujat plot minus Juvela}
+
+baujat(pes.summary.glmm.juvela, xlim=c(0,40), ylim=c(0,40))
+
+```
+
+Keeping the influence axis the same, the significant improvement in heterogeniety is noted. This can be re-processed with smaller scales to more closely explore the result. 
+
+```{r baujat plot minus Juvela 2}
+
+baujat(pes.summary.glmm.juvela, xlim=c(0,15), ylim=c(0,15))
+
+```
+
+# create new meta-analysis of proportions for risk of rutpure in patients with and without exposure to prior SAH
+
+```{r}
+
+dat <- sizedata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>%
+  select(auth, pub, rupt, total_size)
+view(dat)
+```
+
+
+
 
 # How should we consider these moderating variables?
 
