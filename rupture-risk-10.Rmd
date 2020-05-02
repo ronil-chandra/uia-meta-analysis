@@ -596,6 +596,12 @@ res2 <- predict(res, transf=exp, digits=2)
 res2
 ```
 
+#biased urn logistic regression
+
+```{r biased urn}
+
+
+```
 
 
 
