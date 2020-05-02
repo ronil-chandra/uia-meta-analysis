@@ -431,9 +431,11 @@ run new GLMM (random intercept logistic regression model) for patients with hist
 
 ```{r glmm for summary proportion with history of PSAH}
 
-fiter
+dat.psahpos <- dat.psah %>%
+  filter(n1i.psah!=0)
+
 pes.summary.glmm.psahpos = metaprop(ai.psah, n1i.psah,
-                            data=dat.psah,
+                            data=dat.psahpos,
                             sm = "PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
@@ -466,7 +468,7 @@ We can also remove Juvela et al from the first analysis and re-run the summary p
 
 ```{r glmm for summary proportion with history of PSAH without Juvela}
 
-dat.psah.juvela <- slice(dat.psah, -2)
+dat.psah.juvela <- slice(dat.psahpos, -1)
 pes.summary.glmm.psahpos.juvela = metaprop(ai.psah,
                                            n1i.psah,
                                            data=dat.psah.juvela,
@@ -559,20 +561,7 @@ For aneurysms in size cohort with prior SAH, this is estimated by using same pro
 
 ```{r structure data for OR estimate for prior SAH}
 
-view(sizedata)
-psah.or <- sizedata %>%
-  mutate(total_anr = coalesce(num_anr,num)) %>%
-  drop_na(total_anr) %>%
-  rename(ai.psah = rupt_psah) %>%
-  mutate(ci.psah = rupt - ai.psah) %>%
-  mutate(prop_psah = psah_tot / num_tot) %>%
-  mutate(num_anr_psah = prop_psah * total_anr) %>%
-  mutate(bi.psah = num_anr_psah - ai.psah) %>%
-  mutate(di.psah = total_anr - ci.psah) %>%
-  select(auth, ai.psah, bi.psah, ci.psah, di.psah) %>%
-  drop_na(ai.psah, ci.psah) %>%
-  mutate_if(is.numeric, round, 0)
-view(psah.or)
+view(dat.psah)
 
 ```
 
@@ -580,10 +569,11 @@ Use the rma function from metafor to meta-analyse log odds ratio using condition
 
 For measure="OR", this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a mixed-effects conditional logistic model.
 
+Only studies that included patients both with and without history of prior SAH are included. 
 
 ```{r log OR for prior SAH}
 
-res <- rma.glmm(measure = "OR", ai = ai.psah, bi = bi.psah, ci = ci.psah, di = di.psah, data = dat.psah,
+res <- rma.glmm(measure = "OR", ai = ai.psah, bi = bi.psah, ci = ci.psah, di = di.psah, data = dat.psahpos,
                 model = "CM.EL",
                 method = "ML")
 res
