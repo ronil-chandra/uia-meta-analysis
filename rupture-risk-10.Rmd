@@ -402,10 +402,12 @@ n1i = ai + bi = total aneurysms with prior SAH
 n2i = ci + di = total aneurysms without prior SAH
 
 
+
+
 ```{r restructure to 2 x 2 table for PSAH}
 
 view(sizedata)
-dat.psah3 <- sizedata %>%
+dat.psah <- sizedata %>%
   mutate(total_anr = coalesce(num_anr,num)) %>%
   drop_na(total_anr) %>%
   rename(ai.psah = rupt_psah) %>%
@@ -415,14 +417,13 @@ dat.psah3 <- sizedata %>%
   mutate(num_anr_psah = prop_psah * total_anr) %>%
   mutate(total_anr_psah = coalesce(bi.temp.psah,num_anr_psah)) %>%
   mutate(bi.psah = total_anr_psah - ai.psah) %>%
-  mutate(n2i.psah = num - psah) %>%
+  mutate(n2i.psah = total_anr - psah) %>%
   mutate(di.psah = n2i.psah - ci.psah) %>%
   mutate(n1i.psah = ai.psah + bi.psah) %>%
   select(auth, ai.psah, bi.psah, ci.psah, di.psah, n1i.psah, n2i.psah) %>%
   drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
-  filter(n1i.psah!=0) %>%
   mutate_if(is.numeric, round, 0)
-view(dat.psah3)
+view(dat.psah)
 
 ```
 
@@ -430,6 +431,7 @@ run new GLMM (random intercept logistic regression model) for patients with hist
 
 ```{r glmm for summary proportion with history of PSAH}
 
+fiter
 pes.summary.glmm.psahpos = metaprop(ai.psah, n1i.psah,
                             data=dat.psah,
                             sm = "PLOGIT",
