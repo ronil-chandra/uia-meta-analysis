@@ -602,6 +602,7 @@ res2
 ```{r biased urn}
 
 
+
 ```
 
 
