@@ -49,7 +49,7 @@ maindata %>%
 
 ```{r glimpse new, echo=TRUE}
 glimpse(maindata)
-view(maindata)
+#view(maindata)
 ```
 
 # Analyse 10 mm or less aneurysms
@@ -274,8 +274,6 @@ pes.summary.glmm
 ```
 
 Note that the GLMM ie a random intercept logistic regression model is the default method for the logit transformation. Also the the maximum-likelihood method is utilized for GLMMs.
-
-
 
 
 # Display GLMM result using a simple forest plot
