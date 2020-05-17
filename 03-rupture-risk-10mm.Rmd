@@ -63,7 +63,9 @@ view()
 ```
 
 
-If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+
+If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
 
 ```{r coalesce patients into aneurysms}
 
