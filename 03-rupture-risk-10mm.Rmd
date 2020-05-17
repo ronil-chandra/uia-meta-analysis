@@ -77,7 +77,7 @@ view(dat)
 
 ```
 
-##### calculate individual and pooled study proportions 
+##### calculate individual study proportions and use meta-analytical methods to create a pooled summary proportion 
 
 xi = cases ie number of ruptures during all follow up 
 ni = total ie number of aneurysms at study entry
@@ -85,17 +85,33 @@ pi = raw proportions ie xi / ni
 yi = individual effect size ie individual proportion in this study
 vi = sampling variances
 
+Meta-analysis is the statistical combination of results from two or more separate studies. This can improve statistical power, improve precision and answer questions not posed by the original studies. 
+
+However study specific designs, within-study biases, variation across studies, and reporting biases need to be carefully considered, otherwise misleading results will be created. 
+
+A suitable effect measure must be chosen, and a choice should be made regarding the meta-analytical methods. Most meta-analytical methods weight the individual effect sizes from each study to create a pooled effect size. In this study, we will consider individual study proportions, and create a pooled summary proportion for rupture risk. 
+
+The basic steps of the meta-anlaysis are 
+
+* calculate a summary statistic for each individual study
+* calculate the weighting for each individual study 
+* choose a random-effect or fixed effect assumption
+* calculate the pooled summary statistic
+* calculate the p value which communicates the strength of the evidence against the null hypothesis
+* derive the confidence intervals which communicates the precision or certainty of the summary estimate
+* display the meta-analysis result as a forest plot
+
 ies = object that holds results of individual effect sizes and corresponding sampling variances
 
 escalc() is a metafor function to estimate individual effect sizes and sampling variances
 
-rma() is a metafor function to fit a random-effects model. This is utilised to take both intra-study and inter-study variances, to increase generalisability. This is because these samples are drawn from different populations, with different comorbidities that may influence outcome, and undergo observation in different conditions. This leads to variation in the outcomes due to random samping error.
+rma() is a metafor function to fit a random-effects model. This is utilised to take both intra-study and inter-study variances, to increase generalisability. This is because these samples are drawn from different populations, with different comorbidities that may influence outcome, and undergo observation in different conditions. This leads to variation in the outcomes due to random samping error. The simplest version the DerSimonian and Laird method *DerSimonian and Laird 1986*
 
 pes = object that holds results of pooled effect size and pooled sampling variances. Note that the pooled effect size is the weighted average of the observed effect sizes in the individual studies. Weighting can be done by various methods, classically weighting is by the inverse of the total variance in that study. 
 
-Later on in our data analysis we will consider more advanced statistical models that are more suitable to the binomial distribution inherent in our data. Initially we will consider classical meta-analytical methods. 
+Later on in our data analysis we will consider more advanced statistical models that are more suitable to the binomial distribution inherent in our data. Initially we will consider classical meta-analytical methods. Classical meta-analytic methods use the inverse method. The weight assigned to each individual study is the inverse of the variance of the effect size (i.e. 1 over the square of its standard error). Thus, larger studies, which have smaller standard errors, are given more weight than smaller studies, which have larger standard errors. This choice of weights minimizes the imprecision of the pooled effect size. 
 
-The distribution of the observed proportions is skewed, and thus we need to transform the data using either the logit or double arcine methods to improve the statistical properties for exploratory analysis. Typically, transformation is utilised to improve the distribution towards the normal distribution and thus enhance the validity of statistical analysis. It will need to be backtransformed later into raw proportions. The initial choice is between the logit transformation and double arcine transformation. 
+The distribution of the observed proportions in our dataset is skewed, and thus we need to transform the data using either the logit or double arcine methods to improve the statistical properties for exploratory analysis. Typically, transformation is utilised to improve the distribution towards the normal distribution and thus enhance the validity of statistical analysis. It will need to be backtransformed later into raw proportions. The initial choice is between the logit transformation and double arcine transformation. 
 
 In a logit transformation, if the proportion is 0 or 1, the variance becomes undefined. Thus a continuity correction of 0.5 is typically applied. This creates risk of introducing additional bias and reducing the validity of the result, especially if we are dealing with sparse data. Sparse data is that where event rates, such as aneurysm rupture are rare or sample sizes are small. 
 
@@ -312,15 +328,22 @@ forest(pes.summary.wilson,
 
 ### Using generalised linear mixed methods models (GLMMs).
 
-However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially prior to GLMM.
+Classical meta-analytic methods use the inverse method as discussed above. For dichotomous outcomes such as survival, or aneurysm rupture, there are 4 commonly used methods. Mantel-Haenszel, Peto and inverse variance can be used for fixed methods meta-analysis, and the DerSimonian and Laird (DL) inverse variance for random effects meta-analysis. 
 
-Single proportions that have binomial structure are generally transformed using logit, arcine or DA methods. These are then backtransformed to the original scale. 
+In most cases, the random effects meta-analyis is appropriate, and thus the DL method is very commonly used. The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when dealing with sparse data, the event rate or proportion may be 0. In this case, the variances become undefined.
 
-While all back transformations are possible, the methodology of Miller 1978 is typically utilised using the harmonic mean of the sample sizes. However, for highly skewed distribution of sample sizes, the harmonic mean is affected, and this can affect the backtransformed proportions. 
+Transformations are utilised to improve the statistical properties. Single proportions have binomial structure can be transformed using logit, arcine or DA methods. These are then backtransformed to the original scale. 
 
-This anomaly has been confirmed by Schwarzer 2019 and use of a GLMM (random intercept logistic regression model) is recommended. Although there are shortcomings of the logit transformation with classic random-effects meta-analysis methods as highlighted above (issues with p=0 and continuity corrections), they do not apply to the GLMM.
+Limitations of the logit transformation, and utilisation of the Freeman Tukey double arcine methods to overcome this have been discussed. However, back transformations utilsing the harmonic mean affect the backtransformed proportions as described by Schwarzer 2019. This issue does affect our dataset since n in the studies varies from 22 to over 3323. 
 
-This is because the classic meta-analysis methods assume that the effect follows a normal distribution, while the GLMM takes into account the binomial structure of the data as noted by Stinjen 2010. 
+To overcome this statistical limitation, we can utilise a generalised linear mixed methods model such as the random intercept logistic regression model as recommended by Stinjen 2010. Although this does utilise a logit transformation, the GLMM takes into account the binomial structure of the data. *Stinjen 2010* 
+
+Our rationale for choice of a GLMM is based on the following:
+
+* The distribution is binomial
+* The outcome is very rare, with proportions less than 0.05 is almost all studies
+* The sample populations range from 22 to 3323
+* Additional calculations to consider a covariate ie prior exposure to subarachnoid haemorrhage, can be performed using a noncentral hypergeometric model.  
 
 
 ```{r meta-analysis of proportions using glmm}
@@ -338,6 +361,12 @@ pes.summary.glmm
 
 Note that the GLMM ie a random intercept logistic regression model is the default method for the logit transformation. Also the the maximum-likelihood method is utilized for GLMMs.
 
+Compare the output from the random effects meta-analysis using the inverse variance DL method
+
+inverse variance DL: estimate is 1.15 with 95% CI 0.64 to 1.8
+using the GLMM: estimate is 1.22 with 95% CI 0.77 to 1.92
+
+Given our rationale for choosing the GLMM, this produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010. Note CIs are using Wilson score method
 
 #### Display GLMM result using a simple forest plot
 
@@ -351,7 +380,6 @@ forest(pes.summary.glmm,
 
 ```
 
-Note the diffences in the GLMM model compared to classic meta-analytic methods. This produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010. Note CIs are using Wilson score method
 
 
 #### Publication quality forest plots
@@ -388,16 +416,16 @@ pes.summary.glmm
 ```
 
 
-here we can see that tau-squared = 0.9098. This is the estimated amount of total heterogeneity. When Tau-squared is zero this is indicative of no heterogeneity.
+Here we can see that tau-squared = 0.9098. This is the estimated amount of total heterogeneity. When Tau-squared is zero this is indicative of no heterogeneity.
 
-I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively.
+I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively. Here we can see that the between-study heterogeniety is high. 
 
-The next measure is the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. 
+The next measure is the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. Here we can see that the Q-statistic is < 0.0001 which also confirms high between-study heterogeniety. 
 
 
 #### Baujat plots to visually assess which studies contribute most to heterogeniety
 
-These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. Baujat et al. (2002) 
+These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. *Baujat 2002* 
 
 ```{r baujat plot}
 
@@ -445,8 +473,8 @@ Keeping the influence axis the same, the significant improvement in heterogeniet
 ```{r baujat plot minus Juvela 2}
 
 baujat(pes.summary.glmm.juvela, 
-       xlim=c(0,15), 
-       ylim=c(0,15)
+       xlim=c(0,10), 
+       ylim=c(0,10)
        )
 
 ```
@@ -456,7 +484,7 @@ Overall, there seems to be an acceptable level of heterogeniety given the sample
 
 #### create new meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
 
-Firstly structure the data with authors in a 2 x 2 table
+Firstly structure the data in individual studies with authors in a 2 x 2 table
 
 ai = prior SAH and rupture +ve 
 bi = prior SAH and rupture -ve
@@ -465,8 +493,6 @@ di = no prior SAH, and rupture -ve
 
 n1i = ai + bi = total aneurysms with prior SAH
 n2i = ci + di = total aneurysms without prior SAH
-
-
 
 
 ```{r restructure to 2 x 2 table for PSAH}
@@ -492,7 +518,7 @@ view(dat.psah)
 
 ```
 
-run new GLMM (random intercept logistic regression model) for patients with history of PSAH
+run new GLMM (random intercept logistic regression model) for patients with prior history of subaarachnoid haemorrhage. Studies that did not include any patients with prior history of subarachnoid haemorrage are excluded. 
 
 ```{r glmm for summary proportion with history of PSAH}
 
@@ -528,7 +554,7 @@ pes.summary.glmm.psahneg
 
 This exploratory analysis does show different risk of rupture for patients with and without prior SAH for aneurysms <10 mm. 
 
-How can we compare the model outputs for statistical difference?
+**How can we compare the model outputs for statistical difference?**
 
 We can also remove Juvela et al from the first analysis and re-run the summary proportion excluding Juvela. 
 
@@ -590,7 +616,7 @@ n2i = ci + di = total aneurysms without prior SAH
 
 Rupture of the aneurysm is considered a rare event ie <1%, and the data are sparse with single 0s or double 0s in the 2 x 2 table. 
 
-This is methodologically challenging, and the choice of meta-analyis method is important. The most common methods of MA is the inverse variance method, using the DerSimonian and Laird random effects model. 
+This is methodologically challenging, and the choice of meta-analyis method is important. As we discussed The most common methods of MA is the inverse variance method, using the DerSimonian and Laird random effects model. 
 
 The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when one of the cells has a 0 which is common with rare events, the inverse variance cannot be used because the variances become undefined. 
 
@@ -604,9 +630,18 @@ However, to use Peto's method, the following three conditions need to hold true 
 
 Alternatively,the Mantel-haenszel without zero cell continuity correction can be used for unbalanced exposure / treatment groups.(Efthimiou 2018) This method provides a fixed effects meta-anlysis so is best used in the absence of heterogeniety and does exclude double zero studies. In our dataset, there is heterogeniety, and thus a random effects meta-analysis is preferred. 
 
-A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-analysis for rare outcomes, specifically by utilising a hypergeometric-normal (HN) model for the meta-analysis of odds ratios (Stinjen 2010). Recent developments in statistical packages, including in R, make these computationaly intensive methods practical and feasible. The HN model performs well, with minimal bias, and satsifactory coverage of the 95% CIs with rare events. 
+A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-analysis for rare outcomes, specifically by utilising a hypergeometric-normal (HN) model for the meta-analysis of odds ratios (Stinjen 2010). This is appropriate since the event aneurysm rupture is not a true binomial distribution, but in fact a hypergeometric distribution. 
+
+The hypergeometric distribution is best explained by sampling coloured balls in an urn. Hypergeometric distribution is sampling without replacement compared to a binomial distribution where there is sampling with replacement, and the probability of success is required. 
+
+If the balls are of different weight or size, ie one has a greater chance of being chosen, this is a noncentral hypergeometric distribution. The non central hypergeometric distribution can be of the Wallenius type or Fisher type. 
+
+Wallenius type is the biased urn mode, where balls are taken out 1 by 1. Fisher type occurs when the outcome is known, and the number of balls in the urn and their colour need to be calculated. For large samples with a common outcome, the binomial distribution is a reasonable estimate. However in populations that are small, or outcomes that are rare, such as in our dataset where certain aneurysms have features that make them more prone to rupure ie heavier weighted ball, thus each outcome influences the probability of the next event. Thus the non central hyperegeometric distribution is required. 
+
+Recent developments in statistical packages, including in R, make these computationaly intensive methods practical and feasible. The HN model performs well, with minimal bias, and satsifactory coverage of the 95% CIs with rare events. 
 
 Mete-regression can also be included easily by extending the model to include a study level covariate. 
+
 
 #### Using metafor to asess the OR for prior SAH using a GLMM
 
@@ -635,9 +670,7 @@ view(dat.psah)
 
 ```
 
-Use the rma function from metafor to meta-analyse log odds ratio using conditional logistic regression model (random effects). The conditional model (model="CM.EL") avoids having to model study level variability by conditioning on the total numbers of cases/events in each study. 
-
-For measure="OR", this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a mixed-effects conditional logistic model.
+Use the rma function from metafor to meta-analyse log odds ratio using conditional logistic regression model with random effects meta-analysis. The conditional generalized linear mixed-effects model with exact likelihood (model="CM.EL") avoids having to model study level variability by conditioning on the total numbers of cases/events in each study. For the odds ratio, this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a mixed-effects conditional logistic model.
 
 Only studies that included patients both with and without history of prior SAH are included. 
 
@@ -674,10 +707,11 @@ res2 <- predict(res, transf=exp,
 res2
 ```
 
-The predicted OR and log OR both have confidence intervals that cross 1. Thus it is unclear whether prior SAH does increase rupture risk in small unruptured aneurysms. 
+The predicted OR and log OR both have confidence intervals that cross 1, and the confidence intervals are wide. 
 
-These synthesised data analysis are considered exploratory and hypothesis generating. We have demonstrated that the risk of rupture of small unruptured aneurysms with conservative management remains unclear, with probably up to 2% risk. 
+Overall, taking into account the limitations of the data, prior SAH may not increase rupture risk in small unruptured aneurysms measuring 10 mm or less. In addition, the overall rupture risk for conservatively managed aneurysms is more uncertain than previously considered with up to 2% risk of rupture.   
 
+These synthesised data analyses are considered exploratory and hypothesis generating, and additional data are required. 
 
 
 
