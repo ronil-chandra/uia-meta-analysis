@@ -119,6 +119,8 @@ view(ies.da)
 transf.ipft(ies.da$yi, ies.da$total_size)
 ```
 
+note that the studies without rupture are included in the tibble, with proportion of 0.  
+
 #### pool the transformed values using a weighted mean according to inverse variance method
 
 
@@ -145,16 +147,17 @@ The DL method is also used to estimate between-study variance using the statisti
 
 ```{r pooled proportion}
 
-pes <- predict(pes.da, transf=transf.ipft.hm,
+pes <- predict(pes.da, 
+               transf=transf.ipft.hm,
                targs=list(ni=dat$total_size)
                )
 pes
 
 ```
 
-Simply using the harmonic mean of the sample sizes as suggested by Miller et al 1978 and applying this to all the individual studies creates misleading results for each individual study.
+Note that we have used the harmonic mean of the sample sizes as suggested by Miller et al 1978 and applying this to all the individual studies. However this can create misleading results since each study has a specific sample size which is known. Moreover, this is exacerbated when the range of sample sizes is large, which does occur in our study from 22 aneurysms in a sample to 3323 aneurysms in a sample. This anomaly can introduce additional bias and reduces the validity of the result as noted by Schwarzer 2019.
 
-Instead, the back transformation to the pooled proportion needs to be carried out using study-specific sample sizes. 
+To compensate for this, we can carry out the back transformation to the pooled proportion using the study-specific sample sizes. 
 
 #### create a new tibble for individual study back transformation
 
@@ -197,13 +200,15 @@ abline(h=0.5)
 
 ### Utilise metaprop function from meta
 
-Metaprop can be used to caclulate an overall proportion from studies reporting a single proportion. Pooling methods are the inverse variance and generalised linear mixed models (GLMM).
+The metaprop function from meta in R can be used to caclulate an overall proportion from studies reporting a single proportion. Pooling methods are the inverse variance and generalised linear mixed models (GLMM).
 
 Our options are to pool untransformed proportions or pool transformed proportions according to logit or DA methods. 
 
-The choice of meta-analytic method for transformed proportions is controversial. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. 
+As we have noted, the choice of meta-analytic method is controversial, and has to be customised to the data at hand. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. 
 
-However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially prior to GLMM.
+We will choose initially explore the DA method with inverse variance study weighing as we have done previously, but this time utilise the metaprop function from meta. This should yeild the same result as performing each individual step in metafor. 
+
+We will utilise this opportunity to explore different types of confidence intervals, starting with the normal approximation.  
 
 #### Meta-analysis of proportions using inverse variance DL method and Normal approximimation method for CIs
 
@@ -221,8 +226,9 @@ pes.summary.nasm
 
 ```
 
-Note that this is the same result as performing the individual steps using the metafor package. 
+Note that we have achieved the same result ie 0.0115 with 95% CI 0.0064 to 0.0177, since we have specified the Freeman-Tukey double arcine transformation, inverse variance method for pooling the data, and normal approximation Wald confidence interval. Utilising the metaprop function is more efficient, and allows us to explore the impact of the different confidence interval methods. 
 
+We will now examine the normal approximation Wald interval, to the exact Clopper-Pearson CI, and the Wilson CI in the following examples.  
 
 #### Meta-analysis of proportions using inverse variance DL method and CP method for CIs
 
@@ -279,6 +285,8 @@ forest(pes.summary.wilson,
 ```
 
 ### Using generalised linear mixed methods models (GLMMs).
+
+However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially prior to GLMM.
 
 Single proportions that have binomial structure are generally transformed using logit, arcine or DA methods. These are then backtransformed to the original scale. 
 
