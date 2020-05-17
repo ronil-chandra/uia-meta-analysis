@@ -228,7 +228,7 @@ pes.summary.nasm
 
 Note that we have achieved the same result ie 0.0115 with 95% CI 0.0064 to 0.0177, since we have specified the Freeman-Tukey double arcine transformation, inverse variance method for pooling the data, and normal approximation Wald confidence interval. Utilising the metaprop function is more efficient, and allows us to explore the impact of the different confidence interval methods. 
 
-We will now examine the normal approximation Wald interval, to the exact Clopper-Pearson CI, and the Wilson CI in the following examples.  
+We will now examine the normal approximation Wald interval, to the exact Clopper-Pearson CI, and the Wilson CI in the following examples. 
 
 #### Meta-analysis of proportions using inverse variance DL method and CP method for CIs
 
@@ -261,16 +261,42 @@ pes.summary.wilson
 
 ```
 
+When reviewing the results above, the CIs in each of the individual studies varies according to the method of CI chosen. The pooled proportion CI is notably the same in all the examples above. 
 
-The choice of CI is important given the rarity of the outcome event ie p=0 is common which creates a highly skewed distribution. 
+**how do we confirm that the pooled proportion is calculated according to the specified methodology?**
 
-The Wilson method is chosen for 2 main reasons, as recommended by Vollset 1993, Agresti 1998, and Newcombe 1998 and Brown 2001. 
+Use of the CI is important, since CIs convey information about magnitude and precision of effect. The choice of the CI is important, since each of them have limitations, and thus choice of the CI should be tailed to the dataset that is present. Options include:
 
-Firstly, as compared to the exact Clopper-Pearson method, the Wilson method is more accurate when the sample size is small, can be applied to all sample sizes, and derives an interval that more accurately reflects the true interval in the population of interest. 
+* Wald method or Normal Approximation
+  + this produces CIs that are often centred on the point estimate
+  + thus they are not often suitable with proportions close to the boundaries of 0 and 1, since this method can create CIs that are below 0 and above 1.
+  + for proportions that are often 0 or close to zero, a continuity correction may be applied, but this can lead to additional overshoot
+  
+* Clopper-Pearson or Exact method
+  + Most commonly used, and recommended to avoid approximation by most statistical textbooks. 
+  + Called exact because it is based directly on the binomial distribution and not an approximation. 
+  + Output is usually conservative, and the true coverage is almost always larger than the derived coverage ie closer to a 99% CI than a 95% CI. 
+  + The derived 95% CI does not accurately reflect the true 95% CI unless n is quite large *Agresti 2008*. 
+  + When n is small eg 10, there is severe overcoverage (closer to 99% coverage) with the true CI much larger than the derived 95% CI. 
+  + Even when n is large, the derived 95% CI does not accurately reflect the true 95% CI when p is near 0 because the binomial distribution is highly skewed. *Agresti 1998* 
+  + Needs a very large number of n to be accurate *Brown 2001*
 
-For this situation of aneurysm rupture in small unruptured aneurysms, p is very close to 0, and thus the Clopper-Pearson exact method can result in overcoverage since n is small, and even when n is large, the derived CI does not accurately reflect the true population CI when p is very close to 0. 
+* Wilson method
+  + Is suggested for small n ie 40 or less and/or extreme probabilities *Brown 2001*
+  + The derived CI more accurately reflects the true CI with less variability compared to CP method *Agresti 1998* 
+  + For small n, the Wilson CI’s are shorter and a more accurate derivation than the CP CI’s *Vollset 1993*
+  + Can be used and is recommended for all sample sizes *Newcombe 1998* 
 
-Note the differences in the CIs between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
+Note the differences in the CIs above between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
+
+We will choose the Wilson method for CI for the following reasons:
+
+* Rupture of an aneurysm is a rare event with the proportion p very close to zero 
+* The distribution of the outcomes is highly skewed towards zero
+* There is a wide range of sample sizes, with very small studies and very large studies included
+* More accurate CIs are likely given the highly skewed and sparse dataset. 
+
+This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *Newcombe 1998* and *Brown 2001*. 
 
 #### A simple forest plot with inverse variance DL and Wilson method for CIs
 
