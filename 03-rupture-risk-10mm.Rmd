@@ -10,7 +10,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Load required packages
+#### Load required packages
 
 ```{r load packages, echo=TRUE, include = TRUE}
 library(tidyverse)
@@ -20,7 +20,7 @@ library(BiasedUrn)
 
 ```
 
-# Load required data
+#### Load required data
 
 ```{r load data, echo=TRUE, include = TRUE}
 
@@ -28,7 +28,7 @@ maindata <- read_csv("data/psash-290420.csv")
 
 ```
 
-# Correct vector types
+#### Correct vector types
 
 ```{r correct vectors, echo=TRUE}
 maindata %>% 
@@ -46,14 +46,14 @@ maindata %>%
          )
 ```
 
-# Confirm new data structure with correct vector types
+#### Confirm new data structure with correct vector types
 
 ```{r glimpse new, echo=TRUE}
 glimpse(maindata)
 view(maindata)
 ```
 
-# Analyse 10 mm or less aneurysms
+#### Analyse 10 mm or less aneurysms
 
 ```{r select size cohort}
 
@@ -75,7 +75,7 @@ view(dat)
 
 ```
 
-## calculate individual and pooled study proportions 
+##### calculate individual and pooled study proportions 
 
 xi = cases ie number of ruptures during all follow up 
 ni = total ie number of aneurysms at study entry
@@ -97,7 +97,7 @@ If the proportion is 0 or 1, the variance is undefined in a logit transformation
 
 To better stabilise the variance, and to normalise the distribution especially for small sample sizes, the double arcine method of Freeman-Tukey (Reference Freeman and Tukey 1950) is recommended. This can be later backtransformed using the equation derived by Miller (Reference Miller 1978).
 
-# calculate individual transformed study proportions using DA method
+#### calculate individual transformed study proportions using DA method
 
 
 ```{r individual DA transformed proportions}
@@ -109,13 +109,13 @@ view(ies.da)
 
 ```
 
-# double check if back transform individual transformed values that we should get the original raw proportions
+#### double check if back transform individual transformed values that we should get the original raw proportions
 
 ```{r cross check individual back transformation}
 transf.ipft(ies.da$yi, ies.da$total_size)
 ```
 
-# pool the transformed values using a weighted mean according to inverse variance method
+#### pool the transformed values using a weighted mean according to inverse variance method
 
 
 ```{r pooled DA transformed proportion}
@@ -137,7 +137,7 @@ Note that if the proportion is 0, then a constant may be added. Ensure that ther
 
 The DL method is also used to estimate between-study variance using the statistic tau-squared, and can be estimated using different random-effects models. 
 
-# back transformation is required to obtain the summary proportion. 
+#### back transformation is required to obtain the summary proportion. 
 
 ```{r pooled proportion}
 
@@ -152,7 +152,7 @@ Simply using the harmonic mean of the sample sizes as suggested by Miller et al 
 
 Instead, the back transformation to the pooled proportion needs to be carried out using study-specific sample sizes. 
 
-# create a new tibble for individual study back transformation
+#### create a new tibble for individual study back transformation
 
 ```{r individual back transformation}
 
@@ -162,7 +162,7 @@ view(dat.back)
 ```
 
 
-# display the individual and pooled proportions as a forest plot
+#### display the individual and pooled proportions as a forest plot
 
 ```{r simple forest after back transformation, fig.height= 10, fig.width = 10}
 
@@ -191,7 +191,7 @@ abline(h=0.5)
 ```
 
 
-#Utilise metaprop function from meta
+### Utilise metaprop function from meta
 
 Metaprop can be used to caclulate an overall proportion from studies reporting a single proportion. Pooling methods are the inverse variance and generalised linear mixed models (GLMM).
 
@@ -201,7 +201,7 @@ The choice of meta-analytic method for transformed proportions is controversial.
 
 However, given the extreme skewedness of the initial data, the rarity of the outcome event ie p=0 is common, the logits will become undefined. The addition of a continuity correction of 0.5, which is commonly employed can bias the results further. Thus the DA method with inverse variance study weighing will be performed initially prior to GLMM.
 
-# Meta-analysis of proportions using inverse variance DL method and Normal approximimation method for CIs
+#### Meta-analysis of proportions using inverse variance DL method and Normal approximimation method for CIs
 
 ```{r meta-analysis of proportions with DL and NAsm method for CIs}
 
@@ -220,7 +220,7 @@ pes.summary.nasm
 Note that this is the same result as performing the individual steps using the metafor package. 
 
 
-# Meta-analysis of proportions using inverse variance DL method and CP method for CIs
+#### Meta-analysis of proportions using inverse variance DL method and CP method for CIs
 
 ```{r meta-analysis of proportions with DL and CP method for CIs}
 
@@ -235,7 +235,7 @@ pes.summary.cp
 
 ```
 
-# Meta-analysis of proportions using inverse variance DL method and Wilson score interval method for CIs
+#### Meta-analysis of proportions using inverse variance DL method and Wilson score interval method for CIs
 
 
 ```{r meta-analysis of proportions with DL and Wilson method for CIs}
@@ -262,7 +262,7 @@ For this situation of aneurysm rupture in small unruptured aneurysms, p is very 
 
 Note the differences in the CIs between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
 
-# A simple forest plot with inverse variance DL and Wilson method for CIs
+#### A simple forest plot with inverse variance DL and Wilson method for CIs
 
 ```{r simple forest with DL and Wilson method for CIs, fig.height= 10, fig.width = 10}
 
@@ -274,7 +274,7 @@ forest(pes.summary.wilson,
 
 ```
 
-# Using generalised linear mixed methods models (GLMMs).
+### Using generalised linear mixed methods models (GLMMs).
 
 Single proportions that have binomial structure are generally transformed using logit, arcine or DA methods. These are then backtransformed to the original scale. 
 
@@ -301,7 +301,7 @@ pes.summary.glmm
 Note that the GLMM ie a random intercept logistic regression model is the default method for the logit transformation. Also the the maximum-likelihood method is utilized for GLMMs.
 
 
-# Display GLMM result using a simple forest plot
+#### Display GLMM result using a simple forest plot
 
 
 ```{r simple forst using glmm, fig.height= 10, fig.width = 10}
@@ -316,9 +316,7 @@ forest(pes.summary.glmm,
 Note the diffences in the GLMM model compared to classic meta-analytic methods. This produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010. Note CIs are using Wilson score method
 
 
-# Publication quality forest plots
-
-# Still working on everything below this line
+#### Publication quality forest plots
 
 ```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
 
@@ -332,7 +330,7 @@ forest(pes.summary.glmm,
 ```
 
 
-## Assess and quantify heterogeniety 
+### Assess and quantify heterogeniety 
 
 This is required to assess whether the pooled proportion provides an accurate summary of the finding of interest. If there is high heterogeneity then interpretation of the data synthesis should be taken with caution. 
 
@@ -359,7 +357,7 @@ I^2 represents the proportion of total heterogeniety that can be attributed to t
 The next measure is the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. 
 
 
-# Baujat plots to visually assess which studies contribute most to heterogeniety
+#### Baujat plots to visually assess which studies contribute most to heterogeniety
 
 These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. Baujat et al. (2002) 
 
@@ -373,7 +371,7 @@ This shows that study 12 ie Juvela et al, is the major source of between study h
 
 We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity.
 
-# Re-run analysis excluding Juvela - exploratory analysis
+#### Re-run analysis excluding Juvela - exploratory analysis
 
 ```{r exclude Juvela from total proportion}
 
@@ -393,7 +391,7 @@ This exploratory analaysis demonstrates greater homogeniety, with reduced and no
 The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
 
 
-# Rerun Baujat plots excluing Juvela to visually assess which studies contribute most to heterogeniety
+#### Rerun Baujat plots excluing Juvela to visually assess which studies contribute most to heterogeniety
 
 ```{r baujat plot minus Juvela}
 
@@ -418,7 +416,7 @@ baujat(pes.summary.glmm.juvela,
 Overall, there seems to be an acceptable level of heterogeniety given the samples that are available. 
 
 
-# create new meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
+#### create new meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
 
 Firstly structure the data with authors in a 2 x 2 table
 
@@ -515,7 +513,7 @@ pes.summary.glmm.psahpos.juvela
 
 This shows that when we exclude Juvela, and concentrate on prior SAH only, the rupture risk is still higher in patients with exposure to prior SAH than those without this exposure, but now the studies are homogeneous. Limitation is of course the small number of rutpures in this cohort. 
 
-#Dispay the information as simple forest plots - first one including Juvela and second without Juvela
+#### Display the information as simple forest plots - first one including Juvela and second without Juvela
 
 
 
@@ -540,7 +538,7 @@ forest(pes.summary.glmm.psahpos.juvela,
 ```
 
 
-# How do we assess the effect of exposure to prior SAH for these  aneurysms ?
+### How do we assess the effect of exposure to prior SAH for these  aneurysms ?
 
 Consider the data in the form of a 2 x 2 table, prior SAH as the exposure and rupture as the outcome. 
 
@@ -572,7 +570,7 @@ A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-a
 
 Mete-regression can also be included easily by extending the model to include a study level covariate. 
 
-# Using metafor to asess the OR for prior SAH using a GLMM
+#### Using metafor to asess the OR for prior SAH using a GLMM
 
 Structure the data in this format
 
