@@ -91,13 +91,15 @@ escalc() is a metafor function to estimate individual effect sizes and sampling 
 
 rma() is a metafor function to fit a random-effects model. This is utilised to take both intra-study and inter-study variances, to increase generalisability. This is because these samples are drawn from different populations, with different comorbidities that may influence outcome, and undergo observation in different conditions. This leads to variation in the outcomes due to random samping error.
 
-pes = object that holds results of pooled effect size and pooled sampling variances. Note that the pooled effect size is the weighted average of the observed effect sizes in the individual studies that are weighted by the inverse of the total variance in that study. 
+pes = object that holds results of pooled effect size and pooled sampling variances. Note that the pooled effect size is the weighted average of the observed effect sizes in the individual studies. Weighting can be done by various methods, classically weighting is by the inverse of the total variance in that study. 
 
-The distribution of the observed proportions is skewed, and thus we need to transform the data using either the logit or double arcine methods to make it follow a normal distribution and thus enhance the validity of statistical analysis. It will need to be backtransformed later into proportions. 
+Later on in our data analysis we will consider more advanced statistical models that are more suitable to the binomial distribution inherent in our data. Initially we will consider classical meta-analytical methods. 
 
-If the proportion is 0 or 1, the variance is undefined in a logit transformation, and often a continuity correction of 0.5 is applied. 
+The distribution of the observed proportions is skewed, and thus we need to transform the data using either the logit or double arcine methods to improve the statistical properties for exploratory analysis. Typically, transformation is utilised to improve the distribution towards the normal distribution and thus enhance the validity of statistical analysis. It will need to be backtransformed later into raw proportions. The initial choice is between the logit transformation and double arcine transformation. 
 
-To better stabilise the variance, and to normalise the distribution especially for small sample sizes, the double arcine method of Freeman-Tukey (Reference Freeman and Tukey 1950) is recommended. This can be later backtransformed using the equation derived by Miller (Reference Miller 1978).
+In a logit transformation, if the proportion is 0 or 1, the variance becomes undefined. Thus a continuity correction of 0.5 is typically applied. This creates risk of introducing additional bias and reducing the validity of the result, especially if we are dealing with sparse data. Sparse data is that where event rates, such as aneurysm rupture are rare or sample sizes are small. 
+
+To better stabilise the variance, and to normalise the distribution especially for small sample sizes or rare event rates, the double arcine method of Freeman-Tukey (Reference Freeman and Tukey 1950) is recommended. This can be later backtransformed using the equation derived by Miller (Reference Miller 1978).
 
 #### calculate individual transformed study proportions using DA method
 
