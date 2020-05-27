@@ -380,6 +380,7 @@ Given our rationale for choosing the GLMM, this produces the least biased result
 
 forest(pes.summary.glmm,
        xlim=c(0,10),
+       leftlabs = c("Study", "Ruptures", "Total"),
        digits = 4
        )
 
@@ -393,9 +394,13 @@ forest(pes.summary.glmm,
 
 
 forest(pes.summary.glmm,
-       layout = "JAMA",
+       layout = "meta",
+       comb.fixed = FALSE,
+       rightlabs = c ("Rupture Risk", " ", "95% CI"),
+       leftlabs = c ("Study", "Ruptures", "Total"),
        xlim=c(0,10),
-       xlab = "Percent Rupture Risk"
+       xlab = "Percent Rupture Risk",
+       pooled.events = TRUE,
        ) 
 
 ```
@@ -459,6 +464,24 @@ pes.summary.glmm.juvela
 ```
 
 This exploratory analaysis demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic. 
+
+The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
+
+#### Rerun forest plots excluing Juvela which is the study that adds the most to heterogeniety for a sensitivity analysis
+
+
+```{r forest for publication using GLMM without Juvela, fig.height= 10, fig.width = 10}
+
+
+forest(pes.summary.glmm.juvela,
+       layout = "JAMA",
+       xlim=c(0,10),
+       xlab = "Percent Rupture Risk"
+       ) 
+
+```
+
+This visually displays the exploratory analaysis which demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic. 
 
 The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
 
