@@ -392,7 +392,7 @@ forest(pes.summary.glmm,
 
 ```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
 
-
+pdf(file='forestplot_ruptureproportion.pdf', width=10, height=8) 
 forest(pes.summary.glmm,
        layout = "meta",
        comb.fixed = FALSE,
