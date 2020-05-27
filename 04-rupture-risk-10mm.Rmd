@@ -477,10 +477,17 @@ The point estimate and confidence intervals have changed slightly, which confirm
 
 
 forest(pes.summary.glmm.juvela,
-       layout = "JAMA",
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
        xlim=c(0,10),
-       xlab = "Percent Rupture Risk"
-       ) 
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       )  
 
 ```
 
@@ -512,6 +519,42 @@ baujat(pes.summary.glmm.juvela,
 ```
 
 Overall, there seems to be an acceptable level of heterogeniety given the samples that are available. 
+
+### Assess for publication bias
+
+## Funnel plots 
+
+Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies which are not published are not identified and not integrated into the meta-analysis. This leads to publication bias meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not published. 
+
+In addition, large studies are more likely to get published regardless of the effect size. Small studies are at the greatest risk, since they are only generally published if there is a large effect size. 
+
+Thus when assessing for publication bias, conventional assessment is focused on identifying whether small studies with small effect sizes are missing or not. This can be performed using a funnel plot. 
+
+```{r funnel plots}
+
+funnel(pes.summary.glmm)
+
+```
+
+Here we can see that the funnel plot is assymetrical. The assymetry is primarily driven by 1 study in the top right corner with a large effect. We can identify the study by labelling the funnel plot. 
+
+
+```{r funnel plots labelled}
+
+funnel(pes.summary.glmm,
+       studlab = TRUE
+       )
+
+```
+
+```{r funnel plots without juvela}
+
+funnel(pes.summary.glmm.juvela)
+
+```
+
+
+If we re-do the funnel plot without Juvela, the plot becomes more symmetrical. 
 
 
 #### create new meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
@@ -620,9 +663,16 @@ This shows that when we exclude Juvela, and concentrate on prior SAH only, the r
 ```{r simple forest using glmm model for summary proportion with history of PSAH}
 
 forest(pes.summary.glmm.psahpos,
-       layout = "JAMA",
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
        xlim=c(0,30),
-       xlab = "Percent Rupture Risk"
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
        ) 
 
 ```
@@ -630,9 +680,16 @@ forest(pes.summary.glmm.psahpos,
 ```{r simple forest using glmm model for summary proportion with history of PSAH without Juvela }
 
 forest(pes.summary.glmm.psahpos.juvela,
-       layout = "JAMA",
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
        xlim=c(0,30),
-       xlab = "Percent Rupture Risk"
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
        ) 
 
 ```
