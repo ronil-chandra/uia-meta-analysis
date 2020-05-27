@@ -232,11 +232,12 @@ We will utilise this opportunity to explore different types of confidence interv
 ```{r meta-analysis of proportions with DL and NAsm method for CIs}
 
 pes.summary.nasm = metaprop(rupt, total_size, data=dat, 
-                     sm = "PFT", 
-                     method.tau = "DL",
-                     method.ci = "NAsm",
-                     pscale = 1
-                     ) 
+                            studlab=paste(auth_year),
+                            sm = "PFT", 
+                            method.tau = "DL",
+                            method.ci = "NAsm",
+                            pscale = 1
+                            ) 
 pes.summary.nasm
 
 
@@ -253,6 +254,7 @@ We will now examine the normal approximation Wald interval, to the exact Clopper
 
 pes.summary.cp = metaprop(rupt, total_size, 
                           data=dat, 
+                          studlab=paste(auth_year),
                           sm = "PFT", 
                           method.tau = "DL",
                           method.ci = "CP",
@@ -269,6 +271,7 @@ pes.summary.cp
 
 pes.summary.wilson = metaprop(rupt, total_size,
                               data=dat, 
+                              studlab=paste(auth_year),
                               sm = "PFT", 
                               method.tau = "DL",
                               method.ci = "WS",
@@ -446,6 +449,7 @@ We can use these sources of heterogeniety to assess for moderating variables tha
 dat.juvela <- slice(dat, -12)
 pes.summary.glmm.juvela = metaprop(rupt, total_size,
                             data=dat.juvela,
+                            studlab=paste(auth_year),
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
@@ -501,6 +505,7 @@ n2i = ci + di = total aneurysms without prior SAH
 
 view(sizedata)
 dat.psah <- sizedata %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(total_anr = coalesce(num_anr,num)) %>%
   drop_na(total_anr) %>%
   rename(ai.psah = rupt_psah) %>%
@@ -513,7 +518,7 @@ dat.psah <- sizedata %>%
   mutate(n2i.psah = total_anr - psah) %>%
   mutate(di.psah = n2i.psah - ci.psah) %>%
   mutate(n1i.psah = ai.psah + bi.psah) %>%
-  select(auth, ai.psah, bi.psah, ci.psah, di.psah, n1i.psah, n2i.psah) %>%
+  select(auth_year, ai.psah, bi.psah, ci.psah, di.psah, n1i.psah, n2i.psah) %>%
   drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
   mutate_if(is.numeric, round, 0)
 view(dat.psah)
@@ -529,6 +534,7 @@ dat.psahpos <- dat.psah %>%
 
 pes.summary.glmm.psahpos = metaprop(ai.psah, n1i.psah,
                             data=dat.psahpos,
+                            studlab=paste(auth_year),
                             sm = "PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
@@ -545,6 +551,7 @@ Then run new GLMM (random intercept logistic regression model) for patients with
 
 pes.summary.glmm.psahneg = metaprop(ci.psah, n2i.psah,
                             data=dat.psah,
+                            studlab=paste(auth_year),
                             sm = "PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
@@ -567,6 +574,7 @@ dat.psah.juvela <- slice(dat.psahpos, -1)
 pes.summary.glmm.psahpos.juvela = metaprop(ai.psah,
                                            n1i.psah,
                                            data=dat.psah.juvela,
+                                           studlab=paste(auth_year),
                                            sm = "PLOGIT",
                                            method.tau = "ML", 
                                            method.ci = "WS",
@@ -684,6 +692,7 @@ res <- rma.glmm(measure = "OR",
                 ci = ci.psah, 
                 di = di.psah, 
                 data = dat.psahpos,
+                slab = auth_year,
                 model = "CM.EL",
                 method = "ML"
                 )
