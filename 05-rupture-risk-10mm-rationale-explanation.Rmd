@@ -1,0 +1,836 @@
+---
+title: "04-rupture-risk-10"
+author: "Ronil V. Chandra"
+date: "29/04/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Load required packages
+
+```{r load packages, echo=TRUE, include = TRUE}
+library(tidyverse)
+library(meta)
+library(metafor)
+library(BiasedUrn)
+
+```
+
+#### Load required data
+
+```{r load data, echo=TRUE, include = TRUE}
+
+maindata <- read_csv("data/psash-290420.csv")
+
+```
+
+#### Correct vector types
+
+```{r correct vectors, echo=TRUE}
+maindata %>% 
+  mutate(pub = as.integer(pub),
+         start = as.integer(start),
+         end = as.integer(end), 
+         psah = as.double(psah),
+         fu = as.double(fu),
+         nos_select = as.double(nos_select),
+         nos_outcome = as.double(nos_outcome),
+         nos_compare = as.double(nos_compare),
+         nos_outcome = as.double(nos_outcome),
+         country = as.factor(country),
+         type = as.factor(type)
+         )
+```
+
+#### Confirm new data structure with correct vector types
+
+```{r glimpse new, echo=TRUE}
+glimpse(maindata)
+view(maindata)
+```
+
+#### Analyse 10 mm or less aneurysms
+
+```{r select size cohort}
+
+sizedata <- filter(maindata, size == 10) %>%
+view()
+
+```
+
+
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+
+If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+
+```{r coalesce patients into aneurysms}
+
+dat <- sizedata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size)
+view(dat)
+
+```
+
+##### calculate individual study proportions and use meta-analytical methods to create a pooled summary proportion 
+
+xi = cases ie number of ruptures during all follow up 
+ni = total ie number of aneurysms at study entry
+pi = raw proportions ie xi / ni 
+yi = individual effect size ie individual proportion in this study
+vi = sampling variances
+
+Meta-analysis is the statistical combination of results from two or more separate studies. This can improve statistical power, improve precision and answer questions not posed by the original studies. 
+
+However study specific designs, within-study biases, variation across studies, and reporting biases need to be carefully considered, otherwise misleading results will be created. 
+
+A suitable effect measure must be chosen, and a choice should be made regarding the meta-analytical methods. Most meta-analytical methods weight the individual effect sizes from each study to create a pooled effect size. In this study, we will consider individual study proportions, and create a pooled summary proportion for rupture risk. 
+
+The basic steps of the meta-anlaysis are 
+
+* calculate a summary statistic for each individual study
+* calculate the weighting for each individual study 
+* choose a random-effect or fixed effect assumption
+* calculate the pooled summary statistic
+* calculate the p value which communicates the strength of the evidence against the null hypothesis
+* derive the confidence intervals which communicates the precision or certainty of the summary estimate
+* display the meta-analysis result as a forest plot
+
+ies = object that holds results of individual effect sizes and corresponding sampling variances
+
+escalc() is a metafor function to estimate individual effect sizes and sampling variances
+
+rma() is a metafor function to fit a random-effects model. This is utilised to take both intra-study and inter-study variances, to increase generalisability. This is because these samples are drawn from different populations, with different comorbidities that may influence outcome, and undergo observation in different conditions. This leads to variation in the outcomes due to random samping error. The simplest version the DerSimonian and Laird method *DerSimonian and Laird 1986*
+
+pes = object that holds results of pooled effect size and pooled sampling variances. Note that the pooled effect size is the weighted average of the observed effect sizes in the individual studies. Weighting can be done by various methods, classically weighting is by the inverse of the total variance in that study. 
+
+Later on in our data analysis we will consider more advanced statistical models that are more suitable to the binomial distribution inherent in our data. Initially we will consider classical meta-analytical methods. Classical meta-analytic methods use the inverse method. The weight assigned to each individual study is the inverse of the variance of the effect size (i.e. 1 over the square of its standard error). Thus, larger studies, which have smaller standard errors, are given more weight than smaller studies, which have larger standard errors. This choice of weights minimizes the imprecision of the pooled effect size. 
+
+The distribution of the observed proportions in our dataset is skewed, and thus we need to transform the data using either the logit or double arcine methods to improve the statistical properties for exploratory analysis. Typically, transformation is utilised to improve the distribution towards the normal distribution and thus enhance the validity of statistical analysis. It will need to be backtransformed later into raw proportions. The initial choice is between the logit transformation and double arcine transformation. 
+
+In a logit transformation, if the proportion is 0 or 1, the variance becomes undefined. Thus a continuity correction of 0.5 is typically applied. This creates risk of introducing additional bias and reducing the validity of the result, especially if we are dealing with sparse data. Sparse data is that where event rates, such as aneurysm rupture are rare or sample sizes are small. 
+
+To better stabilise the variance, and to normalise the distribution especially for small sample sizes or rare event rates, the double arcine method of Freeman-Tukey (Reference Freeman and Tukey 1950) is recommended. This can be later backtransformed using the equation derived by Miller (Reference Miller 1978).
+
+#### calculate individual transformed study proportions using DA method
+
+
+```{r individual DA transformed proportions}
+ies.da=escalc(xi=rupt, ni=total_size, data=dat, 
+              measure="PFT", 
+              add=0
+              )
+view(ies.da)
+
+```
+
+#### double check if back transform individual transformed values that we should get the original raw proportions
+
+```{r cross check individual back transformation}
+transf.ipft(ies.da$yi, ies.da$total_size)
+```
+
+note that the studies without rupture are included in the tibble, with proportion of 0.  
+
+#### pool the transformed values using a weighted mean according to inverse variance method
+
+
+```{r pooled DA transformed proportion}
+
+pes.da=rma.uni(yi, vi, data=ies.da, 
+               add = 0,
+               method = "DL",
+               level = 95
+               )
+pes.da
+
+```
+
+The DA method proposed by Freeman-Tukey transforms the data, stabilises the sampling variance, and allows us to carry out statistical analysis. Using the transformed data, we can then fit our chosen statistical models.  
+
+rma.uni fits a linear (random/fixed or mixed) model without moderaters. Here, we have chosen a DerSimonian and Laird model (DL) method, and the summary proportion is calculated by weighting the studies using the inverse variance method. Note that the condfidence intervals are calculated using the Wald method ie assuming a normal distribution. 
+
+Note that if the proportion is 0, then a constant may be added. Ensure that there is no adjustment to observed proportions by specifying add=0. 
+
+The DL method is also used to estimate between-study variance using the statistic tau-squared, and can be estimated using different random-effects models. 
+
+#### back transformation is required to obtain the summary proportion. 
+
+```{r pooled proportion}
+
+pes <- predict(pes.da, 
+               transf=transf.ipft.hm,
+               targs=list(ni=dat$total_size)
+               )
+pes
+
+```
+
+Note that we have used the harmonic mean of the sample sizes as suggested by Miller et al 1978 and applying this to all the individual studies. However this can create misleading results since each study has a specific sample size which is known. Moreover, this is exacerbated when the range of sample sizes is large, which does occur in our study from 22 aneurysms in a sample to 3323 aneurysms in a sample. This anomaly can introduce additional bias and reduces the validity of the result as noted by Schwarzer 2019.
+
+To compensate for this, we can carry out the back transformation to the pooled proportion using the study-specific sample sizes. 
+
+#### create a new tibble for individual study back transformation
+
+```{r individual back transformation}
+
+dat.back <- summary(ies.da, transf = transf.ipft, ni = dat$total_size)
+view(dat.back)
+
+```
+
+
+#### display the individual and pooled proportions as a forest plot
+
+```{r simple forest after back transformation, fig.height= 10, fig.width = 10}
+
+forest(dat.back$yi, 
+       ci.lb=dat.back$ci.lb, 
+       ci.ub=dat.back$ci.ub, 
+       psize=1,
+       xlim=c(-0.5,1.8), 
+       alim=c(0,1), 
+       ylim=c(-1,32), 
+       refline=NA, 
+       digits=3L,
+       xlab="Proportion", 
+       header=c("Study", "Proportion [95% CI]")
+       )
+addpoly(pes$pred, 
+        ci.lb=pes$ci.lb, 
+        ci.ub=pes$ci.ub, 
+        row=-0.5, 
+        digits=3,
+        mlab="RE Model", 
+        efac=1.3
+        ) 
+abline(h=0.5)
+
+```
+
+
+### Utilise metaprop function from meta
+
+The metaprop function from meta in R can be used to caclulate an overall proportion from studies reporting a single proportion. Pooling methods are the inverse variance and generalised linear mixed models (GLMM).
+
+Our options are to pool untransformed proportions or pool transformed proportions according to logit or DA methods. 
+
+As we have noted, the choice of meta-analytic method is controversial, and has to be customised to the data at hand. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. 
+
+We will choose initially explore the DA method with inverse variance study weighing as we have done previously, but this time utilise the metaprop function from meta. This should yeild the same result as performing each individual step in metafor. 
+
+We will utilise this opportunity to explore different types of confidence intervals, starting with the normal approximation.  
+
+#### Meta-analysis of proportions using inverse variance DL method and Normal approximimation method for CIs
+
+```{r meta-analysis of proportions with DL and NAsm method for CIs}
+
+pes.summary.nasm = metaprop(rupt, total_size, data=dat, 
+                            studlab=paste(auth_year),
+                            sm = "PFT", 
+                            method.tau = "DL",
+                            method.ci = "NAsm",
+                            pscale = 1
+                            ) 
+pes.summary.nasm
+
+
+
+```
+
+Note that we have achieved the same result ie 0.0115 with 95% CI 0.0064 to 0.0177, since we have specified the Freeman-Tukey double arcine transformation, inverse variance method for pooling the data, and normal approximation Wald confidence interval. Utilising the metaprop function is more efficient, and allows us to explore the impact of the different confidence interval methods. 
+
+We will now examine the normal approximation Wald interval, to the exact Clopper-Pearson CI, and the Wilson CI in the following examples. 
+
+#### Meta-analysis of proportions using inverse variance DL method and CP method for CIs
+
+```{r meta-analysis of proportions with DL and CP method for CIs}
+
+pes.summary.cp = metaprop(rupt, total_size, 
+                          data=dat, 
+                          studlab=paste(auth_year),
+                          sm = "PFT", 
+                          method.tau = "DL",
+                          method.ci = "CP",
+                          pscale = 1
+                          ) 
+pes.summary.cp
+
+```
+
+#### Meta-analysis of proportions using inverse variance DL method and Wilson score interval method for CIs
+
+
+```{r meta-analysis of proportions with DL and Wilson method for CIs}
+
+pes.summary.wilson = metaprop(rupt, total_size,
+                              data=dat, 
+                              studlab=paste(auth_year),
+                              sm = "PFT", 
+                              method.tau = "DL",
+                              method.ci = "WS",
+                              pscale = 1
+                              ) 
+pes.summary.wilson
+
+```
+
+When reviewing the results above, the CIs in each of the individual studies varies according to the method of CI chosen. The pooled proportion CI is notably the same in all the examples above. 
+
+**how do we confirm that the pooled proportion is calculated according to the specified methodology?**
+
+Use of the CI is important, since CIs convey information about magnitude and precision of effect. The choice of the CI is important, since each of them have limitations, and thus choice of the CI should be tailed to the dataset that is present. Options include:
+
+* Wald method or Normal Approximation
+  + this produces CIs that are often centred on the point estimate
+  + thus they are not often suitable with proportions close to the boundaries of 0 and 1, since this method can create CIs that are below 0 and above 1.
+  + for proportions that are often 0 or close to zero, a continuity correction may be applied, but this can lead to additional overshoot
+  
+* Clopper-Pearson or Exact method
+  + Most commonly used, and recommended to avoid approximation by most statistical textbooks. 
+  + Called exact because it is based directly on the binomial distribution and not an approximation. 
+  + Output is usually conservative, and the true coverage is almost always larger than the derived coverage ie closer to a 99% CI than a 95% CI. 
+  + The derived 95% CI does not accurately reflect the true 95% CI unless n is quite large *Agresti 2008*. 
+  + When n is small eg 10, there is severe overcoverage (closer to 99% coverage) with the true CI much larger than the derived 95% CI. 
+  + Even when n is large, the derived 95% CI does not accurately reflect the true 95% CI when p is near 0 because the binomial distribution is highly skewed. *Agresti 1998* 
+  + Needs a very large number of n to be accurate *Brown 2001*
+
+* Wilson method
+  + Is suggested for small n ie 40 or less and/or extreme probabilities *Brown 2001*
+  + The derived CI more accurately reflects the true CI with less variability compared to CP method *Agresti 1998* 
+  + For small n, the Wilson CI’s are shorter and a more accurate derivation than the CP CI’s *Vollset 1993*
+  + Can be used and is recommended for all sample sizes *Newcombe 1998* 
+
+Note the differences in the CIs above between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
+
+We will choose the Wilson method for CI for the following reasons:
+
+* Rupture of an aneurysm is a rare event with the proportion p very close to zero 
+* The distribution of the outcomes is highly skewed towards zero
+* There is a wide range of sample sizes, with very small studies and very large studies included
+* More accurate CIs are likely given the highly skewed and sparse dataset. 
+
+This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *Newcombe 1998* and *Brown 2001*. 
+
+#### A simple forest plot with inverse variance DL and Wilson method for CIs
+
+```{r simple forest with DL and Wilson method for CIs, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.wilson,
+       xlim=c(0,10),
+       pscale = 100,
+       digits = 4
+       )
+
+```
+
+### Using generalised linear mixed methods models (GLMMs).
+
+Classical meta-analytic methods use the inverse method as discussed above. For dichotomous outcomes such as survival, or aneurysm rupture, there are 4 commonly used methods. Mantel-Haenszel, Peto and inverse variance can be used for fixed methods meta-analysis, and the DerSimonian and Laird (DL) inverse variance for random effects meta-analysis. 
+
+In most cases, the random effects meta-analyis is appropriate, and thus the DL method is very commonly used. The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when dealing with sparse data, the event rate or proportion may be 0. In this case, the variances become undefined.
+
+Transformations are utilised to improve the statistical properties. Single proportions have binomial structure can be transformed using logit, arcine or DA methods. These are then backtransformed to the original scale. 
+
+Limitations of the logit transformation, and utilisation of the Freeman Tukey double arcine methods to overcome this have been discussed. However, back transformations utilsing the harmonic mean affect the backtransformed proportions as described by Schwarzer 2019. This issue does affect our dataset since n in the studies varies from 22 to over 3323. 
+
+To overcome this statistical limitation, we can utilise a generalised linear mixed methods model such as the random intercept logistic regression model as recommended by Stinjen 2010. Although this does utilise a logit transformation, the GLMM takes into account the binomial structure of the data. *Stinjen 2010* 
+
+Our rationale for choice of a GLMM is based on the following:
+
+* The distribution is binomial
+* The outcome is very rare, with proportions less than 0.05 is almost all studies
+* The sample populations range from 22 to 3323
+* Additional calculations to consider a covariate ie prior exposure to subarachnoid haemorrhage, can be performed using a noncentral hypergeometric model.  
+
+
+```{r meta-analysis of proportions using glmm}
+
+pes.summary.glmm = metaprop(rupt, total_size,
+                            data=dat,
+                            studlab=paste(auth_year),
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm
+
+```
+
+Note that the GLMM ie a random intercept logistic regression model is the default method for the logit transformation. Also the the maximum-likelihood method is utilized for GLMMs.
+
+Compare the output from the random effects meta-analysis using the inverse variance DL method
+
+inverse variance DL: estimate is 1.15 with 95% CI 0.64 to 1.8
+using the GLMM: estimate is 1.22 with 95% CI 0.77 to 1.92
+
+Given our rationale for choosing the GLMM, this produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010. Note CIs are using Wilson score method
+
+#### Display GLMM result using a simple forest plot
+
+
+```{r simple forst using glmm, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm,
+       xlim=c(0,10),
+       leftlabs = c("Study", "Ruptures", "Total"),
+       digits = 4
+       )
+
+```
+
+
+
+#### Publication quality forest plots
+
+```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+
+pdf(file='forestplot_ruptureproportion.pdf', width=10, height=8) 
+forest(pes.summary.glmm,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
+### Assess and quantify heterogeniety 
+
+This is required to assess whether the pooled proportion provides an accurate summary of the finding of interest. If there is high heterogeneity then interpretation of the data synthesis should be taken with caution. 
+
+Heterogeniety arises from both between-study and within-study variance. 
+
+Between-study variance arises from differences in the baseline populations, participant characteristics, study designs and study environment. Intra-study variance arises from random sampling error.
+
+The between-study variance is calculated as the statistic tau-squared, and can be estimated.
+
+This is important because the estimated amount of the between-study variance influences the weights assigned to each study and hence the overall summary effect size and the precision of the effect size. 
+
+
+```{r heterogeniety}
+
+pes.summary.glmm
+
+```
+
+
+Here we can see that tau-squared = 0.9098. This is the estimated amount of total heterogeneity. When Tau-squared is zero this is indicative of no heterogeneity.
+
+I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively. Here we can see that the between-study heterogeniety is high. 
+
+The next measure is the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. Here we can see that the Q-statistic is < 0.0001 which also confirms high between-study heterogeniety. 
+
+
+#### Baujat plots to visually assess which studies contribute most to heterogeniety
+
+These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. *Baujat 2002* 
+
+```{r baujat plot}
+
+baujat(pes.summary.glmm)
+
+```
+
+This shows that study 12 ie Juvela et al, is the major source of between study heterogeneity. 
+
+We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity.
+
+#### Re-run analysis excluding Juvela - exploratory analysis
+
+```{r exclude Juvela from total proportion}
+
+dat.juvela <- slice(dat, -12)
+pes.summary.glmm.juvela = metaprop(rupt, total_size,
+                            data=dat.juvela,
+                            studlab=paste(auth_year),
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.juvela
+```
+
+This exploratory analaysis demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic. 
+
+The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
+
+#### Rerun forest plots excluing Juvela which is the study that adds the most to heterogeniety for a sensitivity analysis
+
+
+```{r forest for publication using GLMM without Juvela, fig.height= 10, fig.width = 10}
+
+
+forest(pes.summary.glmm.juvela,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       )  
+
+```
+
+This visually displays the exploratory analaysis which demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic. 
+
+The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
+
+
+#### Rerun Baujat plots excluing Juvela to visually assess which studies contribute most to heterogeniety
+
+```{r baujat plot minus Juvela}
+
+baujat(pes.summary.glmm.juvela, 
+       xlim=c(0,40), 
+       ylim=c(0,40)
+       )
+
+```
+
+Keeping the influence axis the same, the significant improvement in heterogeniety is noted. This can be re-processed with smaller scales to more closely explore the result. 
+
+```{r baujat plot minus Juvela 2}
+
+baujat(pes.summary.glmm.juvela, 
+       xlim=c(0,10), 
+       ylim=c(0,10)
+       )
+
+```
+
+Overall, there seems to be an acceptable level of heterogeniety given the samples that are available. 
+
+### Assess for publication bias
+
+## Funnel plots 
+
+Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies which are not published are not identified and not integrated into the meta-analysis. This leads to publication bias meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not published. 
+
+In addition, large studies are more likely to get published regardless of the effect size. Small studies are at the greatest risk, since they are only generally published if there is a large effect size. 
+
+Thus when assessing for publication bias, conventional assessment is focused on identifying whether small studies with small effect sizes are missing or not. This can be performed using a funnel plot. 
+
+```{r funnel plots}
+
+funnel(pes.summary.glmm)
+
+```
+
+Here we can see that the funnel plot is assymetrical. The assymetry is primarily driven by 1 study in the top right corner with a large effect. We can identify the study by labelling the funnel plot. 
+
+
+```{r funnel plots labelled}
+
+funnel(pes.summary.glmm,
+       studlab = TRUE
+       )
+
+```
+
+```{r funnel plots without juvela}
+
+funnel(pes.summary.glmm.juvela)
+
+```
+
+
+If we re-do the funnel plot without Juvela, the plot becomes more symmetrical. 
+
+
+#### create new meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
+
+Firstly structure the data in individual studies with authors in a 2 x 2 table
+
+ai = prior SAH and rupture +ve 
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve
+di = no prior SAH, and rupture -ve 
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+
+```{r restructure to 2 x 2 table for PSAH}
+
+view(sizedata)
+dat.psah <- sizedata %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai.psah = rupt_psah) %>%
+  mutate(ci.psah = rupt - ai.psah) %>%
+  mutate(bi.temp.psah = psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_anr) %>%
+  mutate(total_anr_psah = coalesce(bi.temp.psah,num_anr_psah)) %>%
+  mutate(bi.psah = total_anr_psah - ai.psah) %>%
+  mutate(n2i.psah = total_anr - psah) %>%
+  mutate(di.psah = n2i.psah - ci.psah) %>%
+  mutate(n1i.psah = ai.psah + bi.psah) %>%
+  select(auth_year, ai.psah, bi.psah, ci.psah, di.psah, n1i.psah, n2i.psah) %>%
+  drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
+  mutate_if(is.numeric, round, 0)
+view(dat.psah)
+
+```
+
+run new GLMM (random intercept logistic regression model) for patients with prior history of subaarachnoid haemorrhage. Studies that did not include any patients with prior history of subarachnoid haemorrage are excluded. 
+
+```{r glmm for summary proportion with history of PSAH}
+
+dat.psahpos <- dat.psah %>%
+  filter(n1i.psah!=0)
+
+pes.summary.glmm.psahpos = metaprop(ai.psah, n1i.psah,
+                            data=dat.psahpos,
+                            studlab=paste(auth_year),
+                            sm = "PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.psahpos
+
+```
+
+Then run new GLMM (random intercept logistic regression model) for patients without history of PSAH
+
+
+```{r glmm for summary proportion without history of prior SAH}
+
+pes.summary.glmm.psahneg = metaprop(ci.psah, n2i.psah,
+                            data=dat.psah,
+                            studlab=paste(auth_year),
+                            sm = "PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.psahneg
+
+```
+
+This exploratory analysis does show different risk of rupture for patients with and without prior SAH for aneurysms <10 mm. 
+
+**How can we compare the model outputs for statistical difference?**
+
+We can also remove Juvela et al from the first analysis and re-run the summary proportion excluding Juvela. 
+
+
+```{r glmm for summary proportion with history of PSAH without Juvela}
+
+dat.psah.juvela <- slice(dat.psahpos, -1)
+pes.summary.glmm.psahpos.juvela = metaprop(ai.psah,
+                                           n1i.psah,
+                                           data=dat.psah.juvela,
+                                           studlab=paste(auth_year),
+                                           sm = "PLOGIT",
+                                           method.tau = "ML", 
+                                           method.ci = "WS",
+                                           pscale = 100
+                                           )
+pes.summary.glmm.psahpos.juvela
+
+
+```
+
+This shows that when we exclude Juvela, and concentrate on prior SAH only, the rupture risk is still higher in patients with exposure to prior SAH than those without this exposure, but now the studies are homogeneous. Limitation is of course the small number of rutpures in this cohort. 
+
+#### Display the information as simple forest plots - first one including Juvela and second without Juvela
+
+
+
+```{r simple forest using glmm model for summary proportion with history of PSAH}
+
+forest(pes.summary.glmm.psahpos,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,30),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+```{r simple forest using glmm model for summary proportion with history of PSAH without Juvela }
+
+forest(pes.summary.glmm.psahpos.juvela,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,30),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
+### How do we assess the effect of exposure to prior SAH for these  aneurysms ?
+
+Consider the data in the form of a 2 x 2 table, prior SAH as the exposure and rupture as the outcome. 
+
+ai = prior SAH and rupture +ve 
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve
+di = no prior SAH, and rupture -ve
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+Rupture of the aneurysm is considered a rare event ie <1%, and the data are sparse with single 0s or double 0s in the 2 x 2 table. 
+
+This is methodologically challenging, and the choice of meta-analyis method is important. As we discussed The most common methods of MA is the inverse variance method, using the DerSimonian and Laird random effects model. 
+
+The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when one of the cells has a 0 which is common with rare events, the inverse variance cannot be used because the variances become undefined. 
+
+There are 2 options for correction: use of a continuity correction ie adding a fixed value usually 0.5 or using calculating the risk difference. However using a continuity correction leads to excess bias in the effect, and can influence the result and conclusions (Stinjen 2010). Risk differences have poor statistical properties with too wide intervals when events are rare, and are also not recommended (Bradburn 2007)
+
+There are also issues on how to handle double 0 studies, since these may also carry some meaningful data due to their sample size (Keus 2009). 
+
+In summary, there is debate on what is the best model to meta-analyse rare events. Use of Peto's method to estimate the OR is often suggested for rare events, since this includes single zero studies without a continuity correction. Double zero studies are excluded. 
+
+However, to use Peto's method, the following three conditions need to hold true ie a rare event <1%, the exposure / treatment groups are balanced, and the effects are not very large (Cochrane handbook). Unless all three are true, then Peto's method also may give biased results. In our dataset, the groups with and without prior SAH are unbalanced ie >1:3, so Peto's method is not appropriate. 
+
+Alternatively,the Mantel-haenszel without zero cell continuity correction can be used for unbalanced exposure / treatment groups.(Efthimiou 2018) This method provides a fixed effects meta-anlysis so is best used in the absence of heterogeniety and does exclude double zero studies. In our dataset, there is heterogeniety, and thus a random effects meta-analysis is preferred. 
+
+A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-analysis for rare outcomes, specifically by utilising a hypergeometric-normal (HN) model for the meta-analysis of odds ratios (Stinjen 2010). This is appropriate since the event aneurysm rupture is not a true binomial distribution, but in fact a hypergeometric distribution. 
+
+The hypergeometric distribution is best explained by sampling coloured balls in an urn. Hypergeometric distribution is sampling without replacement compared to a binomial distribution where there is sampling with replacement, and the probability of success is required. 
+
+If the balls are of different weight or size, ie one has a greater chance of being chosen, this is a noncentral hypergeometric distribution. The non central hypergeometric distribution can be of the Wallenius type or Fisher type. 
+
+Wallenius type is the biased urn mode, where balls are taken out 1 by 1. Fisher type occurs when the outcome is known, and the number of balls in the urn and their colour need to be calculated. For large samples with a common outcome, the binomial distribution is a reasonable estimate. However in populations that are small, or outcomes that are rare, such as in our dataset where certain aneurysms have features that make them more prone to rupure ie heavier weighted ball, thus each outcome influences the probability of the next event. Thus the non central hyperegeometric distribution is required. 
+
+Recent developments in statistical packages, including in R, make these computationaly intensive methods practical and feasible. The HN model performs well, with minimal bias, and satsifactory coverage of the 95% CIs with rare events. 
+
+Mete-regression can also be included easily by extending the model to include a study level covariate. 
+
+
+#### Using metafor to asess the OR for prior SAH using a GLMM
+
+Structure the data in this format
+
+Author	This signifies the column for the study label (i.e., the first author)
+
+ai = prior SAH and rupture +ve 
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve
+di = no prior SAH, and rupture -ve 
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+Assumptions
+
+For num_anr is not known, then num (of patients) is brought forward assuming 1 patient has 1 aneurysm.
+
+For aneurysms in size cohort with prior SAH, this is estimated by using same proportion of patients with prior SAH in the total observed cohort, and applying this to the number of aneurysms in that specific size cohort. 
+
+
+```{r structure data for OR estimate for prior SAH}
+
+view(dat.psah)
+
+```
+
+Use the rma function from metafor to meta-analyse log odds ratio using conditional logistic regression model with random effects meta-analysis. The conditional generalized linear mixed-effects model with exact likelihood (model="CM.EL") avoids having to model study level variability by conditioning on the total numbers of cases/events in each study. For the odds ratio, this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a mixed-effects conditional logistic model.
+
+Only studies that included patients both with and without history of prior SAH are included. 
+
+```{r log OR for prior SAH}
+
+res <- rma.glmm(measure = "OR", 
+                ai = ai.psah, 
+                bi = bi.psah, 
+                ci = ci.psah, 
+                di = di.psah, 
+                data = dat.psahpos,
+                slab = auth_year,
+                model = "CM.EL",
+                method = "ML"
+                )
+res
+
+```
+
+
+View the results as a forest
+
+```{r forest log OR for prior SAH}
+
+forest(res)
+
+```
+
+transform the log OR to OR
+
+```{r}
+res2 <- predict(res, transf=exp, 
+                digits=2
+                )
+res2
+```
+
+The predicted OR and log OR both have confidence intervals that cross 1, and the confidence intervals are wide. 
+
+Overall, taking into account the limitations of the data, prior SAH may not increase rupture risk in small unruptured aneurysms measuring 10 mm or less. In addition, the overall rupture risk for conservatively managed aneurysms is more uncertain than previously considered with up to 2% risk of rupture.   
+
+These synthesised data analyses are considered exploratory and hypothesis generating, and additional data are required. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
