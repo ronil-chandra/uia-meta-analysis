@@ -268,7 +268,11 @@ Explore the sources of the heterogeneity by looking for effect modifiers. This i
 
 Perform sensitivity analysis by excluding outlier studies that contribute to heterogeneity. Removing any study on the basis of their result may introduce bias, however, if there is an obvious reason for the outlying result the study can be removed with confidence. 
 
-## Subgroup analysis using meta-regression
+## sub-group analysis based on diffent aneurysm sizes
+
+
+
+## Subgroup analysis using meta-regression to identify effect modifiers
 
 Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data have been pooled. Regardless subgroup anlysis are non-randomized and observational in nature, and can lead to misleading conclusions. 
 
@@ -282,7 +286,7 @@ To reduce the risk of false positives, and to ensure that there are adequate stu
 2. Exposure to prior subarachnoid haemorrhage
 3. Length of follow up
 
-Regardless, the outcomes of the subgroup comparisons using meta-regression are entirely observational, susceptible to confounding bias from other study level characteristics, and the level of statistical significance of the results within subgroups cannot be compared. 
+Regardless, the outcomes of the subgroup comparisons using meta-regression are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since study-level data is used to make inferences and not patient level data. 
 
 ## Sensitivity analysis 
 
