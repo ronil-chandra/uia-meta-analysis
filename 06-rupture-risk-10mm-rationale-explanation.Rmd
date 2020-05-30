@@ -270,6 +270,9 @@ Explore the sources of the heterogeneity by looking for effect modifiers. This i
 
 Perform sensitivity analysis by excluding outlier studies that contribute to heterogeneity. Removing any study on the basis of their result may introduce bias, however, if there is an obvious reason for the outlying result the study can be removed with confidence. 
 
+### Subgroup analysis for aneurysm sizes, categorsied as 3, 5, 7, and 10 mm and less 
+
+
 ## sub-group analysis based on aneurysm size 7 mm and less 
 
 ```{r select 7 mm and less}
@@ -355,6 +358,7 @@ If the number of aneuryms for that size criteria are known, then then variable n
 dat5 <- sizedata5 %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
   drop_na(total_size) %>% 
+  drop_na(rupt) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size)
 view(dat5)
@@ -438,6 +442,7 @@ pes.summary.glmm3 = metaprop(rupt, total_size,
                             data=dat3,
                             studlab=paste(auth_year),
                             method="GLMM",
+                            control=list(maxiter=1000),
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
@@ -446,6 +451,30 @@ pes.summary.glmm3 = metaprop(rupt, total_size,
 pes.summary.glmm3
 
 ```
+
+Note that the Fisher scoring algorith fails to converge to calculate the tau2 using the maximum-likelihood estimator after the default 100 iterations; this also fails after attempting 1000 iterations. This can be corrected by adjusting reducing the step length, and the model converges. 
+
+Another option to consider is usting a penalised maximum likelihood estimation using the Firth method. The penalisation allows for convergence to finite estimates even with very sparse data. 
+
+
+```{r meta-analysis of proportions using glmm}
+
+pes.summary.glmm3 = metaprop(rupt, total_size,
+                            data=dat3,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            control=list(stepadj=0.5,maxiter=1000),
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm3
+
+```
+
+
+
 
 ## Publication quality forest plots for 3mm and less 
 
