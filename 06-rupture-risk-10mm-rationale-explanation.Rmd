@@ -53,31 +53,6 @@ glimpse(maindata)
 view(maindata)
 ```
 
-#### Analyse 10 mm or less aneurysms
-
-```{r select size cohort}
-
-sizedata <- filter(maindata, size == 10) %>%
-view()
-
-```
-
-
-If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
-
-If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
-
-```{r coalesce patients into aneurysms}
-
-dat <- sizedata %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
-  drop_na(total_size) %>% 
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size)
-view(dat)
-
-```
-
 ##### calculate individual study proportions and use meta-analytical methods to create a pooled summary proportion 
 
 Individual rupture risk at study entry can be calculated by calculating the proportion of patients who ruptured ie pi = xi / ni. 
@@ -167,6 +142,33 @@ We will choose the Wilson method for CI for the following reasons:
 * More accurate CIs are likely to be generated using the Wilson method given the highly skewed and sparse dataset. 
 
 This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *Newcombe 1998* and *Brown 2001*. 
+
+
+#### Analyse total cohort 
+
+```{r select total cohort}
+
+sizedata <- filter(maindata, size == 10) %>%
+view()
+
+```
+
+
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+
+If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+
+```{r coalesce patients into aneurysms}
+
+dat <- sizedata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size)
+view(dat)
+
+```
+
 
 
 ## Meta-analysis of proportions using GLMM and Wilson CIs
@@ -268,7 +270,202 @@ Explore the sources of the heterogeneity by looking for effect modifiers. This i
 
 Perform sensitivity analysis by excluding outlier studies that contribute to heterogeneity. Removing any study on the basis of their result may introduce bias, however, if there is an obvious reason for the outlying result the study can be removed with confidence. 
 
-## sub-group analysis based on diffent aneurysm sizes
+## sub-group analysis based on aneurysm size 7 mm and less 
+
+```{r select 7 mm and less}
+
+sizedata7 <- filter(maindata, size == 7) %>%
+view()
+
+```
+
+
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+
+If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+
+```{r coalesce patients into aneurysms}
+
+dat7 <- sizedata7 %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size)
+view(dat7)
+
+```
+
+
+
+## Meta-analysis of proportions of 7 mm aneurysms and less using GLMM and Wilson CIs
+  
+
+```{r meta-analysis of proportions using glmm}
+
+pes.summary.glmm7 = metaprop(rupt, total_size,
+                            data=dat7,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm7
+
+```
+
+## Publication quality forest plots for 7mm and less 
+
+```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+
+pdf(file='forestplot_ruptureproportion7.pdf', width=10, height=8) 
+forest(pes.summary.glmm7,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
+## sub-group analysis based on aneurysm size 5 mm and less 
+
+```{r select 5 mm and less}
+
+sizedata5 <- filter(maindata, size == 5) %>%
+view()
+
+```
+
+
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+
+If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+
+```{r coalesce patients into aneurysms}
+
+dat5 <- sizedata5 %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size)
+view(dat5)
+
+```
+
+
+
+## Meta-analysis of proportions of 5 mm aneurysms and less using GLMM and Wilson CIs
+  
+
+```{r meta-analysis of proportions using glmm}
+
+pes.summary.glmm5 = metaprop(rupt, total_size,
+                            data=dat5,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm5
+
+```
+
+## Publication quality forest plots for 5mm and less 
+
+```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+
+pdf(file='forestplot_ruptureproportion5.pdf', width=10, height=8) 
+forest(pes.summary.glmm5,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
+## sub-group analysis based on aneurysm size 3 mm and less 
+
+```{r select 3 mm and less}
+
+sizedata3 <- filter(maindata, size == 3) %>%
+view()
+
+```
+
+
+If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+
+If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+
+```{r coalesce patients into aneurysms}
+
+dat3 <- sizedata3 %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size)
+view(dat3)
+
+```
+
+
+
+## Meta-analysis of proportions of 3 mm aneurysms and less using GLMM and Wilson CIs
+  
+
+```{r meta-analysis of proportions using glmm}
+
+pes.summary.glmm3 = metaprop(rupt, total_size,
+                            data=dat3,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm3
+
+```
+
+## Publication quality forest plots for 3mm and less 
+
+```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+
+pdf(file='forestplot_ruptureproportion3.pdf', width=10, height=8) 
+forest(pes.summary.glmm3,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
 
 
 
