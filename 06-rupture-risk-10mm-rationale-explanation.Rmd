@@ -117,150 +117,58 @@ These characteristics of the data that we are synthesising, means that appropria
 
 ##Choice of meta-analytical method
 
-Classical meta-analytical methods have the potential to contribute to additional sparse data bias. 
+Classical meta-analytical methods have the potential to contribute to additional sparse data bias and give misleading results for rare events  **Bradburn 2007** from Cochrane. 
 
-In a logit transformation, if the proportion is 0 or 1, the variance becomes undefined. In our dataset, some of the included studies have a proportion of 0. To overcome this issue, typically a continuity correction of 0.5 is applied. This creates risk of introducing additional sparse data bias and reducing the validity of the result, especially given that pi is close to zero and 0.5. 
+The generic inverse variance method calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. A variation on the generic inverse variance method that produces a fixed effects meta-analyis is the DerSimonian and Laird method (DerSimonian 1986). This adjusts the standard errors of the individual effect sizes to incorporate a measure of heterogeniety. This is the most common method in medical meta-analysis. 
 
-The double arcine transformation of Freeman-Tukey (Reference Freeman and Tukey 1950) can be used to stabilise the variance, and to normalise the distribution especially for small sample sizes or rare event rates, is recommended. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller (Reference Miller 1978).
+Regardless of the inverse variance or DL methods for data synthesis, if the individual study proportions are 0 or 1, the variance becomes undefined. In our dataset, some of the included studies have 0 ruptures and thus a proportion of 0. To overcome this issue, typically a continuity correction of 0.5 is applied. This creates risk of introducing additional sparse data bias and reducing the validity of the result, especially given that pi is close to both zero and 0.5. 
 
+To better stabilise the variance, and to normalise the distribution especially for small sample sizes or rare event rates, the double arcine transformation of Freeman-Tukey (Reference Freeman and Tukey 1950) can be used. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller (Reference Miller 1978). However, the Miller back transformation utilsing the harmonic mean does affect the backtransformed proportion as described by Schwarzer 2019. This issue is particularly evident when there is a large range of sample sizes. This issue does affect our dataset since n in the studies varies from 22 to over 3323. 
 
+To overcome these statistical limitation for classical methods of pooling the individual study proportions, we can instead utilise a generalised linear mixed methods (GLMM) model such as the random intercept logistic regression model as recommended by Stinjen 2010 and Schwarzer et al. 2019. 
 
+Our rationale for choice of a GLMM is based on the following:
 
-xi = cases ie number of ruptures during all follow up 
-ni = total ie number of aneurysms at study entry
-pi = raw proportions ie xi / ni 
-yi = individual effect size ie individual proportion in this study
-vi = sampling variances
-
-Meta-analysis is the statistical combination of results from two or more separate studies. This can improve statistical power, improve precision and answer questions not posed by the original studies. 
-
-
+* The distribution for the outcome of rupture is binomial, which is taken into account by a GLMM model. 
+* The outcome is very rare, with proportions less than 0.05 is almost all studies, and thus generic inverse variance and DL methods can lead to misleadong results
+* The sample populations range from 22 to 3323, which creates misleading results when utilising the Freeman-Tukey methods of transformation and backtransformation of Miller. 
+* Additional calculations to consider covariates can be performed using noncentral hypergeometric models. 
 
 
+## Choice of confidence interval
 
+Use of the CI is important, since CIs convey information about magnitude and precision of individual study effect size and the pooled meta-analytical effect size. The choice of the CI should be tailed to the dataset that is present. Options include:
 
-ies = object that holds results of individual effect sizes and corresponding sampling variances
+* Wald method or Normal Approximation
+  + this produces CIs that are often centred on the point estimate
+  + thus they are not often suitable with proportions close to the boundaries of 0 and 1, since this method can create CIs that are below 0 and above 1.
+  + for proportions that are often 0 or close to zero, a continuity correction may be applied, but this can lead to additional overshoot
+  
+* Clopper-Pearson or Exact method
+  + Most commonly used, and recommended to avoid approximation by most statistical textbooks. 
+  + Called exact because it is based directly on the binomial distribution and not an approximation. 
+  + Output is usually conservative, and the true coverage is almost always larger than the derived coverage ie closer to a 99% CI than a 95% CI. 
+  + The derived 95% CI does not accurately reflect the true 95% CI unless n is quite large *Agresti 2008*. 
+  + When n is small eg 10, there is severe overcoverage (closer to 99% coverage) with the true CI much larger than the derived 95% CI. 
+  + Even when n is large, the derived 95% CI does not accurately reflect the true 95% CI when p is near 0 because the binomial distribution is highly skewed. *Agresti 1998* 
+  + Needs a very large number of n to be accurate *Brown 2001*
 
-escalc() is a metafor function to estimate individual effect sizes and sampling variances
+* Wilson method
+  + Is suggested for small n ie 40 or less and/or extreme probabilities *Brown 2001*
+  + The derived CI more accurately reflects the true CI with less variability compared to CP method *Agresti 1998* 
+  + For small n, the Wilson CI’s are shorter and a more accurate derivation than the CP CI’s *Vollset 1993*
+  + Can be used and is recommended for all sample sizes *Newcombe 1998* 
 
-rma() is a metafor function to fit a random-effects model. This is utilised to take both intra-study and inter-study variances, to increase generalisability. This is because these samples are drawn from different populations, with different comorbidities that may influence outcome, and undergo observation in different conditions. This leads to variation in the outcomes due to random samping error. The simplest version the DerSimonian and Laird method *DerSimonian and Laird 1986*
+We will choose the Wilson method for CI for the following reasons:
 
-pes = object that holds results of pooled effect size and pooled sampling variances. Note that the pooled effect size is the weighted average of the observed effect sizes in the individual studies. Weighting can be done by various methods, classically weighting is by the inverse of the total variance in that study. 
+* Rupture of an aneurysm is a rare event with the proportion p very close to zero 
+* The distribution of the outcomes is highly skewed towards zero
+* There is a wide range of sample sizes, with very small studies and very large studies included
+* More accurate CIs are likely to be generated using the Wilson method given the highly skewed and sparse dataset. 
 
-Later on in our data analysis we will consider more advanced statistical models that are more suitable to the binomial distribution inherent in our data. Initially we will consider classical meta-analytical methods. Classical meta-analytic methods use the inverse method. The weight assigned to each individual study is the inverse of the variance of the effect size (i.e. 1 over the square of its standard error). Thus, larger studies, which have smaller standard errors, are given more weight than smaller studies, which have larger standard errors. This choice of weights minimizes the imprecision of the pooled effect size. 
+This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *Newcombe 1998* and *Brown 2001*. 
 
-The distribution of the observed proportions in our dataset is skewed, and thus we need to transform the data using either the logit or double arcine methods to improve the statistical properties for exploratory analysis. Typically, transformation is utilised to improve the distribution towards the normal distribution and thus enhance the validity of statistical analysis. It will need to be backtransformed later into raw proportions. The initial choice is between the logit transformation and double arcine transformation. 
-
-
-
-#### calculate individual transformed study proportions using DA method
-
-
-```{r individual DA transformed proportions}
-ies.da=escalc(xi=rupt, ni=total_size, data=dat, 
-              measure="PFT", 
-              add=0
-              )
-view(ies.da)
-
-```
-
-#### double check if back transform individual transformed values that we should get the original raw proportions
-
-```{r cross check individual back transformation}
-transf.ipft(ies.da$yi, ies.da$total_size)
-```
-
-note that the studies without rupture are included in the tibble, with proportion of 0.  
-
-#### pool the transformed values using a weighted mean according to inverse variance method
-
-
-```{r pooled DA transformed proportion}
-
-pes.da=rma.uni(yi, vi, data=ies.da, 
-               add = 0,
-               method = "DL",
-               level = 95
-               )
-pes.da
-
-```
-
-The DA method proposed by Freeman-Tukey transforms the data, stabilises the sampling variance, and allows us to carry out statistical analysis. Using the transformed data, we can then fit our chosen statistical models.  
-
-rma.uni fits a linear (random/fixed or mixed) model without moderaters. Here, we have chosen a DerSimonian and Laird model (DL) method, and the summary proportion is calculated by weighting the studies using the inverse variance method. Note that the condfidence intervals are calculated using the Wald method ie assuming a normal distribution. 
-
-Note that if the proportion is 0, then a constant may be added. Ensure that there is no adjustment to observed proportions by specifying add=0. 
-
-The DL method is also used to estimate between-study variance using the statistic tau-squared, and can be estimated using different random-effects models. 
-
-#### back transformation is required to obtain the summary proportion. 
-
-```{r pooled proportion}
-
-pes <- predict(pes.da, 
-               transf=transf.ipft.hm,
-               targs=list(ni=dat$total_size)
-               )
-pes
-
-```
-
-Note that we have used the harmonic mean of the sample sizes as suggested by Miller et al 1978 and applying this to all the individual studies. However this can create misleading results since each study has a specific sample size which is known. Moreover, this is exacerbated when the range of sample sizes is large, which does occur in our study from 22 aneurysms in a sample to 3323 aneurysms in a sample. This anomaly can introduce additional bias and reduces the validity of the result as noted by Schwarzer 2019.
-
-To compensate for this, we can carry out the back transformation to the pooled proportion using the study-specific sample sizes. 
-
-#### create a new tibble for individual study back transformation
-
-```{r individual back transformation}
-
-dat.back <- summary(ies.da, transf = transf.ipft, ni = dat$total_size)
-view(dat.back)
-
-```
-
-
-#### display the individual and pooled proportions as a forest plot
-
-```{r simple forest after back transformation, fig.height= 10, fig.width = 10}
-
-forest(dat.back$yi, 
-       ci.lb=dat.back$ci.lb, 
-       ci.ub=dat.back$ci.ub, 
-       psize=1,
-       xlim=c(-0.5,1.8), 
-       alim=c(0,1), 
-       ylim=c(-1,32), 
-       refline=NA, 
-       digits=3L,
-       xlab="Proportion", 
-       header=c("Study", "Proportion [95% CI]")
-       )
-addpoly(pes$pred, 
-        ci.lb=pes$ci.lb, 
-        ci.ub=pes$ci.ub, 
-        row=-0.5, 
-        digits=3,
-        mlab="RE Model", 
-        efac=1.3
-        ) 
-abline(h=0.5)
-
-```
-
-
-### Utilise metaprop function from meta
-
-The metaprop function from meta in R can be used to caclulate an overall proportion from studies reporting a single proportion. Pooling methods are the inverse variance and generalised linear mixed models (GLMM).
-
-Our options are to pool untransformed proportions or pool transformed proportions according to logit or DA methods. 
-
-As we have noted, the choice of meta-analytic method is controversial, and has to be customised to the data at hand. Some authors suggest utilisation of the DA method and inverse variance for study weighting, while others suggest utilisation of GLMMs with logit transformation. 
-
-We will choose initially explore the DA method with inverse variance study weighing as we have done previously, but this time utilise the metaprop function from meta. This should yeild the same result as performing each individual step in metafor. 
-
-We will utilise this opportunity to explore different types of confidence intervals, starting with the normal approximation.  
+  
 
 #### Meta-analysis of proportions using inverse variance DL method and Normal approximimation method for CIs
 
