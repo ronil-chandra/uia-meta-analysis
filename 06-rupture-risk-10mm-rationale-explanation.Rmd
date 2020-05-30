@@ -168,136 +168,16 @@ We will choose the Wilson method for CI for the following reasons:
 
 This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *Newcombe 1998* and *Brown 2001*. 
 
+
+## Meta-analysis of proportions using GLMM and Wilson CIs
   
-
-#### Meta-analysis of proportions using inverse variance DL method and Normal approximimation method for CIs
-
-```{r meta-analysis of proportions with DL and NAsm method for CIs}
-
-pes.summary.nasm = metaprop(rupt, total_size, data=dat, 
-                            studlab=paste(auth_year),
-                            sm = "PFT", 
-                            method.tau = "DL",
-                            method.ci = "NAsm",
-                            pscale = 1
-                            ) 
-pes.summary.nasm
-
-
-
-```
-
-Note that we have achieved the same result ie 0.0115 with 95% CI 0.0064 to 0.0177, since we have specified the Freeman-Tukey double arcine transformation, inverse variance method for pooling the data, and normal approximation Wald confidence interval. Utilising the metaprop function is more efficient, and allows us to explore the impact of the different confidence interval methods. 
-
-We will now examine the normal approximation Wald interval, to the exact Clopper-Pearson CI, and the Wilson CI in the following examples. 
-
-#### Meta-analysis of proportions using inverse variance DL method and CP method for CIs
-
-```{r meta-analysis of proportions with DL and CP method for CIs}
-
-pes.summary.cp = metaprop(rupt, total_size, 
-                          data=dat, 
-                          studlab=paste(auth_year),
-                          sm = "PFT", 
-                          method.tau = "DL",
-                          method.ci = "CP",
-                          pscale = 1
-                          ) 
-pes.summary.cp
-
-```
-
-#### Meta-analysis of proportions using inverse variance DL method and Wilson score interval method for CIs
-
-
-```{r meta-analysis of proportions with DL and Wilson method for CIs}
-
-pes.summary.wilson = metaprop(rupt, total_size,
-                              data=dat, 
-                              studlab=paste(auth_year),
-                              sm = "PFT", 
-                              method.tau = "DL",
-                              method.ci = "WS",
-                              pscale = 1
-                              ) 
-pes.summary.wilson
-
-```
-
-When reviewing the results above, the CIs in each of the individual studies varies according to the method of CI chosen. The pooled proportion CI is notably the same in all the examples above. 
-
-**how do we confirm that the pooled proportion is calculated according to the specified methodology?**
-
-Use of the CI is important, since CIs convey information about magnitude and precision of effect. The choice of the CI is important, since each of them have limitations, and thus choice of the CI should be tailed to the dataset that is present. Options include:
-
-* Wald method or Normal Approximation
-  + this produces CIs that are often centred on the point estimate
-  + thus they are not often suitable with proportions close to the boundaries of 0 and 1, since this method can create CIs that are below 0 and above 1.
-  + for proportions that are often 0 or close to zero, a continuity correction may be applied, but this can lead to additional overshoot
-  
-* Clopper-Pearson or Exact method
-  + Most commonly used, and recommended to avoid approximation by most statistical textbooks. 
-  + Called exact because it is based directly on the binomial distribution and not an approximation. 
-  + Output is usually conservative, and the true coverage is almost always larger than the derived coverage ie closer to a 99% CI than a 95% CI. 
-  + The derived 95% CI does not accurately reflect the true 95% CI unless n is quite large *Agresti 2008*. 
-  + When n is small eg 10, there is severe overcoverage (closer to 99% coverage) with the true CI much larger than the derived 95% CI. 
-  + Even when n is large, the derived 95% CI does not accurately reflect the true 95% CI when p is near 0 because the binomial distribution is highly skewed. *Agresti 1998* 
-  + Needs a very large number of n to be accurate *Brown 2001*
-
-* Wilson method
-  + Is suggested for small n ie 40 or less and/or extreme probabilities *Brown 2001*
-  + The derived CI more accurately reflects the true CI with less variability compared to CP method *Agresti 1998* 
-  + For small n, the Wilson CI’s are shorter and a more accurate derivation than the CP CI’s *Vollset 1993*
-  + Can be used and is recommended for all sample sizes *Newcombe 1998* 
-
-Note the differences in the CIs above between the CP and Wilson method, particulary on the lower boundary. Given the statistical considerations in choosing the Wilson method, overcoverage using the CP method is confirmed. 
-
-We will choose the Wilson method for CI for the following reasons:
-
-* Rupture of an aneurysm is a rare event with the proportion p very close to zero 
-* The distribution of the outcomes is highly skewed towards zero
-* There is a wide range of sample sizes, with very small studies and very large studies included
-* More accurate CIs are likely given the highly skewed and sparse dataset. 
-
-This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *Newcombe 1998* and *Brown 2001*. 
-
-#### A simple forest plot with inverse variance DL and Wilson method for CIs
-
-```{r simple forest with DL and Wilson method for CIs, fig.height= 10, fig.width = 10}
-
-forest(pes.summary.wilson,
-       xlim=c(0,10),
-       pscale = 100,
-       digits = 4
-       )
-
-```
-
-### Using generalised linear mixed methods models (GLMMs).
-
-Classical meta-analytic methods use the inverse method as discussed above. For dichotomous outcomes such as survival, or aneurysm rupture, there are 4 commonly used methods. Mantel-Haenszel, Peto and inverse variance can be used for fixed methods meta-analysis, and the DerSimonian and Laird (DL) inverse variance for random effects meta-analysis. 
-
-In most cases, the random effects meta-analyis is appropriate, and thus the DL method is very commonly used. The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when dealing with sparse data, the event rate or proportion may be 0. In this case, the variances become undefined.
-
-Transformations are utilised to improve the statistical properties. Single proportions have binomial structure can be transformed using logit, arcine or DA methods. These are then backtransformed to the original scale. 
-
-Limitations of the logit transformation, and utilisation of the Freeman Tukey double arcine methods to overcome this have been discussed. However, back transformations utilsing the harmonic mean affect the backtransformed proportions as described by Schwarzer 2019. This issue does affect our dataset since n in the studies varies from 22 to over 3323. 
-
-To overcome this statistical limitation, we can utilise a generalised linear mixed methods model such as the random intercept logistic regression model as recommended by Stinjen 2010. Although this does utilise a logit transformation, the GLMM takes into account the binomial structure of the data. *Stinjen 2010* 
-
-Our rationale for choice of a GLMM is based on the following:
-
-* The distribution is binomial
-* The outcome is very rare, with proportions less than 0.05 is almost all studies
-* The sample populations range from 22 to 3323
-* Additional calculations to consider a covariate ie prior exposure to subarachnoid haemorrhage, can be performed using a noncentral hypergeometric model.  
-
 
 ```{r meta-analysis of proportions using glmm}
 
 pes.summary.glmm = metaprop(rupt, total_size,
                             data=dat,
                             studlab=paste(auth_year),
+                            method="GLMM",
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
@@ -307,14 +187,14 @@ pes.summary.glmm
 
 ```
 
-Note that the GLMM ie a random intercept logistic regression model is the default method for the logit transformation. Also the the maximum-likelihood method is utilized for GLMMs.
 
-Compare the output from the random effects meta-analysis using the inverse variance DL method
+The output from the random effects meta-analysis using the GLMM: 
 
-inverse variance DL: estimate is 1.15 with 95% CI 0.64 to 1.8
-using the GLMM: estimate is 1.22 with 95% CI 0.77 to 1.92
+Summary estimate is 1.22 with 95% CI 0.77 to 1.92
 
-Given our rationale for choosing the GLMM, this produces the least biased results and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010. Note CIs are using Wilson score method
+Note that for GLMMs no continuity correction is used. **Meta documentation** Given our rationale for choosing the GLMM, this should produce the least biased result and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010. Note CIs are using Wilson score method.
+
+Remember that the confidence interval from this random-effects meta-analysis describes uncertainty in the location of average proportion across the individual studies. Thus there is likely to be an even higher degree of uncertainty in the true population rupture risk. **Cochrane handbook 10.10.4.2**
 
 #### Display GLMM result using a simple forest plot
 
@@ -354,7 +234,7 @@ forest(pes.summary.glmm,
 
 ### Assess and quantify heterogeniety 
 
-This is required to assess whether the pooled proportion provides an accurate summary of the finding of interest. If there is high heterogeneity then interpretation of the data synthesis should be taken with caution. 
+This is required to assess whether the pooled proportion provides an accurate summary of the finding of interest. If there is high heterogeneity then interpretation of the data synthesis should be taken with caution, and the conclusions may not be generalisable. 
 
 Heterogeniety arises from both between-study and within-study variance. 
 
@@ -377,6 +257,21 @@ Here we can see that tau-squared = 0.9098. This is the estimated amount of total
 I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively. Here we can see that the between-study heterogeniety is high. 
 
 The next measure is the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. Here we can see that the Q-statistic is < 0.0001 which also confirms high between-study heterogeniety. 
+
+### How to consider and address heterogeneity 
+
+There are various strategies to consider and adddress heterogeneity. 
+
+If there is considerable heterogeniety, the pooled result may be misleading. A systematic review does not need to contain a meta-analysis particularly if there are considerable inconsistencies and variations in the results. 
+
+Explore the sources of the heterogeneity by conducting subgroup analysis or meta-regression. Reliable conclusions can only be obtained if these subgroup analysis were pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating. 
+
+Perform sensitivity analysis by excluding outlier studies that contribute to heterogeneity. Removing any study on the basis of their result may introduce bias, however, if there is an obvious reason for the outlying result the study can be removed with confidence. 
+
+
+
+
+
 
 
 #### Baujat plots to visually assess which studies contribute most to heterogeniety
