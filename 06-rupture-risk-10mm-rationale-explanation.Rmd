@@ -264,9 +264,51 @@ There are various strategies to consider and adddress heterogeneity.
 
 If there is considerable heterogeniety, the pooled result may be misleading. A systematic review does not need to contain a meta-analysis particularly if there are considerable inconsistencies and variations in the results. 
 
-Explore the sources of the heterogeneity by conducting subgroup analysis or meta-regression. Reliable conclusions can only be obtained if these subgroup analysis were pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating. 
+Explore the sources of the heterogeneity by looking for effect modifiers. This is where the outcome varies in different population or intervention characteristics. This can be explored by using subgroup analysis or meta-regression. Reliable conclusions can only be obtained if these additional analysis were pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating. 
 
 Perform sensitivity analysis by excluding outlier studies that contribute to heterogeneity. Removing any study on the basis of their result may introduce bias, however, if there is an obvious reason for the outlying result the study can be removed with confidence. 
+
+## Subgroup analysis using meta-regression
+
+Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data have been pooled. Regardless subgroup anlysis are non-randomized and observational in nature, and can lead to misleading conclusions. 
+
+Meta-regression is a method of subgroup analyses that allows the effects of multiple continuous and categorical variables to be investigated simultaneously. This generallly utilises a random effect model to conduct the analysis in each subgroup, and then consider additional statistical testing to compare the pooled results across the subgroups.  Meta-regression should generally not be considered when there are less than ten studies in a meta-analysis.
+
+The meta-regression cooeffient obtained describes how the outcome changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. **Cochrane 10.11.4**
+
+To reduce the risk of false positives, and to ensure that there are adequate studies to consider meta-regression, only 3 potential effect modifiers are chosen, based on clinical hypotheses, supported by previously published data, and that are unlikely to be co-linear. In our case, potential effect modifiers to consider include:
+
+1. Size of the unruptured aneurysm
+2. Exposure to prior subarachnoid haemorrhage
+3. Length of follow up
+
+Regardless, the outcomes of the subgroup comparisons using meta-regression are entirely observational, susceptible to confounding bias from other study level characteristics, and the level of statistical significance of the results within subgroups cannot be compared. 
+
+## Sensitivity analysis 
+
+Sensitivity analysis is used to assess the robustness of the result, and helps strengthed or weaken the conclusions that can be drawn from the meta-analysis.
+
+If sensitivity analyses show that the overall result and conclusions are not affected by the different decisions that could be made during the review process, the results of the review can be regarded with a higher degree of certainty. 
+
+Similarly, if sensitivity analyses show that the overall result and conclusions are affected, the results should be interpreted with caution, and can be used to generate hypothesis for additional research. 
+
+Sensitivity analysis differs from subgroup analysis in that there is no assessment of the treatment effect in the removed studies, nor is there formal statistical assessment across the included and excluded studies. Instead, there is an informal comparison by recalculating the pooled effect size. Rather than produce multiple new forest plots, a summary table can be produced that includes the results of the sensitivity analysis. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
