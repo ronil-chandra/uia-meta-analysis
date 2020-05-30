@@ -496,8 +496,6 @@ forest(pes.summary.glmm3,
 
 ```
 
-
-
 ## Subgroup analysis using meta-regression to identify effect modifiers
 
 Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data have been pooled. Regardless subgroup anlysis are non-randomized and observational in nature, and can lead to misleading conclusions. Nonetheless, we have performed sub-group meta-analysis above to consider rupture proptions above which is an alternate to meta-regression.  
@@ -527,28 +525,6 @@ Similarly, if sensitivity analyses show that the overall result and conclusions 
 
 Sensitivity analysis differs from subgroup analysis in that there is no assessment of the treatment effect in the removed studies, nor is there formal statistical assessment across the included and excluded studies. Instead, there is an informal comparison by recalculating the pooled effect size. Rather than produce multiple new forest plots, a summary table can be produced that includes the results of the sensitivity analysis. 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### Baujat plots to visually assess which studies contribute most to heterogeniety
 
 These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. *Baujat 2002* 
@@ -559,7 +535,7 @@ baujat(pes.summary.glmm)
 
 ```
 
-This shows that study 12 ie Juvela et al, is the major source of between study heterogeneity. 
+This shows that Juvela et al is the major source of between study heterogeneity. 
 
 We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity.
 
@@ -581,7 +557,12 @@ pes.summary.glmm.juvela
 
 This exploratory analaysis demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic. 
 
-The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
+The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. 
+
+Including Juvela - 1.2198 (0.7739; 1.9177)
+Excluding Juvela - 1.2849 (0.9547; 1.7274)
+
+Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
 
 #### Rerun forest plots excluing Juvela which is the study that adds the most to heterogeniety for a sensitivity analysis
 
@@ -609,7 +590,7 @@ This visually displays the exploratory analaysis which demonstrates greater homo
 The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
 
 
-#### Rerun Baujat plots excluing Juvela to visually assess which studies contribute most to heterogeniety
+#### Rerun Baujat plots excluing Juvela
 
 ```{r baujat plot minus Juvela}
 
@@ -635,13 +616,15 @@ Overall, there seems to be an acceptable level of heterogeniety given the sample
 
 ### Assess for publication bias
 
-## Funnel plots 
+## Funnel plots  - exploratory 
 
 Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies which are not published are not identified and not integrated into the meta-analysis. This leads to publication bias meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not published. 
 
 In addition, large studies are more likely to get published regardless of the effect size. Small studies are at the greatest risk, since they are only generally published if there is a large effect size. 
 
-Thus when assessing for publication bias, conventional assessment is focused on identifying whether small studies with small effect sizes are missing or not. This can be performed using a funnel plot. 
+Thus when assessing for publication bias, conventional assessment is focused on identifying whether small studies with small effect sizes are missing or not. 
+
+This can be performed using a funnel plot, however, we will later discuss why a funnel plot analysis may not be required. 
 
 ```{r funnel plots}
 
@@ -660,14 +643,11 @@ funnel(pes.summary.glmm,
 
 ```
 
-```{r funnel plots without juvela}
+There are many possible sources of funnel plot assymetry - selection bias from publication and selective outcome reporting bias, poor methodological quality leading to spuriously elevated effecs in small studies, true heterogeniety, statistical modeling artefacts and chance. 
 
-funnel(pes.summary.glmm.juvela)
+In our case, the most likely explanation for this appearance of the funnel plot is due to the outlier rupture risk in the Juvela study that contributes to true heterogeniety from true differences in rupture proportion.
 
-```
-
-
-If we re-do the funnel plot without Juvela, the plot becomes more symmetrical. 
+In general, testing for funnel plot assymetry should always be performed in the context of visual assessment, and while there are many potential statistical tests for funnel plots including Egger 1997, Harbord 2006, Peters 2006 or Rücker 2008, even Cochrane suggests that tests for funnel plot asymmetry should be used in only a minority of meta-analyses (Ioannidis 2007b).
 
 
 #### create new meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
