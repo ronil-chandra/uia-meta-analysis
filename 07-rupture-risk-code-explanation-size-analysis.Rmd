@@ -525,6 +525,19 @@ Similarly, if sensitivity analyses show that the overall result and conclusions 
 
 Sensitivity analysis differs from subgroup analysis in that there is no assessment of the treatment effect in the removed studies, nor is there formal statistical assessment across the included and excluded studies. Instead, there is an informal comparison by recalculating the pooled effect size. Rather than produce multiple new forest plots, a summary table can be produced that includes the results of the sensitivity analysis. 
 
+## Sensitivity analysis - exploratory - consider fixed vs random effects meta-analysis decision
+
+If there is heterogeniety, the random effect meta-analysis weights studies more equally. However, if there are marked small study effects, and only 1 high quality study, then this may not be reasonable. To synthesise the data, the author must make a decision whether this is appropriate. This can be done by comparing the results of the random and fixed effects meta-analysis. 
+
+```{r pes summary}
+
+pes.summary.glmm
+
+```
+
+Here the results are not clinically significant with the overall same rupture proportion of 1-2% with either method. Regardless, other sources of heterogeneity need to be explored. 
+
+
 #### Baujat plots to visually assess which studies contribute most to heterogeniety
 
 These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. *Baujat 2002* 
