@@ -650,7 +650,9 @@ Meta-regression is a method of subgroup analyses that allows the effects of mult
 
 The meta-regression cooeffient obtained describes how the outcome changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. **Cochrane 10.11.4**
 
-To reduce the risk of false positives, and to ensure that there are adequate studies to consider meta-regression, the pre-specified potential effect modifier of exposure to prior subarachnoid haemorrhage is chosen, based on clinical hypotheses, supported by previously published data. In our case, other potential effect modifiers that are of interest include:
+To reduce the risk of false positives, and to ensure that there are adequate studies to consider meta-regression, the pre-specified potential effect modifier of exposure to prior subarachnoid haemorrhage is chosen, based on clinical hypotheses, supported by previously published data. 
+
+In our case, other potential effect modifiers that are of interest include:
 
 1. Exposure to prior subarachnoid haemorrhage
 2. Size of the unruptured aneurysm
@@ -658,7 +660,7 @@ To reduce the risk of false positives, and to ensure that there are adequate stu
 
 Regardless, the outcomes of the subgroup comparisons using meta-regression are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since study-level data is used to make inferences and not patient level data. 
 
-
+To explore exposure to prior subarachnoid haemorrhage, we can create a new meta-anlysis of rupture proportions in patients with and without subarachnoid haemorrhage. 
 
 
 #### create new meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
@@ -697,6 +699,36 @@ dat.psah <- sizedata %>%
 view(dat.psah)
 
 ```
+
+
+
+
+
+```{r restructure to 2 x 2 table for PSAH}
+
+view(sizedata)
+dat.psah <- sizedata %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai.psah = rupt_psah) %>%
+  mutate(ci.psah = rupt - ai.psah) %>%
+  mutate(bi.temp.psah = psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_anr) %>%
+  mutate(total_anr_psah = coalesce(bi.temp.psah,num_anr_psah)) %>%
+  mutate(bi.psah = total_anr_psah - ai.psah) %>%
+  mutate(n2i.psah = total_anr - psah) %>%
+  mutate(di.psah = n2i.psah - ci.psah) %>%
+  mutate(n1i.psah = ai.psah + bi.psah) %>%
+  select(auth_year, ai.psah, bi.psah, ci.psah, di.psah, n1i.psah, n2i.psah) %>%
+  drop_na(ai.psah, bi.psah, ci.psah, di.psah) %>%
+  mutate_if(is.numeric, round, 0)
+view(dat.psah)
+
+```
+
+
 
 run new GLMM (random intercept logistic regression model) for patients with prior history of subaarachnoid haemorrhage. Studies that did not include any patients with prior history of subarachnoid haemorrage are excluded. 
 
