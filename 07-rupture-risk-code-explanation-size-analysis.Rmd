@@ -1078,12 +1078,13 @@ forest(pes.summary.glmmlong,
 
 ```
 
+Overall, this result in the long term follow up seems to be driven by patients with prior history of SAH and long term follow up. Explore this by examining only patients with prior SAH and long term follow up. 
 
-
-```{r restructure to 2 x 2 table for PSAH}
+```{r restructure to 2 x 2 table for PSAH and long term follow up}
 
 view(sizedata)
-dat.psah <- sizedata %>%
+dat.psah.fu <- sizedata %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(total_anr = coalesce(num_anr,num)) %>%
   drop_na(total_anr) %>%
@@ -1097,19 +1098,46 @@ dat.psah <- sizedata %>%
   mutate(n2i = total_anr - n1i) %>%
   mutate(bi = n1i - ai) %>%
   mutate(di = n2i - ci) %>%
-  select(auth_year, ai, bi, ci, di, n1i, n2i) %>%
+  select(auth_year, ai, bi, ci, di, n1i, n2i, fu) %>%
   drop_na(ai, bi, ci, di) %>%
   mutate_if(is.numeric, round, 0)
-view(dat.psah)
+view(dat.psah.fu)
+
 
 ```
 
 
+How about patients with intermediate follow up?
 
 
+```{r intermediate follow up}
+
+dat.psah.fu.int <- dat.psah.fu %>%
+  filter(fu < 60)
+view(dat.psah.fu.int)
 
 
+```
 
+How about patients with long term follow up?
+
+
+```{r}
+
+dat.psah.fu.long <- dat.psah.fu %>%
+  filter(fu > 60)
+view(dat.psah.fu.long)
+
+
+```
+
+Examine dat.psah.fu.long and review ai and ci. 
+
+ci = patients without prior history of SAH who were included in studies with greater than 5 years of follow up who susbsequently ruptured. See that only 2 patients without history of prior SAH ruptured on long term follow up. Most of the results on long term follow up are patients with prior SAH who ruptured. 
+
+This is the gap in the literature. 
+
+There is minimal data to guide clinicians on the risk of rupture associated with conservative management of an incidental aneurysm beyond 5 years of follow up. 
 
 
 
