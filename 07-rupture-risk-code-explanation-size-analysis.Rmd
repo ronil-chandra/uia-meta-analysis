@@ -779,10 +779,10 @@ This shows that when we exclude Juvela, and concentrate on prior SAH only, the r
 
 #### Display the information as forest plots including Juvela and second without Juvela
 
-```{r forest for psahpos using GLMM, fig.height= 10, fig.width = 10}
+```{r forest for psahpos using GLMM with Juvela, fig.height= 10, fig.width = 10}
 
 pdf(file='forestplot_ruptureproportionpsahpos.pdf', width=10, height=8) 
-forest(pes.summary.glmm.psahpos,
+forest(pes.summary.psahpos,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
@@ -820,7 +820,7 @@ forest(pes.summary.glmm.psahpos.juvela,
 ```{r simple forest using glmm model for summary proportion without history of PSAH  }
 
 pdf(file='forestplot_ruptureproportionpsahneg.pdf', width=10, height=8) 
-forest(pes.summary.glmm.psahneg,
+forest(pes.summary.psahneg,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
@@ -992,7 +992,7 @@ pes.summary.glmmint
 
 ## Publication quality forest plots for patients with less than 5 years of follow up
 
-```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+```{r forest for publication using GLMM less than 5 years , fig.height= 10, fig.width = 10}
 
 pdf(file='forestplot_ruptureproportionint.pdf', width=10, height=8) 
 forest(pes.summary.glmmint,
@@ -1017,7 +1017,7 @@ forest(pes.summary.glmmint,
 ## Meta-analysis of proportions for patients with 5 years or more of follow up
   
 
-```{r meta-analysis of proportions using glmm}
+```{r meta-analysis of proportions using glmm long}
 
 dat.fu.long <- dat.fu %>%
   filter(fu > 60)
@@ -1039,7 +1039,7 @@ pes.summary.glmmlong
 
 ## Publication quality forest plots for patients with 5 years or more follow up
 
-```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+```{r forest for publication using GLMM long, fig.height= 10, fig.width = 10}
 
 pdf(file='forestplot_ruptureproportionlong.pdf', width=10, height=8) 
 forest(pes.summary.glmmlong,
@@ -1101,7 +1101,7 @@ view(dat.psah.fu.int)
 How about patients with long term follow up?
 
 
-```{r}
+```{r filtered long}
 
 dat.psah.fu.long <- dat.psah.fu %>%
   filter(fu > 60)
