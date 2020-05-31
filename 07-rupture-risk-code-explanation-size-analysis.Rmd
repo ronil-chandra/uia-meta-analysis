@@ -287,7 +287,7 @@ If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie v
 
 If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
 
-```{r coalesce patients into aneurysms}
+```{r coalesce patients into aneurysms for 7 mm}
 
 dat7 <- sizedata7 %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
@@ -303,7 +303,7 @@ view(dat7)
 ## Meta-analysis of proportions of 7 mm aneurysms and less using GLMM and Wilson CIs
   
 
-```{r meta-analysis of proportions using glmm}
+```{r meta-analysis of proportions using glmm for 7mm}
 
 pes.summary.glmm7 = metaprop(rupt, total_size,
                             data=dat7,
@@ -320,7 +320,7 @@ pes.summary.glmm7
 
 ## Publication quality forest plots for 7mm and less 
 
-```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+```{r forest for publication for 7 mm using GLMM, fig.height= 10, fig.width = 10}
 
 pdf(file='forestplot_ruptureproportion7.pdf', width=10, height=8) 
 forest(pes.summary.glmm7,
@@ -353,7 +353,7 @@ If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie v
 
 If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
 
-```{r coalesce patients into aneurysms}
+```{r coalesce patients into aneurysms for 5 mm}
 
 dat5 <- sizedata5 %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
@@ -370,7 +370,7 @@ view(dat5)
 ## Meta-analysis of proportions of 5 mm aneurysms and less using GLMM and Wilson CIs
   
 
-```{r meta-analysis of proportions using glmm}
+```{r meta-analysis of proportions using glmm for 5 mm}
 
 pes.summary.glmm5 = metaprop(rupt, total_size,
                             data=dat5,
@@ -387,7 +387,7 @@ pes.summary.glmm5
 
 ## Publication quality forest plots for 5mm and less 
 
-```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+```{r forest for publication using GLMM for 5 mm, fig.height= 10, fig.width = 10}
 
 pdf(file='forestplot_ruptureproportion5.pdf', width=10, height=8) 
 forest(pes.summary.glmm5,
@@ -420,7 +420,7 @@ If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie v
 
 If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
 
-```{r coalesce patients into aneurysms}
+```{r coalesce patients into aneurysms for 3 mm}
 
 dat3 <- sizedata3 %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
@@ -436,28 +436,8 @@ view(dat3)
 ## Meta-analysis of proportions of 3 mm aneurysms and less using GLMM and Wilson CIs
   
 
-```{r meta-analysis of proportions using glmm}
 
-pes.summary.glmm3 = metaprop(rupt, total_size,
-                            data=dat3,
-                            studlab=paste(auth_year),
-                            method="GLMM",
-                            control=list(maxiter=1000),
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            ) 
-pes.summary.glmm3
-
-```
-
-Note that the Fisher scoring algorith fails to converge to calculate the tau2 using the maximum-likelihood estimator after the default 100 iterations; this also fails after attempting 1000 iterations. This can be corrected by adjusting reducing the step length, and the model converges. 
-
-Another option to consider is usting a penalised maximum likelihood estimation using the Firth method. The penalisation allows for convergence to finite estimates even with very sparse data. 
-
-
-```{r meta-analysis of proportions using glmm}
+```{r meta-analysis of proportions using glmm for 3mm}
 
 pes.summary.glmm3 = metaprop(rupt, total_size,
                             data=dat3,
@@ -473,12 +453,14 @@ pes.summary.glmm3
 
 ```
 
+Note that the Fisher scoring algorith failed to converge to calculate the tau2 using the maximum-likelihood estimator after the default 100 iterations; this also fails after attempting 1000 iterations. This was be corrected by reducing the step length, and the model converges. 
 
+Another option to consider is usting a penalised maximum likelihood estimation using the Firth method. The penalisation allows for convergence to finite estimates even with very sparse data.
 
 
 ## Publication quality forest plots for 3mm and less 
 
-```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+```{r forest for publication using GLMM for 3mm, fig.height= 10, fig.width = 10}
 
 pdf(file='forestplot_ruptureproportion3.pdf', width=10, height=8) 
 forest(pes.summary.glmm3,
@@ -511,7 +493,7 @@ Sensitivity analysis differs from subgroup analysis in that there is no assessme
 
 If there is heterogeniety, the random effect meta-analysis weights studies more equally. However, if there are marked small study effects, and only 1 high quality study, then this may not be reasonable. To synthesise the data, the author must make a decision whether this is appropriate. This can be done by comparing the results of the random and fixed effects meta-analysis. 
 
-```{r pes summary}
+```{r pes summary 2}
 
 pes.summary.glmm
 
@@ -536,7 +518,7 @@ We can use these sources of heterogeniety to assess for moderating variables tha
 
 #### Re-run analysis excluding Juvela - exploratory analysis
 
-```{r exclude Juvela from total proportion}
+```{r exclude Juvela from total proportion and redo analysis}
 
 dat.juvela <- slice(dat, -12)
 pes.summary.glmm.juvela = metaprop(rupt, total_size,
@@ -667,12 +649,9 @@ To explore exposure to prior subarachnoid haemorrhage, we can create a new meta-
 
 Meta-regression allows for the exploration of study level factors that may be effect modifiers to assist with the interpretation of the results of the meta-analysis. This explores the influence of study level variables on heterogeneity. 
 
-A subgroup analysis like we have done above using size categories can be conidered a meta-regression with categorical predictors. However, meta-regression allows us to utilise both categorical and continuous data as potential predictors, and check whether they modify outcome. 
+A subgroup analysis like we have done above using size categories can be considered a meta-regression with categorical predictors. However, meta-regression allows us to utilise both categorical and continuous data as potential predictors, and check whether they modify outcome. 
 
-In our case, we can now explore the influence of study follow up duration on the rupture proportion. 
-
-
-
+In our case, we can now explore the influence of study follow up duration on the rupture proportion using additional subgroup analysis. 
 
 
 #### create new meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
@@ -898,7 +877,7 @@ Recent developments in statistical packages, including in R, make these computat
 Mete-regression can also be included easily by extending the model to include a study level covariate. 
 
 
-#### Using metafor to asess the OR for prior SAH using a GLMM
+#### Using metafor to asess the potential effect modification of prior SAH using a GLMM
 
 Structure the data in this format
 
@@ -987,7 +966,7 @@ view(dat.fu)
 
 ```
 
-Now that the column with length of follow up is created, we can perform a subgroup analyis of studies with intermediate and long term follow up. 
+Now that the column with length of follow up is created, we can perform a subgroup meta-analysis of studies with intermediate and long term follow up. 
 
 ```{r subgroup analysis with intermediate of follow up}
 
@@ -1133,11 +1112,20 @@ view(dat.psah.fu.long)
 
 Examine dat.psah.fu.long and review ai and ci. 
 
-ci = patients without prior history of SAH who were included in studies with greater than 5 years of follow up who susbsequently ruptured. See that only 2 patients without history of prior SAH ruptured on long term follow up. Most of the results on long term follow up are patients with prior SAH who ruptured. 
+ci = patients without prior history of SAH who were included in studies with greater than 5 years of follow up who susbsequently ruptured. 
+
+See that only 2 patients without history of prior SAH ruptured on long term follow up. Most of the results on long term follow up are patients with prior SAH who ruptured. 
 
 This is the gap in the literature. 
 
-There is minimal data to guide clinicians on the risk of rupture associated with conservative management of an incidental aneurysm beyond 5 years of follow up. 
+The rupture risk
+
+There is minimal data to guide clinicians on the risk of rupture associated with conservative management of an incidental aneurysm measuring 10 mm or less. The overall rupture risk associated with conservative management is more uncertain than previously considered, with minimal data to guide clinicians beyond 5 years of follow up. In addition, exploratory subgroup analysis demonstrates that the rupture risk of smaller aneurysm measuring 5 mm or less 
+
+
+beyond 5 years of follow up. The overall rupture risk for conservatively managed aneurysms is more uncertain than previously considered with up to 2% risk of rupture.   
+
+These synthesised data analyses are considered exploratory and hypothesis generating, and additional data are required. 
 
 
 
