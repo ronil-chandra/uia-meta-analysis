@@ -1119,11 +1119,63 @@ beyond 5 years of follow up. The overall rupture risk for conservatively managed
 These synthesised data analyses are considered exploratory and hypothesis generating, and additional data are required. 
 
 
+## Leave-1-out sensitivity analysis
+
+## Meta-regression to explore length of follow up on rupture outcomes
 
 
+```{r metaregression data setup}
+view(sizedata)
+dat.fu.metareg <- sizedata %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)/12) %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size, fu) %>%
+  drop_na(fu)
+view(dat.fu.metareg)
+
+```
 
 
+```{r metaanalysis pf proporations for metareg - option 1}
 
+pes.metareg = rma.glmm(xi = rupt, 
+                       ni = total_size,
+                       data=dat.fu.metareg,
+                       method="ML",
+                       measure = "PLO",
+                       mods = ~fu,
+                       ) 
+pes.metareg
+
+```
+
+
+```{r metaanalysis pf proporations for metareg - option 2}
+
+fu.metareg = metaprop(rupt, total_size,
+                      data=dat.fu.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+fu.metareg
+                      
+
+```
+
+```{r metaregression exploration}
+
+r1 <- metareg(fu.metareg, ~fu)
+
+bubble(r1, studlab=dat.fu.metareg$auth_year, xlim=c(0, 25), main="Bubble plot")
+
+
+```
 
 
 
