@@ -265,37 +265,36 @@ pes.summary.glmm
 
 ```
 
-
 I^2 = 84.4%, which is high, which means that the between study variation due to clinical and methodological variation between studies is high, and greater than that expected by random chance variation within studies. 
 
 For interest, the tau-squared = 0.9098 and the Q-statistic is < 0.0001 which also confirms high between-study heterogeniety. 
 
-### How to consider and address heterogeneity 
+### How to explore and address heterogeneity 
 
-There are various strategies to consider and adddress heterogeneity. 
+There are various strategies to explore and adddress heterogeneity. If there is considerable heterogeniety, there are 2 options. 
 
-If there is considerable heterogeniety, the pooled result may be misleading. A systematic review does not need to contain a meta-analysis particularly if there are considerable inconsistencies and variations in the results. 
+1. Avoid quantitative data synthesis and pooling studies. If clinical and methodological heterogeneity are substantial, then a quantitative data synthesis shuld not be peformed. 
 
-Explore the sources of the heterogeneity by looking for effect modifiers. This is where the outcome varies in different population or intervention characteristics. This can be explored by using subgroup analysis or meta-regression. Reliable conclusions can only be obtained if these additional analysis were pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating. 
+2. Choosing to pool the data, while exploring heterogeneity. Heterogeneity can be explored through sub-group analysis or metaregression to help identify study-level effect modifiers. This is where the outcome varies in different population or intervention characteristics. Such sub-group and metaregression analyses should be pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating.
 
-Perform sensitivity analysis by excluding outlier studies that contribute to heterogeneity. Removing any study on the basis of their result may introduce bias, however, if there is an obvious reason for the outlying result the study can be removed with confidence. 
+We shall choose to pool the data, and explore heterogeneity with the following analyses
 
-### Subgroup analysis for aneurysm sizes, categorsied as 3, 5, 7, and 10 mm and less 
+1. Prespecified sub-group analysis of rupture risk by size of aneurysm (10mm or less, 7mm and less, 5mm and less, and 3mm and less)
+2. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage. 
+3. Post hoc metagression to consider whether duration of follow up was an important source of heterogeneity. 
 
-
-## sub-group analysis based on aneurysm size 7 mm and less 
+#### sub-group analysis based on aneurysm size 7 mm and less 
 
 ```{r select 7 mm and less}
 
-sizedata7 <- filter(maindata, size == 7) %>%
-view()
+sizedata7 <- filter(maindata, size == 7) 
 
 ```
 
+Assumptions: 
 
-If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
-
-If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
 
 ```{r coalesce patients into aneurysms for 7 mm}
 
@@ -352,15 +351,14 @@ forest(pes.summary.glmm7,
 
 ```{r select 5 mm and less}
 
-sizedata5 <- filter(maindata, size == 5) %>%
-view()
+sizedata5 <- filter(maindata, size == 5) 
 
 ```
 
+Assumptions: 
 
-If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
-
-If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
 
 ```{r coalesce patients into aneurysms for 5 mm}
 
@@ -424,9 +422,11 @@ view()
 ```
 
 
-If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+Assumptions: 
 
-If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+
 
 ```{r coalesce patients into aneurysms for 3 mm}
 
