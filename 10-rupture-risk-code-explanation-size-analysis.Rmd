@@ -234,21 +234,29 @@ forest(pes.summary.glmm,
 
 ### Calculate heterogeniety across the studies 
 
-Heterogeniety commonly refers to variablity across studies. Heterogeniety can be considered in terms of 
+Heterogeniety refers to all types of variation across studies. Heterogeniety can be considered in terms of 
 
-1. Clinical heterogeneity. This refers to variablity in characteristics of patients, exposures, interventions and outcomes. 
-2. Methodological heterogeniety
+1. Clinical heterogeneity, which refers to variablity in characteristics of patients, exposures, interventions and outcomes. 
+2. Methodological heterogeneity, which refers to variablity in study designs eg randomization, blinding etc. 
+3. Statistical heterogeneity, which refers to the situation when variation across studies is greater than variation or random error within a study. 
 
+Clinical and methodolocal heterogeniety cannot be calculated. These are both subjectively evaluated by the meta-analyst. If there is substantial clinical and/or methdological heterogeneity, a quantitative synthesis should not be performed to create a pooled effect measure, and instead a qualitative systematic review performed. 
 
-This is required to assess whether the pooled proportion provides an accurate summary of the finding of interest. If there is high heterogeneity then interpretation of the data synthesis should be taken with caution, and the conclusions may not be generalisable. 
+If clinical and methodological differences are not significant, then quantative synthesis is considered appropriate. 
 
-Heterogeniety arises from both between-study and within-study variance. 
+Overall, identification of heterogeniety is critical to assist in interpreting the results of the meta-analyis. This gives the reader confidence that the effect demonstrated is generalisable. It is impossible to completely avoid heterogeneity, however clinical and methodological heterogeneity can be minimised by using strict inclusion criteria.  
 
-Between-study variance arises from differences in the baseline populations, participant characteristics, study designs and study environment. Intra-study variance arises from random sampling error.
+Statitical heterogeneity is most commonly calculated using Cochrane's Q statistic, tau-squared statistic or the Inconsistency measure I^2 statistic. 
 
-The between-study variance is calculated as the statistic tau-squared, and can be estimated.
+1. Cochrane's Q. This test performs poorly for small numbers of studies. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity.
+2. tau-squared statistic. Uncommonly reported. An estimate of the between-study variance. When tau-squared is zero this is indicative of no heterogeneity.
+3. I^2 statistic. I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively. 95% CIs can also be calculated for the I^2 statistic to demonstrate the uncertainty of the result. 
 
-This is important because the estimated amount of the between-study variance influences the weights assigned to each study and hence the overall summary effect size and the precision of the effect size. 
+We will choose the I^2 statistic for the following reasons:
+
+1. This measure is not affected by the number of studies included.
+2. The output offers a percentage that is easily interpreted
+3. This is the standard method of reporting for Cochrane reviews. 
 
 
 ```{r heterogeniety}
@@ -258,11 +266,9 @@ pes.summary.glmm
 ```
 
 
-Here we can see that tau-squared = 0.9098. This is the estimated amount of total heterogeneity. When Tau-squared is zero this is indicative of no heterogeneity.
+I^2 = 84.4%, which is high, which means that the between study variation due to clinical and methodological variation between studies is high, and greater than that expected by random chance variation within studies. 
 
-I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively. Here we can see that the between-study heterogeniety is high. 
-
-The next measure is the Q-statistic with degrees of freedom. This also assesses the ratio of observed variation that can be attributed to actual between-study variance. However the advantages of I^2 are that unlike the Q statistic, the I^2 is not sensitive to the number of studies includeed, and that CIs can also be calculated for I^2. Thus it is suggested to utilise I^2. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity. Here we can see that the Q-statistic is < 0.0001 which also confirms high between-study heterogeniety. 
+For interest, the tau-squared = 0.9098 and the Q-statistic is < 0.0001 which also confirms high between-study heterogeniety. 
 
 ### How to consider and address heterogeneity 
 
