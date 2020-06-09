@@ -383,7 +383,7 @@ view(dat5)
 
 
 
-#### Meta-analysis of proportions of 5 mm aneurysms and less using GLMM and Wilson CIs
+#### Subgroup meta-analysis of proportions of 5 mm aneurysms and less using GLMM and Wilson CIs
   
 
 ```{r meta-analysis of proportions using glmm for 5 mm}
@@ -449,7 +449,7 @@ view(dat3)
 
 
 
-#### Meta-analysis of proportions of 3 mm aneurysms and less using GLMM and Wilson CIs
+#### subgroup meta-analysis of proportions of 3 mm aneurysms and less using GLMM and Wilson CIs
   
 
 
@@ -696,7 +696,7 @@ forest(pes.summary.glmmint,
 ```
 
 
-## Meta-analysis of proportions for patients with 5 years or more of follow up
+#### Meta-analysis of proportions for patients with 5 years or more of follow up
   
 
 ```{r meta-analysis of proportions using glmm long}
@@ -719,7 +719,7 @@ pes.summary.glmmlong
 
 ```
 
-## Publication quality forest plots for patients with 5 years or more follow up
+#### Publication quality forest plots for patients with 5 years or more follow up
 
 ```{r forest for publication using GLMM long, fig.height= 10, fig.width = 10}
 
@@ -799,7 +799,7 @@ ci = patients without prior history of SAH who were included in studies with gre
 
 See that only 2 patients without history of prior SAH ruptured on long term follow up. Most of the results on long term follow up are patients with prior SAH who ruptured. 
 
-## Meta-regression to explore length of follow up on rupture outcomes
+#### Meta-regression to explore length of follow up on rupture outcomes
 
 
 ```{r metaregression data setup}
@@ -968,7 +968,7 @@ Overall, there seems to be an acceptable level of heterogeniety given the sample
 #### Sensitivity analysis - exploratory - using leave-1-out testing
 
 
-## Funnel plots  - exploratory for small study bias 
+### Funnel plots  - exploratory for small study publication bias 
 
 Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies which are not published are not identified and not integrated into the meta-analysis. This leads to publication bias meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not published. 
 
