@@ -957,8 +957,8 @@ Keeping the influence axis the same, the significant improvement in heterogeniet
 ```{r baujat plot minus Juvela rescaled}
 
 baujat(pes.summary.glmm.juvela, 
-       xlim=c(0,10), 
-       ylim=c(0,10)
+       xlim=c(0,6), 
+       ylim=c(0,6)
        )
 
 ```
