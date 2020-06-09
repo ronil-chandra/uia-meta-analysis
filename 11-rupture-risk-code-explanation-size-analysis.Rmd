@@ -1,7 +1,7 @@
 ---
-title: "10-rupture-risk-10 Rationale and Explanation"
+title: "Rupture Risk Data Analysis Rationale and Explanation"
 author: "Ronil V. Chandra"
-date: "09/06/2020"
+date: "10/06/2020"
 output: html_document
 ---
 
@@ -12,11 +12,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Objectives:
 
-My goal is to learn how to conduct a quantitative synthesis to better understand rupture of an intracranial aneurysm. I have three aims:
+My goal is to learn how to conduct a quantitative synthesis to better understand the current literature on the rupture of an intracranial aneurysm with conservative management. 
+
+After performing my systematic review, I have three aims:
 
 1. To quantitatively synthesise the data in order to calculate a summary pooled proportion.
-2. To calculate heterogeniety across the studies. 
-3. To explore the heterogeneity by considering pre-specified sub-group analysis and post hoc meteregression. 
+2. To calculate heterogeniety across the studies to help consider whether pooling is appropriate. 
+3. If pooling is appropriate, then to explore the heterogeneity by considering pre-specified sub-group analysis and post hoc meteregression. 
 
 The statistical approaches will be tailored to the source dataset and structure of the data which is characterised by the following:
 
@@ -829,6 +831,8 @@ pes.metareg
 
 ```
 
+note that in option 1, I cannot produce a bubble plot, an alternate way to examine this is by doing a meta-analyis of proportions using metaprop, and then using metareg command on the output.
+
 
 ```{r metaanalysis pf proporations for metareg - option 2}
 
@@ -841,19 +845,22 @@ fu.metareg = metaprop(rupt, total_size,
                       method.ci = "WS",
                       pscale = 100
                       )
-fu.metareg
-                      
 
 ```
 
-```{r metaregression exploration}
+```{r metaregression exploration - option 2}
 
 r1 <- metareg(fu.metareg, ~fu)
+r1
+
+```
+
+```{r metaregression - option 2 - bubble plot}
 
 bubble(r1, studlab=dat.fu.metareg$auth_year, xlim=c(0, 25), main="Bubble plot")
 
-
 ```
+
 
 ### Sensitivity analysis 
 
@@ -875,7 +882,7 @@ pes.summary.glmm
 
 ```
 
-Here the results are not clinically significant with the overall same rupture proportion of 1-2% with either method. Regardless, other sources of heterogeneity still need to be explored. 
+Here the results are not clinically significant with the overall same rupture proportion of 1-2% with either method. Moreover, in our case, a random effects meta-analysis is more appropriate due to existence of clinical and methodological heterogeneity. Regardless, other sources of heterogeneity still need to be explored. 
 
 #### Sensitivity analysis - exploratory - using Baujat plots to visually assess which studies contribute most to heterogeniety
 
@@ -916,7 +923,7 @@ Excluding Juvela - 1.2849 (0.9547; 1.7274)
 
 Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
 
-#### Rerun forest plots excluding Juvela for a sensitivity analysis for total cohort
+#### Rerun forest plots excluding Juvela for a visual display of the sensitivity analysis for total cohort
 
 
 ```{r forest for publication using GLMM without Juvela, fig.height= 10, fig.width = 10}
@@ -941,7 +948,7 @@ This visually displays the exploratory analaysis which demonstrates greater homo
 
 The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
 
-#### Rerun Baujat plots excluing Juvela
+#### Rerun Baujat plots excluing Juvela - exploratory 
 
 ```{r baujat plot minus Juvela}
 
@@ -965,10 +972,26 @@ baujat(pes.summary.glmm.juvela,
 
 Overall, there seems to be an acceptable level of heterogeniety given the samples that are available. 
 
-#### Sensitivity analysis - exploratory - using leave-1-out testing
+#### Sensitivity analysis - exploratory - leave each study out 
 
+note that traditional leave-1-out testing jn metafor does not apply to generalized linear mixed models, and thus individual studies are left out, and the summary pooled proportion re-calculated. 
 
+An example below is performed for study 1, this will be repeated for all 30 studies to assess the impact on the pooled effect size. For the interest of space for initial draft code review, this is not included below. 
 
+```{r leave 1 out sensitivity analysis - study 1}
+
+dat.1 <- slice(dat, -1)
+pes.summary.glmm.1 = metaprop(rupt, total_size,
+                            data=dat.1,
+                            studlab=paste(auth_year),
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+print(pes.summary.glmm.1)
+
+```
 
 ### Funnel plots  - exploratory for small study publication bias 
 
