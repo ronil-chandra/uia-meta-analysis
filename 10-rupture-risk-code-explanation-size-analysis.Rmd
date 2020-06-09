@@ -277,11 +277,20 @@ There are various strategies to explore and adddress heterogeneity. If there is 
 
 2. Choosing to pool the data, while exploring heterogeneity. Heterogeneity can be explored through sub-group analysis or metaregression to help identify study-level effect modifiers. This is where the outcome varies in different population or intervention characteristics. Such sub-group and metaregression analyses should be pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating.
 
+Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data have been pooled. Regardless subgroup anlysis are non-randomized and observational in nature, and can lead to misleading conclusions. Nonetheless, we will perform the sub-group meta-analysis above to explore heterogeneity and consider the limitations of the analyses.  
+
+Meta-regression allows the effects of multiple continuous and categorical variables to be investigated simultaneously, unlike subgroup analysis which considered categorical variables only. This generallly utilises a random effect model to conduct the analysis in each subgroup, and then consider additional statistical testing to compare the pooled results across the subgroups. Meta-regression should generally not be considered when there are less than ten studies in a meta-analysis. The meta-regression cooeffient obtained describes how the outcome (dependent variable) changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. **Cochrane 10.11.4**
+
 We shall choose to pool the data, and explore heterogeneity with the following analyses
 
 1. Prespecified sub-group analysis of rupture risk by size of aneurysm (10mm or less, 7mm and less, 5mm and less, and 3mm and less)
 2. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage. 
-3. Post hoc metagression to consider whether duration of follow up was an important source of heterogeneity. 
+3. Post hoc sub-group analysis of rupture risk with length of follow up categorised as intermediate (5 years or less), or long term (>5 years)
+5. Post hoc metagression to consider whether duration of follow up analyised as a continuous variable was an important source of heterogeneity. 
+
+To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one pre-specified potential effect modifier of duration of follow up is chosen, based on the clinical hypotheses that longer follow up durations may be required for rupture events to occur. 
+
+Regardless, the outcomes of the subgroup analysis ormeta-regression are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data.  
 
 #### sub-group analysis based on aneurysm size 7 mm and less 
 
@@ -309,7 +318,7 @@ view(dat7)
 
 
 
-## Meta-analysis of proportions of 7 mm aneurysms and less using GLMM and Wilson CIs
+#### Meta-analysis of proportions of 7 mm aneurysms and less using GLMM and Wilson CIs
   
 
 ```{r meta-analysis of proportions using glmm for 7mm}
@@ -327,7 +336,7 @@ pes.summary.glmm7
 
 ```
 
-## Publication quality forest plots for 7mm and less 
+#### Publication quality forest plots for 7mm and less 
 
 ```{r forest for publication for 7 mm using GLMM, fig.height= 10, fig.width = 10}
 
@@ -347,7 +356,7 @@ forest(pes.summary.glmm7,
 ```
 
 
-## sub-group analysis based on aneurysm size 5 mm and less 
+#### sub-group analysis based on aneurysm size 5 mm and less 
 
 ```{r select 5 mm and less}
 
@@ -374,7 +383,7 @@ view(dat5)
 
 
 
-## Meta-analysis of proportions of 5 mm aneurysms and less using GLMM and Wilson CIs
+#### Meta-analysis of proportions of 5 mm aneurysms and less using GLMM and Wilson CIs
   
 
 ```{r meta-analysis of proportions using glmm for 5 mm}
@@ -392,7 +401,7 @@ pes.summary.glmm5
 
 ```
 
-## Publication quality forest plots for 5mm and less 
+#### Publication quality forest plots for 5mm and less 
 
 ```{r forest for publication using GLMM for 5 mm, fig.height= 10, fig.width = 10}
 
@@ -412,12 +421,11 @@ forest(pes.summary.glmm5,
 ```
 
 
-## sub-group analysis based on aneurysm size 3 mm and less 
+#### sub-group analysis based on aneurysm size 3 mm and less 
 
 ```{r select 3 mm and less}
 
-sizedata3 <- filter(maindata, size == 3) %>%
-view()
+sizedata3 <- filter(maindata, size == 3) 
 
 ```
 
@@ -441,7 +449,7 @@ view(dat3)
 
 
 
-## Meta-analysis of proportions of 3 mm aneurysms and less using GLMM and Wilson CIs
+#### Meta-analysis of proportions of 3 mm aneurysms and less using GLMM and Wilson CIs
   
 
 
@@ -466,7 +474,7 @@ Note that the Fisher scoring algorith failed to converge to calculate the tau2 u
 Another option to consider is usting a penalised maximum likelihood estimation using the Firth method. The penalisation allows for convergence to finite estimates even with very sparse data.
 
 
-## Publication quality forest plots for 3mm and less 
+#### Publication quality forest plots for 3mm and less 
 
 ```{r forest for publication using GLMM for 3mm, fig.height= 10, fig.width = 10}
 
@@ -484,6 +492,321 @@ forest(pes.summary.glmm3,
        ) 
 
 ```
+
+
+#### Sub-group meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
+
+Firstly structure the data in individual studies with authors in a 2 x 2 table
+
+ai = prior SAH and rupture +ve = variable rupt_psah
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve = rupt minus rupt_psah
+di = no prior SAH, and rupture -ve 
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+n1i + n2i = total_anr included with and without prior SAH
+
+total number of events = total number of ruptures = variable rupt
+
+assumptions:
+if number of aneurysms in the size criteria are not reported, number of patients are carried forward, assuming 1 patient has 1 aneurysm. 
+If the number of patients with prior is SAH is known, this is utilised as n1i. 
+ 
+If the patients of patients with prior is SAH is unknown, then the proportion of patients with prior SAH in the total observation cohort of all aneurysms is carried forward and applied to the number of aneurysms, and an estimated number of patients with prior SAH calculated based on the total observation cohort. 
+
+Data analysis is limited to studies in which there are known values of ai, bi, ci, and di. If there are NAs in the 2 x 2 table, then that study is excluded. 
+
+```{r restructure to 2 x 2 table for PSAH}
+
+dat.psah <- sizedata %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai = rupt_psah) %>%
+  rename(rupt.total = rupt) %>%
+  mutate(ci = rupt.total - ai) %>%
+  rename(n1i.temp = psah) %>%
+  mutate(prop = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop * total_anr) %>%
+  mutate(n1i = coalesce(n1i.temp,num_anr_psah)) %>%
+  mutate(n2i = total_anr - n1i) %>%
+  mutate(bi = n1i - ai) %>%
+  mutate(di = n2i - ci) %>%
+  select(auth_year, ai, bi, ci, di, n1i, n2i) %>%
+  drop_na(ai, bi, ci, di) %>%
+  mutate_if(is.numeric, round, 0)
+view(dat.psah)
+
+```
+
+then create new tibble for patients with and without history of prior subarachnoid haemorrhage. 
+
+```{r new tibbles for psah postive and psah negative }
+
+dat.psahpos <- dat.psah %>%
+  filter(n1i!=0) 
+view(dat.psahpos)
+
+dat.psahneg <- dat.psah %>%
+  filter(n2i!=0) 
+view(dat.psahneg)
+
+```
+
+
+run new GLMM (random intercept logistic regression model) for patients with prior history of subaarachnoid haemorrhage. Studies that did not include any patients with prior history of subarachnoid haemorrage are excluded. 
+
+```{r glmm for summary proportion with history of PSAH}
+
+pes.summary.psahpos = metaprop(ai, n1i,
+                            data=dat.psahpos,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.psahpos
+```
+
+Then run new GLMM (random intercept logistic regression model) for patients without history of PSAH
+
+
+```{r glmm for summary proportion without history of prior SAH}
+
+pes.summary.psahneg = metaprop(ci, n2i,
+                            data=dat.psahneg,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.psahneg
+
+```
+
+This exploratory subgroup analysis does show different risk of rupture for patients with and without prior SAH for aneurysms <10 mm. 
+
+#### Display the information as forest plots for patients with prior exposure to subarachnoid haemorrhage
+
+```{r forest for psahpos using GLMM with Juvela, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.psahpos,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,30),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
+#### Display the information as forest plots for patients without prior exposure to subarachnoid haemorrhage
+
+
+
+```{r simple forest using glmm model for summary proportion without history of PSAH, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.psahneg,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+
+```
+
+
+### Subgroup analyis for length of follow up
+
+Overall, the proportion of patients that rupture may be associated with the length of follow up in the study. 
+
+This exploratory analysis considers the proportion of ruptures that occur in studies with intermediate length of follow up defined as 5 years or less, and long term follow up defined as more than 5 years. 
+
+```{r create new column with length of follow up}
+
+view(sizedata)
+dat.fu <- sizedata %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size, fu) 
+view(dat.fu)
+
+```
+
+Now that the column with length of follow up is created, we can perform a subgroup meta-analysis of studies with intermediate and long term follow up. 
+
+```{r subgroup analysis with intermediate of follow up}
+
+dat.fu.int <- dat.fu %>%
+  filter(fu < 60)
+view(dat.fu.int)
+
+pes.summary.glmmint = metaprop(rupt, total_size,
+                            data=dat.fu.int,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmmint
+
+
+
+```
+
+
+## Publication quality forest plots for patients with less than 5 years of follow up
+
+```{r forest for publication using GLMM less than 5 years , fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmmint,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
+## Meta-analysis of proportions for patients with 5 years or more of follow up
+  
+
+```{r meta-analysis of proportions using glmm long}
+
+dat.fu.long <- dat.fu %>%
+  filter(fu > 60)
+view(dat.fu.long)
+
+
+pes.summary.glmmlong = metaprop(rupt, total_size,
+                            data=dat.fu.long,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmmlong
+
+```
+
+## Publication quality forest plots for patients with 5 years or more follow up
+
+```{r forest for publication using GLMM long, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmmlong,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+Note that the number of studies in the long term follow up arm are very few, and the heterogeneity is very high. Thus this will be described qualitatively, and not included for submission. 
+
+It is noted however, that the result in the long term follow up subgroup may be due to mainly patients with prior history of SAH and long term follow up. Explore this by examining only patients with prior SAH and long term follow up. 
+
+```{r restructure to 2 x 2 table for PSAH and long term follow up}
+
+view(sizedata)
+dat.psah.fu <- sizedata %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai = rupt_psah) %>%
+  rename(rupt.total = rupt) %>%
+  mutate(ci = rupt.total - ai) %>%
+  rename(n1i.temp = psah) %>%
+  mutate(prop = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop * total_anr) %>%
+  mutate(n1i = coalesce(n1i.temp,num_anr_psah)) %>%
+  mutate(n2i = total_anr - n1i) %>%
+  mutate(bi = n1i - ai) %>%
+  mutate(di = n2i - ci) %>%
+  select(auth_year, ai, bi, ci, di, n1i, n2i, fu) %>%
+  drop_na(ai, bi, ci, di) %>%
+  mutate_if(is.numeric, round, 0)
+view(dat.psah.fu)
+
+
+```
+
+
+How about patients with intermediate follow up?
+
+
+```{r intermediate follow up}
+
+dat.psah.fu.int <- dat.psah.fu %>%
+  filter(fu < 60)
+view(dat.psah.fu.int)
+
+
+```
+
+How about patients with long term follow up?
+
+
+```{r filtered long, include= TRUE}
+
+dat.psah.fu.long <- dat.psah.fu %>%
+  filter(fu > 60)
+view(dat.psah.fu.long)
+
+
+```
+
+Examine dat.psah.fu.long and review ai and ci. 
+
+ci = patients without prior history of SAH who were included in studies with greater than 5 years of follow up who susbsequently ruptured. 
+
+See that only 2 patients without history of prior SAH ruptured on long term follow up. Most of the results on long term follow up are patients with prior SAH who ruptured. 
+
+
+
+
+
+
+
 
 
 ## Sensitivity analysis 
@@ -685,7 +1008,7 @@ If the patients of patients with prior is SAH is unknown, then the proportion of
 
 Data analysis is limited to studies in which there are known values of ai, bi, ci, and di. If there are NAs in the 2 x 2 table, then that study is excluded. 
 
-```{r restructure to 2 x 2 table for PSAH}
+```{r restructure to 2 x 2 table for PSAH 2}
 
 view(sizedata)
 dat.psah <- sizedata %>%
@@ -711,7 +1034,7 @@ view(dat.psah)
 
 then create new tibble for patients with and without history of prior subarachnoid haemorrhage. 
 
-```{r new tibbles for psah postive and psah negative }
+```{r new tibbles for psah postive and psah negative 2 }
 
 dat.psahpos <- dat.psah %>%
   filter(n1i!=0) 
@@ -726,7 +1049,7 @@ view(dat.psahneg)
 
 run new GLMM (random intercept logistic regression model) for patients with prior history of subaarachnoid haemorrhage. Studies that did not include any patients with prior history of subarachnoid haemorrage are excluded. 
 
-```{r glmm for summary proportion with history of PSAH}
+```{r glmm for summary proportion with history of PSAH 2}
 
 pes.summary.psahpos = metaprop(ai, n1i,
                             data=dat.psahpos,
@@ -743,7 +1066,7 @@ pes.summary.psahpos
 Then run new GLMM (random intercept logistic regression model) for patients without history of PSAH
 
 
-```{r glmm for summary proportion without history of prior SAH}
+```{r glmm for summary proportion without history of prior SAH 2}
 
 pes.summary.psahneg = metaprop(ci, n2i,
                             data=dat.psahneg,
@@ -765,7 +1088,7 @@ This exploratory subgroup analysis does show different risk of rupture for patie
 We can also remove Juvela et al from the first analysis and re-run the summary proportion excluding Juvela. 
 
 
-```{r glmm for summary proportion with history of PSAH without Juvela}
+```{r glmm for summary proportion with history of PSAH without Juvela 2}
 
 dat.psahpos.juvela <- slice(dat.psahpos, -2)
 pes.summary.glmm.psahpos.juvela = metaprop(ai, n1i,
@@ -786,7 +1109,7 @@ This shows that when we exclude Juvela, and concentrate on prior SAH only, the r
 
 #### Display the information as forest plots including Juvela and second without Juvela
 
-```{r forest for psahpos using GLMM with Juvela, fig.height= 10, fig.width = 10}
+```{r forest for psahpos using GLMM with Juvela, fig.height= 10, fig.width = 10 2}
 
 forest(pes.summary.psahpos,
        layout = "meta",
@@ -803,7 +1126,7 @@ forest(pes.summary.psahpos,
 
 ```
 
-```{r simple forest using glmm model for summary proportion with history of PSAH without Juvela, fig.height= 10, fig.width = 10 }
+```{r simple forest using glmm model for summary proportion with history of PSAH without Juvela, fig.height= 10, fig.width = 10 2}
 
 forest(pes.summary.glmm.psahpos.juvela,
        layout = "meta",
@@ -822,7 +1145,7 @@ forest(pes.summary.glmm.psahpos.juvela,
 ```
 
 
-```{r simple forest using glmm model for summary proportion without history of PSAH, fig.height= 10, fig.width = 10}
+```{r simple forest using glmm model for summary proportion without history of PSAH, fig.height= 10, fig.width = 10 2}
 
 forest(pes.summary.psahneg,
        layout = "meta",
@@ -957,7 +1280,7 @@ These synthesised data analyses are considered exploratory and hypothesis genera
 
 Overall, the proportion of patients that rupture may be associated with the length of follow up in the study. This exploratory analysis considers the proportion of ruptures that occur in studies with intermediate length of follow up defined as 5 years or less, and long term follow up defined as more than 5 years. 
 
-```{r create new column with length of follow up}
+```{r create new column with length of follow up 2}
 
 view(sizedata)
 dat.fu <- sizedata %>%
@@ -972,7 +1295,7 @@ view(dat.fu)
 
 Now that the column with length of follow up is created, we can perform a subgroup meta-analysis of studies with intermediate and long term follow up. 
 
-```{r subgroup analysis with intermediate of follow up}
+```{r subgroup analysis with intermediate of follow up 2}
 
 dat.fu.int <- dat.fu %>%
   filter(fu < 60)
@@ -996,7 +1319,7 @@ pes.summary.glmmint
 
 ## Publication quality forest plots for patients with less than 5 years of follow up
 
-```{r forest for publication using GLMM less than 5 years , fig.height= 10, fig.width = 10}
+```{r forest for publication using GLMM less than 5 years , fig.height= 10, fig.width = 10 2}
 
 forest(pes.summary.glmmint,
        layout = "meta",
@@ -1020,7 +1343,7 @@ forest(pes.summary.glmmint,
 ## Meta-analysis of proportions for patients with 5 years or more of follow up
   
 
-```{r meta-analysis of proportions using glmm long}
+```{r meta-analysis of proportions using glmm long 2}
 
 dat.fu.long <- dat.fu %>%
   filter(fu > 60)
@@ -1042,7 +1365,7 @@ pes.summary.glmmlong
 
 ## Publication quality forest plots for patients with 5 years or more follow up
 
-```{r forest for publication using GLMM long, fig.height= 10, fig.width = 10}
+```{r forest for publication using GLMM long, fig.height= 10, fig.width = 10 2}
 
 forest(pes.summary.glmmlong,
        layout = "meta",
@@ -1061,7 +1384,7 @@ forest(pes.summary.glmmlong,
 
 Overall, this result in the long term follow up seems to be driven by patients with prior history of SAH and long term follow up. Explore this by examining only patients with prior SAH and long term follow up. 
 
-```{r restructure to 2 x 2 table for PSAH and long term follow up}
+```{r restructure to 2 x 2 table for PSAH and long term follow up 2}
 
 view(sizedata)
 dat.psah.fu <- sizedata %>%
@@ -1091,7 +1414,7 @@ view(dat.psah.fu)
 How about patients with intermediate follow up?
 
 
-```{r intermediate follow up}
+```{r intermediate follow up 2}
 
 dat.psah.fu.int <- dat.psah.fu %>%
   filter(fu < 60)
@@ -1103,7 +1426,7 @@ view(dat.psah.fu.int)
 How about patients with long term follow up?
 
 
-```{r filtered long}
+```{r filtered long 2}
 
 dat.psah.fu.long <- dat.psah.fu %>%
   filter(fu > 60)
