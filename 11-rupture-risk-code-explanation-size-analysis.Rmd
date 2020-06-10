@@ -100,23 +100,25 @@ Given unique characteristics of the data that we are synthesising listed above, 
 
 ##### Choice of meta-analytical method
 
-Classical meta-analytical methods have the potential to contribute to additional sparse data bias and give misleading results for rare events  **Bradburn 2007** from Cochrane. 
+Classical meta-analytical methods have the potential to contribute to additional sparse data bias and give misleading results for rare events *Bradburn 2007* from Cochrane. 
 
-The generic inverse variance method calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. A variation on the generic inverse variance method that produces a fixed effects meta-analyis is the DerSimonian and Laird method (DerSimonian 1986). This adjusts the standard errors of the individual effect sizes to incorporate a measure of heterogeniety. This is the most common method in medical meta-analysis. 
+The generic inverse variance method calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. A variation on the generic inverse variance method incorporates an assumption that there is some variation between studies, ie heterogeneity, while measuring the same effect. This produces a random effects meta-analysis, the most common of which is the the DerSimonian and Laird method *DerSimonian 1986*. 
 
 Regardless of the inverse variance or DL methods for data synthesis, if the individual study proportions are 0 or 1, the variance becomes undefined. In our dataset, some of the included studies have 0 ruptures and thus a proportion of 0. To overcome this issue, typically a continuity correction of 0.5 is applied. This creates risk of introducing additional sparse data bias and reducing the validity of the result, especially given that pi is close to both zero and 0.5. 
 
-To better stabilise the variance, and to normalise the distribution especially for small sample sizes or rare event rates, the double arcine transformation of Freeman-Tukey (Reference Freeman and Tukey 1950) can be used. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller (Reference Miller 1978). However, the Miller back transformation utilsing the harmonic mean does affect the backtransformed proportion as described by Schwarzer 2019. This issue is particularly evident when there is a large range of sample sizes. This issue does affect our dataset since n in the studies varies from 22 to over 3323. 
+To better stabilise the variance, and to normalise the distribution especially for small sample sizes or rare event rates, the double arcine transformation of Freeman-Tukey *Freeman and Tukey 1950* can be used. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller *Miller 1978*. However, the Miller back transformation utilsing the harmonic mean does affect the backtransformed proportion as described by *Schwarzer 2019*. This issue is particularly evident when there is a large range of sample sizes. This issue does affect our dataset since n in the studies varies from 22 to over 3323. 
 
-To overcome these statistical limitation for classical methods of pooling the individual study proportions, we can instead utilise a generalised linear mixed methods (GLMM) model such as the random intercept logistic regression model as recommended by Stinjen 2010 and Schwarzer et al. 2019. 
+To overcome these statistical limitation for classical methods of pooling the individual study proportions, we can instead utilise the random intercept logistic regression model, a type of generalised mixed model, as recommended by *Stinjen 2010* and *Schwarzer 2019*. 
 
 Our rationale for choice of a GLMM is based on the following:
 
-* The distribution for the outcome of rupture is binomial, which is taken into account by a GLMM model. 
+* The distribution for the outcome of rupture is binomial. The GLMM accounts for the binomial structure of the data and thus avoids the generic inverse variance method.
 * The outcome is very rare, with proportions less than 0.05 is almost all studies, and thus generic inverse variance and DL methods can lead to misleadong results
 * The sample populations range from 22 to 3323, which creates misleading results when utilising the Freeman-Tukey methods of transformation and backtransformation of Miller. 
+* GLMMs can be fitted using the logit transformation, and results backtransformed to the original scale, in our case a proportion.
 * Additional calculations to consider covariates can be performed using noncentral hypergeometric models. 
 
+The limitation of this statistical approach is that individual study weights utilised to pool the individual studies to create the pooled proportion will not be available. 
 
 ##### Choice of confidence interval
 
@@ -199,9 +201,12 @@ The output from the random effects meta-analysis using the GLMM:
 
 Summary estimate is 1.22 with 95% CI 0.77 to 1.92
 
-Note that for GLMMs no continuity correction is used. **Meta documentation** Given our rationale for choosing the GLMM, this should produce the least biased result and reasonable coverage probabilities for the 95% CI, as suggested by Stinjen 2010. Note CIs are using Wilson score method.
+Note that for GLMMs no continuity correction is used. *Meta documentation* Given our rationale for choosing the GLMM, this should produce the least biased result and reasonable coverage probabilities for the 95% CI, as suggested by *Stinjen 2010*. Note CIs are using Wilson score method.
 
-Remember that the confidence interval from this random-effects meta-analysis describes uncertainty in the location of average proportion across the individual studies. Thus there is likely to be an even higher degree of uncertainty in the true population rupture risk. **Cochrane handbook 10.10.4.2**
+Remember that the confidence interval from this random-effects meta-analysis describes uncertainty in the location of average proportion across the individual studies. Thus there is likely to be an even higher degree of uncertainty in the true population rupture risk. *Cochrane handbook 10.10.4.2*
+
+
+**Does the pooled proportion use the Wilson method?**
 
 
 ```{r simple forst using glmm, fig.height= 10, fig.width = 10, include= FALSE}
@@ -281,18 +286,18 @@ There are various strategies to explore and adddress heterogeneity. If there is 
 
 Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data have been pooled. Regardless subgroup anlysis are non-randomized and observational in nature, and can lead to misleading conclusions. Nonetheless, we will perform the sub-group meta-analysis above to explore heterogeneity and consider the limitations of the analyses.  
 
-Meta-regression allows the effects of multiple continuous and categorical variables to be investigated simultaneously, unlike subgroup analysis which considered categorical variables only. This generallly utilises a random effect model to conduct the analysis in each subgroup, and then consider additional statistical testing to compare the pooled results across the subgroups. Meta-regression should generally not be considered when there are less than ten studies in a meta-analysis. The meta-regression cooeffient obtained describes how the outcome (dependent variable) changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. **Cochrane 10.11.4**
+Meta-regression allows the effects of multiple continuous and categorical variables to be investigated simultaneously, unlike subgroup analysis which considered categorical variables only. This generallly utilises a random effect model to conduct the analysis in each subgroup, and then consider additional statistical testing to compare the pooled results across the subgroups. Meta-regression should generally not be considered when there are less than ten studies in a meta-analysis. The meta-regression cooeffient obtained describes how the outcome (dependent variable) changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. *Cochrane Handbook 10.11.4*
 
 We shall choose to pool the data, and explore heterogeneity with the following analyses
 
 1. Prespecified sub-group analysis of rupture risk by size of aneurysm (10mm or less, 7mm and less, 5mm and less, and 3mm and less)
 2. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage. 
 3. Post hoc sub-group analysis of rupture risk with length of follow up categorised as intermediate (5 years or less), or long term (>5 years)
-5. Post hoc metagression to consider whether duration of follow up analyised as a continuous variable was an important source of heterogeneity. 
+5. Post hoc metagression to consider whether duration of follow up analysed as a continuous variable was an important source of heterogeneity. 
 
-To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one pre-specified potential effect modifier of duration of follow up is chosen, based on the clinical hypotheses that longer follow up durations may be required for rupture events to occur. 
+To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one posthoc potential effect modifier of duration of follow up is chosen, based on the clinical hypotheses that longer follow up durations may be required for rupture events to occur. 
 
-Regardless, the outcomes of the subgroup analysis ormeta-regression are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data.  
+Regardless, the outcomes of these subgroup analysis or meta-regression analyses are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data.  
 
 #### sub-group analysis based on aneurysm size 7 mm and less 
 
@@ -557,7 +562,6 @@ view(dat.psahneg)
 
 ```
 
-
 run new GLMM (random intercept logistic regression model) for patients with prior history of subaarachnoid haemorrhage. Studies that did not include any patients with prior history of subarachnoid haemorrage are excluded. 
 
 ```{r glmm for summary proportion with history of PSAH}
@@ -572,24 +576,6 @@ pes.summary.psahpos = metaprop(ai, n1i,
                             pscale = 100
                             ) 
 pes.summary.psahpos
-```
-
-Then run new GLMM (random intercept logistic regression model) for patients without history of PSAH
-
-
-```{r glmm for summary proportion without history of prior SAH}
-
-pes.summary.psahneg = metaprop(ci, n2i,
-                            data=dat.psahneg,
-                            studlab=paste(auth_year),
-                            method="GLMM",
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            ) 
-pes.summary.psahneg
-
 ```
 
 #### Display the information as forest plots for patients with prior exposure to subarachnoid haemorrhage
@@ -608,6 +594,24 @@ forest(pes.summary.psahpos,
        xlab = "Rupture Proportion per 100",
        pooled.events = TRUE,
        ) 
+
+```
+
+Then run new GLMM (random intercept logistic regression model) for patients without history of PSAH
+
+
+```{r glmm for summary proportion without history of prior SAH}
+
+pes.summary.psahneg = metaprop(ci, n2i,
+                            data=dat.psahneg,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.psahneg
 
 ```
 
@@ -633,12 +637,13 @@ forest(pes.summary.psahneg,
 
 ```
 
+Overall, there are still high levels of heterogeneity in the results, and relatively high degrees of imprecision in the pooled risk of rupture. 
 
 ### Subgroup analyis for length of follow up
 
-Overall, the proportion of patients that rupture may be associated with the length of follow up in the study. 
+A clinical hypothesis to explore is that the proportion of patients that rupture may be associated with the length of follow up in the study. 
 
-This exploratory analysis considers the proportion of ruptures that occur in studies with intermediate length of follow up defined as 5 years or less, and long term follow up defined as more than 5 years. 
+This exploratory analysis considers the proportion of ruptures that occur in studies with intermediate length of follow up defined as 5 years or less, and long term follow up defined as more than 5 years. 5 Years is chosen as it is a relatively common measure for patient level discussions about risk vs benefit across a number of fields of medicine. 
 
 ```{r create new column with length of follow up}
 
@@ -721,6 +726,7 @@ pes.summary.glmmlong
 
 ```
 
+
 #### Publication quality forest plots for patients with 5 years or more follow up
 
 ```{r forest for publication using GLMM long, fig.height= 10, fig.width = 10}
@@ -740,7 +746,7 @@ forest(pes.summary.glmmlong,
 
 ```
 
-Note that the number of studies in the long term follow up arm are very few, and the heterogeneity is very high. Thus this will be described qualitatively, and not included for submission. 
+The data for risk of rupture beyond 5 years is extremely sparse, and quite imprecise. Pooling is not considered appropriate, and forest plots are not required. The results will be described qualitatively. 
 
 It is noted however, that the result in the long term follow up subgroup may be due to mainly patients with prior history of SAH and long term follow up. Explore this by examining only patients with prior SAH and long term follow up. 
 
@@ -770,7 +776,6 @@ view(dat.psah.fu)
 
 ```
 
-
 How about patients with intermediate follow up?
 
 
@@ -785,7 +790,6 @@ view(dat.psah.fu.int)
 
 How about patients with long term follow up?
 
-
 ```{r filtered long, include= TRUE}
 
 dat.psah.fu.long <- dat.psah.fu %>%
@@ -799,7 +803,7 @@ Examine dat.psah.fu.long and review ai and ci.
 
 ci = patients without prior history of SAH who were included in studies with greater than 5 years of follow up who susbsequently ruptured. 
 
-See that only 2 patients without history of prior SAH ruptured on long term follow up. Most of the results on long term follow up are patients with prior SAH who ruptured. 
+See that only 2 patients without history of prior SAH ruptured on long term follow up. Although the data are sparse, there is minimal extractable data on the outcomes of unruptured aneurysms beyond 5 years. 
 
 #### Meta-regression to explore length of follow up on rupture outcomes
 
@@ -862,6 +866,14 @@ bubble(r1, studlab=dat.fu.metareg$auth_year, xlim=c(0, 25), main="Bubble plot")
 ```
 
 
+**How to interpret this?**
+
+Overall, the metaregression result reveals the following
+
+ estimate 0.1654 (95% CI 0.1078 - 0.2230) p value <.0001
+ 
+ This means that for every 1-unit increase in the covariate fu, thre is a 0.17 increase in the dependent variable which is the logit transformed proportion.  The p value is significant, which rejects the null hypothesis that there is no association between the covariate fu and the dependent variable. 
+ 
 ### Sensitivity analysis 
 
 Sensitivity analysis is used to assess the robustness of the result, and helps strengthed or weaken the conclusions that can be drawn from the meta-analysis.
