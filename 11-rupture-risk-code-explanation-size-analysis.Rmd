@@ -73,7 +73,7 @@ maindata %>%
 
 ```{r glimpse new, echo=TRUE, include = FALSE}
 glimpse(maindata)
-view(maindata)
+
 ```
 
 ### Calculate individual study proportions and use meta-analytical methods to create a pooled summary proportion 
@@ -157,8 +157,7 @@ This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *New
 
 ```{r select total cohort}
 
-sizedata <- filter(maindata, size == 10) %>%
-view()
+sizedata <- filter(maindata, size == 10)
 
 ```
 
@@ -174,7 +173,6 @@ dat <- sizedata %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size)
-view(dat)
 
 ```
 
@@ -319,7 +317,6 @@ dat7 <- sizedata7 %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size)
-view(dat7)
 
 ```
 
@@ -384,7 +381,6 @@ dat5 <- sizedata5 %>%
   drop_na(rupt) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size)
-view(dat5)
 
 ```
 
@@ -450,7 +446,6 @@ dat3 <- sizedata3 %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size)
-view(dat3)
 
 ```
 
@@ -544,7 +539,6 @@ dat.psah <- sizedata %>%
   select(auth_year, ai, bi, ci, di, n1i, n2i) %>%
   drop_na(ai, bi, ci, di) %>%
   mutate_if(is.numeric, round, 0)
-view(dat.psah)
 
 ```
 
@@ -554,11 +548,9 @@ then create new tibble for patients with and without history of prior subarachno
 
 dat.psahpos <- dat.psah %>%
   filter(n1i!=0) 
-view(dat.psahpos)
 
 dat.psahneg <- dat.psah %>%
   filter(n2i!=0) 
-view(dat.psahneg)
 
 ```
 
@@ -654,7 +646,6 @@ dat.fu <- sizedata %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size, fu) 
-view(dat.fu)
 
 ```
 
@@ -710,8 +701,6 @@ forest(pes.summary.glmmint,
 
 dat.fu.long <- dat.fu %>%
   filter(fu > 60)
-view(dat.fu.long)
-
 
 pes.summary.glmmlong = metaprop(rupt, total_size,
                             data=dat.fu.long,
@@ -752,7 +741,6 @@ It is noted however, that the result in the long term follow up subgroup may be 
 
 ```{r restructure to 2 x 2 table for PSAH and long term follow up}
 
-view(sizedata)
 dat.psah.fu <- sizedata %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
@@ -771,7 +759,6 @@ dat.psah.fu <- sizedata %>%
   select(auth_year, ai, bi, ci, di, n1i, n2i, fu) %>%
   drop_na(ai, bi, ci, di) %>%
   mutate_if(is.numeric, round, 0)
-view(dat.psah.fu)
 
 
 ```
@@ -783,7 +770,6 @@ How about patients with intermediate follow up?
 
 dat.psah.fu.int <- dat.psah.fu %>%
   filter(fu < 60)
-view(dat.psah.fu.int)
 
 
 ```
@@ -794,8 +780,6 @@ How about patients with long term follow up?
 
 dat.psah.fu.long <- dat.psah.fu %>%
   filter(fu > 60)
-view(dat.psah.fu.long)
-
 
 ```
 
@@ -809,7 +793,7 @@ See that only 2 patients without history of prior SAH ruptured on long term foll
 
 
 ```{r metaregression data setup}
-view(sizedata)
+
 dat.fu.metareg <- sizedata %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)/12) %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
@@ -817,7 +801,6 @@ dat.fu.metareg <- sizedata %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size, fu) %>%
   drop_na(fu)
-view(dat.fu.metareg)
 
 ```
 
@@ -1100,13 +1083,6 @@ Assumptions
 For num_anr is not known, then num (of patients) is brought forward assuming 1 patient has 1 aneurysm.
 
 For aneurysms in size cohort with prior SAH, this is estimated by using same proportion of patients with prior SAH in the total observed cohort, and applying this to the number of aneurysms in that specific size cohort. 
-
-
-```{r structure data for OR estimate for prior SAH}
-
-view(dat.psah)
-
-```
 
 Use the rma function from metafor to meta-analyse log odds ratio using conditional logistic regression model with random effects meta-analysis. The conditional generalized linear mixed-effects model with exact likelihood (model="CM.EL") avoids having to model study level variability by conditioning on the total numbers of cases/events in each study. For the odds ratio, this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a mixed-effects conditional logistic model.
 
