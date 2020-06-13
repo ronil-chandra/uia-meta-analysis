@@ -195,6 +195,8 @@ tab1 <- sizedata %>%
 
 sizedata_ht <- as_hux(sizedata)
 
+width(sizedata_ht) <- 0.4
+
 sizedata_ht <- sizedata_ht %>%
   select(auth, pub, country, type, num_anr, rupt, rupt_psah, fu, nos_total) %>%
   arrange(auth) %>%
