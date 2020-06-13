@@ -1,0 +1,47 @@
+---
+title: "01-Tables"
+author: "Ronil V. Chandra"
+date: "13/06/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Load packages
+
+```{r load packages, echo = FALSE, include = FALSE}
+
+library(tidyverse)
+library(huxtable)
+
+```
+
+#### Load required data
+
+A single excel data file is loaded to carry out all data table creation, with all steps documented below to ensure reproducibility of research.
+
+```{r load data, echo = FALSE, include = FALSE}
+
+maindata <- read_csv("data/maindata.csv")
+```
+
+
+
+
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
