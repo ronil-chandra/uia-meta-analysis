@@ -196,16 +196,19 @@ tab1 <- sizedata %>%
 sizedata_ht <- as_hux(sizedata)
 
 sizedata_ht <- sizedata_ht %>%
-  select(auth, pub, country, type, num_tot) %>%
+  select(auth, pub, country, type, num_anr, rupt, rupt_psah, fu, nos_total) %>%
   arrange(auth) %>%
-  rename("Author" = auth, "Publication Year" = pub, "Country" = country, "Study Type" = type, "Number of Aneurysms" = num_tot) %>%
+  rename("Author" = auth, "Publication Year" = pub, "Country" = country, "Study Type" = type, "Number of Aneurysms" = num_anr, "Number of Ruptured Aneurysms" = rupt, "Number of Ruptured Aneursysms with Prior SAH" = rupt_psah, "Follow up" = fu, "Newcastle-Ottowa Score" = nos_total) %>%
   huxtable::add_colnames() %>%
+  set_number_format(0) %>%
+  set_align(1:4, 2, 'right') %>%
   set_caption("Characteristics of included studies") %>%
   set_caption_pos("topleft") %>%
   theme_article() %>%
   add_footnote("*All aneurysms measuring 10 mm and less")
 
 sizedata_ht
+
 ```
 
 
