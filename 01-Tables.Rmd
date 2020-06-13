@@ -14,8 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load packages, echo = FALSE, include = FALSE}
 
 library(tidyverse)
-library(huxtable)
-
+library(kableExtra)
 ```
 
 #### Load required data
@@ -28,20 +27,52 @@ maindata <- read_csv("data/maindata.csv")
 ```
 
 
+### Analyse total cohort of all aneurysms 10 mm and less 
 
+```{r select total cohort}
 
+sizedata <- filter(maindata, size == 10)
 
-
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
+Assumptions: 
 
-You can also embed plots, for example:
+1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
+2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r coalesce patients into aneurysms}
+
+dat <- sizedata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Display all included information for all aneurysms 10 mm and less 
+### Display all included information for all aneurysms 10 mm and less - option 2 = Kable and Kable Extra. 
+
+
+```{r, results = 'asis'}
+
+sizedata %>%
+  select(auth, pub, country, type, num_tot) %>%
+  knitr::kable(
+    caption = "Table 1: Baseline Study Characteristics",
+    col.names = c("Author", "Publication Year", "Population", "Study Type", "Number of aneurysms"),
+    align = c("l", "c", "c", "c", "c"),
+    longtable=TRUE,
+    digits = 1) %>%
+  kableExtra::kable_styling(full_width = FALSE) %>%
+  footnote(
+    general_title = "Footnote:",
+    general = "Standard deviations are presented in parentheses,Standard deviations are presented in parenthesesStandard deviations are presented in parenthesesStandard deviations are presented in parenthesesStandard deviations are presented in parentheses",
+    threeparttable=TRUE,
+    )
+
+
+```
+
+
+
