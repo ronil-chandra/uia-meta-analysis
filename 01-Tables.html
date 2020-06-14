@@ -407,16 +407,6 @@ summary {
 <div id="analyse-total-cohort-of-all-aneurysms-10-mm-and-less" class="section level3">
 <h3>Analyse total cohort of all aneurysms 10 mm and less</h3>
 <pre class="r"><code>sizedata &lt;- filter(maindata, size == 10)</code></pre>
-<p>Assumptions:</p>
-<ol style="list-style-type: decimal">
-<li>If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size.</li>
-<li>If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is <strong>not</strong> carried forward.</li>
-</ol>
-<pre class="r"><code>dat &lt;- sizedata %&gt;%
-  mutate(total_size = coalesce(num_anr,num)) %&gt;%
-  drop_na(total_size) %&gt;% 
-  unite(auth_year, c(auth, pub), sep = &quot; &quot;, remove = FALSE) %&gt;%
-  select(auth_year, rupt, total_size)</code></pre>
 </div>
 <div id="display-all-included-information-for-all-aneurysms-10-mm-and-less" class="section level3">
 <h3>Display all included information for all aneurysms 10 mm and less</h3>
@@ -424,21 +414,24 @@ summary {
 <div id="display-all-included-information-for-all-aneurysms-10-mm-and-less---option-2-kable-and-kable-extra." class="section level3">
 <h3>Display all included information for all aneurysms 10 mm and less - option 2 = Kable and Kable Extra.</h3>
 <pre class="r"><code>sizedata %&gt;%
-  select(auth, pub, country, type, num_tot) %&gt;%
+  select(auth, pub, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah) %&gt;%
   knitr::kable(
     caption = &quot;Table 1: Baseline Study Characteristics&quot;,
-    col.names = c(&quot;Author&quot;, &quot;Publication Year&quot;, &quot;Population&quot;, &quot;Study Type&quot;, &quot;Number of aneurysms&quot;),
-    align = c(&quot;l&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;),
+    col.names = c(&quot;Author&quot;, &quot;Publication Year&quot;, &quot;Study Year Start&quot;, &quot;Study Year End&quot;, &quot;Source Population&quot;, &quot;Study Type&quot;, &quot;Mean Age&quot;, &quot;Median Age&quot;, &quot;Number of Total Patients Observed&quot;, &quot;Number of Total Aneurysms Observed&quot;, &quot;Number of Total Patients with prior SAH Observed&quot;, &quot;Mean Total Follow up (Months)&quot;, &quot;Median Total Follow up (Months)&quot;, &quot;Number of Patients with rupture&quot;, &quot;Number of Patients with prior SAH and rupture&quot;),
+    align = c(&quot;l&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;, &quot;c&quot;),
     longtable=TRUE,
     digits = 1) %&gt;%
-  kableExtra::kable_styling(full_width = FALSE) %&gt;%
+  kableExtra::kable_styling(bootstrap = &quot;striped&quot;, 
+                            full_width = FALSE,
+                            font_size = 10
+                            ) %&gt;%
   footnote(
     general_title = &quot;Footnote:&quot;,
-    general = &quot;Standard deviations are presented in parentheses,Standard deviations are presented in parenthesesStandard deviations are presented in parenthesesStandard deviations are presented in parenthesesStandard deviations are presented in parentheses&quot;,
+    general = &quot;SAH = Subrachnoid haemorrhage&quot;,
     threeparttable=TRUE,
     )</code></pre>
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>
+<table class="table table-striped" style="font-size: 10px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
 Table 1: Baseline Study Characteristics
 </caption>
 <thead>
@@ -450,13 +443,43 @@ Author
 Publication Year
 </th>
 <th style="text-align:center;">
-Population
+Study Year Start
+</th>
+<th style="text-align:center;">
+Study Year End
+</th>
+<th style="text-align:center;">
+Source Population
 </th>
 <th style="text-align:center;">
 Study Type
 </th>
 <th style="text-align:center;">
-Number of aneurysms
+Mean Age
+</th>
+<th style="text-align:center;">
+Median Age
+</th>
+<th style="text-align:center;">
+Number of Total Patients Observed
+</th>
+<th style="text-align:center;">
+Number of Total Aneurysms Observed
+</th>
+<th style="text-align:center;">
+Number of Total Patients with prior SAH Observed
+</th>
+<th style="text-align:center;">
+Mean Total Follow up (Months)
+</th>
+<th style="text-align:left;">
+Median Total Follow up (Months)
+</th>
+<th style="text-align:center;">
+Number of Patients with rupture
+</th>
+<th style="text-align:center;">
+Number of Patients with prior SAH and rupture
 </th>
 </tr>
 </thead>
@@ -469,13 +492,43 @@ Bor
 2015
 </td>
 <td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 International
 </td>
 <td style="text-align:center;">
 prospective
 </td>
 <td style="text-align:center;">
-363
+55.0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+468
+</td>
+<td style="text-align:center;">
+98
+</td>
+<td style="text-align:center;">
+33.6
+</td>
+<td style="text-align:left;">
+25.2
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+NA
 </td>
 </tr>
 <tr>
@@ -486,18 +539,336 @@ Broderick
 2009
 </td>
 <td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 International
 </td>
 <td style="text-align:center;">
 prospective
 </td>
 <td style="text-align:center;">
-113
+51.4
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+108
+</td>
+<td style="text-align:center;">
+148
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 Burns
+</td>
+<td style="text-align:center;">
+2009
+</td>
+<td style="text-align:center;">
+1987
+</td>
+<td style="text-align:center;">
+2006
+</td>
+<td style="text-align:center;">
+United States
+</td>
+<td style="text-align:center;">
+retrospective
+</td>
+<td style="text-align:center;">
+64.0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+191
+</td>
+<td style="text-align:center;">
+12
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:left;">
+47.0
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Byoun
+</td>
+<td style="text-align:center;">
+2016
+</td>
+<td style="text-align:center;">
+2000
+</td>
+<td style="text-align:center;">
+2008
+</td>
+<td style="text-align:center;">
+Korea
+</td>
+<td style="text-align:center;">
+retrospective
+</td>
+<td style="text-align:center;">
+63.1
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+654
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:left;">
+19.2
+</td>
+<td style="text-align:center;">
+11
+</td>
+<td style="text-align:center;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Choi
+</td>
+<td style="text-align:center;">
+2018
+</td>
+<td style="text-align:center;">
+2007
+</td>
+<td style="text-align:center;">
+2010
+</td>
+<td style="text-align:center;">
+Korea
+</td>
+<td style="text-align:center;">
+retrospective
+</td>
+<td style="text-align:center;">
+57.4
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+173
+</td>
+<td style="text-align:center;">
+21
+</td>
+<td style="text-align:center;">
+73.1
+</td>
+<td style="text-align:left;">
+72.0
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Gibbs
+</td>
+<td style="text-align:center;">
+2004
+</td>
+<td style="text-align:center;">
+1989
+</td>
+<td style="text-align:center;">
+2002
+</td>
+<td style="text-align:center;">
+United States
+</td>
+<td style="text-align:center;">
+retrospective
+</td>
+<td style="text-align:center;">
+47.9
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+21
+</td>
+<td style="text-align:center;">
+22
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+92.0
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Gondar
+</td>
+<td style="text-align:center;">
+2016
+</td>
+<td style="text-align:center;">
+2006
+</td>
+<td style="text-align:center;">
+2014
+</td>
+<td style="text-align:center;">
+Switzerland
+</td>
+<td style="text-align:center;">
+prospective
+</td>
+<td style="text-align:center;">
+55.1
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+368
+</td>
+<td style="text-align:center;">
+17
+</td>
+<td style="text-align:center;">
+38.4
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Guresir
+</td>
+<td style="text-align:center;">
+2013
+</td>
+<td style="text-align:center;">
+1999
+</td>
+<td style="text-align:center;">
+2012
+</td>
+<td style="text-align:center;">
+Germany
+</td>
+<td style="text-align:center;">
+retrospective
+</td>
+<td style="text-align:center;">
+55.0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+263
+</td>
+<td style="text-align:center;">
+384
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+48.5
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Irazabal
+</td>
+<td style="text-align:center;">
+2011
+</td>
+<td style="text-align:center;">
+1989
 </td>
 <td style="text-align:center;">
 2009
@@ -509,109 +880,31 @@ United States
 retrospective
 </td>
 <td style="text-align:center;">
-165
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Byoun
-</td>
-<td style="text-align:center;">
-2016
-</td>
-<td style="text-align:center;">
-Korea
-</td>
-<td style="text-align:center;">
-retrospective
-</td>
-<td style="text-align:center;">
 NA
 </td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Choi
-</td>
 <td style="text-align:center;">
-2018
-</td>
-<td style="text-align:center;">
-Korea
-</td>
-<td style="text-align:center;">
-retrospective
-</td>
-<td style="text-align:center;">
-135
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Gibbs
-</td>
-<td style="text-align:center;">
-2004
-</td>
-<td style="text-align:center;">
-United States
-</td>
-<td style="text-align:center;">
-retrospective
-</td>
-<td style="text-align:center;">
-21
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Gondar
-</td>
-<td style="text-align:center;">
-2016
-</td>
-<td style="text-align:center;">
-Switzerland
-</td>
-<td style="text-align:center;">
-prospective
-</td>
-<td style="text-align:center;">
-292
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Guresir
-</td>
-<td style="text-align:center;">
-2013
-</td>
-<td style="text-align:center;">
-Germany
-</td>
-<td style="text-align:center;">
-retrospective
-</td>
-<td style="text-align:center;">
-263
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Irazabal
-</td>
-<td style="text-align:center;">
-2011
-</td>
-<td style="text-align:center;">
-United States
-</td>
-<td style="text-align:center;">
-retrospective
+49
 </td>
 <td style="text-align:center;">
 38
+</td>
+<td style="text-align:center;">
+45
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+94.8
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -622,13 +915,43 @@ Jeon
 2014
 </td>
 <td style="text-align:center;">
+2001
+</td>
+<td style="text-align:center;">
+2011
+</td>
+<td style="text-align:center;">
 Korea
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
+59.4
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 524
+</td>
+<td style="text-align:center;">
+568
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+35.4
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -639,13 +962,43 @@ Jiang
 2013
 </td>
 <td style="text-align:center;">
+2007
+</td>
+<td style="text-align:center;">
+2012
+</td>
+<td style="text-align:center;">
 China
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
+52.3
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 40
+</td>
+<td style="text-align:center;">
+50
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+36.0
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -656,18 +1009,54 @@ Juvela
 2013
 </td>
 <td style="text-align:center;">
+1956
+</td>
+<td style="text-align:center;">
+1978
+</td>
+<td style="text-align:center;">
 Finland
 </td>
 <td style="text-align:center;">
 prospective
 </td>
 <td style="text-align:center;">
-142
+41.8
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+135
+</td>
+<td style="text-align:center;">
+181
+</td>
+<td style="text-align:center;">
+131
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:left;">
+252.0
+</td>
+<td style="text-align:center;">
+31
+</td>
+<td style="text-align:center;">
+30
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 Loumiotis
+</td>
+<td style="text-align:center;">
+2011
+</td>
+<td style="text-align:center;">
+2008
 </td>
 <td style="text-align:center;">
 2011
@@ -679,7 +1068,31 @@ United States
 prospective
 </td>
 <td style="text-align:center;">
+64.4
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 125
+</td>
+<td style="text-align:center;">
+160
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+16.7
+</td>
+<td style="text-align:left;">
+15.1
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -690,13 +1103,43 @@ Matsubara
 2004
 </td>
 <td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 Japan
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-140
+62.8
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+166
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+17.7
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -707,13 +1150,43 @@ Matsumoto
 2013
 </td>
 <td style="text-align:center;">
+1996
+</td>
+<td style="text-align:center;">
+2008
+</td>
+<td style="text-align:center;">
 Japan
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-111
+65.0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+136
+</td>
+<td style="text-align:center;">
+8
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+NA
 </td>
 </tr>
 <tr>
@@ -724,18 +1197,101 @@ Mizoi
 1995
 </td>
 <td style="text-align:center;">
+1984
+</td>
+<td style="text-align:center;">
+1993
+</td>
+<td style="text-align:center;">
 Japan
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-49
+NA
+</td>
+<td style="text-align:center;">
+60
+</td>
+<td style="text-align:center;">
+15
+</td>
+<td style="text-align:center;">
+67
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+51.6
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 Morita
+</td>
+<td style="text-align:center;">
+2012
+</td>
+<td style="text-align:center;">
+2001
+</td>
+<td style="text-align:center;">
+2004
+</td>
+<td style="text-align:center;">
+Japan
+</td>
+<td style="text-align:center;">
+prospective
+</td>
+<td style="text-align:center;">
+65.0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+3647
+</td>
+<td style="text-align:center;">
+99
+</td>
+<td style="text-align:center;">
+20.0
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+62
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Murayama
+</td>
+<td style="text-align:center;">
+2016
+</td>
+<td style="text-align:center;">
+2003
 </td>
 <td style="text-align:center;">
 2012
@@ -747,24 +1303,31 @@ Japan
 prospective
 </td>
 <td style="text-align:center;">
-2998
+66.0
 </td>
-</tr>
-<tr>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+1960
+</td>
+<td style="text-align:center;">
+44
+</td>
+<td style="text-align:center;">
+45.2
+</td>
 <td style="text-align:left;">
-Murayama
+NA
 </td>
 <td style="text-align:center;">
-2016
+43
 </td>
 <td style="text-align:center;">
-Japan
-</td>
-<td style="text-align:center;">
-prospective
-</td>
-<td style="text-align:center;">
-1556
+NA
 </td>
 </tr>
 <tr>
@@ -775,13 +1338,43 @@ Oh
 2013
 </td>
 <td style="text-align:center;">
+2007
+</td>
+<td style="text-align:center;">
+2008
+</td>
+<td style="text-align:center;">
 Korea
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
+72.2
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 19
+</td>
+<td style="text-align:center;">
+19
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+24.0
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -792,13 +1385,43 @@ Serrone
 2016
 </td>
 <td style="text-align:center;">
+2001
+</td>
+<td style="text-align:center;">
+2012
+</td>
+<td style="text-align:center;">
 United States
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-192
+61.1
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+234
+</td>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+38.4
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -809,13 +1432,43 @@ So
 2010
 </td>
 <td style="text-align:center;">
+1997
+</td>
+<td style="text-align:center;">
+2006
+</td>
+<td style="text-align:center;">
 Australia
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-208
+51.1
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+285
+</td>
+<td style="text-align:center;">
+63
+</td>
+<td style="text-align:center;">
+21.8
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+NA
 </td>
 </tr>
 <tr>
@@ -826,13 +1479,43 @@ Sonobe
 2010
 </td>
 <td style="text-align:center;">
+2000
+</td>
+<td style="text-align:center;">
+2004
+</td>
+<td style="text-align:center;">
 Japan
 </td>
 <td style="text-align:center;">
 prospective
 </td>
 <td style="text-align:center;">
+61.9
+</td>
+<td style="text-align:center;">
+62
+</td>
+<td style="text-align:center;">
 374
+</td>
+<td style="text-align:center;">
+448
+</td>
+<td style="text-align:center;">
+36
+</td>
+<td style="text-align:center;">
+41.0
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+7
+</td>
+<td style="text-align:center;">
+1
 </td>
 </tr>
 <tr>
@@ -843,13 +1526,43 @@ Teo
 2016
 </td>
 <td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 United Kingdom
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-94
+53.0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+152
+</td>
+<td style="text-align:center;">
+30
+</td>
+<td style="text-align:center;">
+40.8
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -860,13 +1573,43 @@ Thien
 2017
 </td>
 <td style="text-align:center;">
+2013
+</td>
+<td style="text-align:center;">
+2014
+</td>
+<td style="text-align:center;">
 Singapore
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-160
+72.4
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+165
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+12.2
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -877,13 +1620,43 @@ Tsukahara
 2005
 </td>
 <td style="text-align:center;">
+1999
+</td>
+<td style="text-align:center;">
+2001
+</td>
+<td style="text-align:center;">
 International
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-181
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+209
+</td>
+<td style="text-align:center;">
+38
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -894,13 +1667,43 @@ Tsutsumi
 2000
 </td>
 <td style="text-align:center;">
+1976
+</td>
+<td style="text-align:center;">
+1997
+</td>
+<td style="text-align:center;">
 Japan
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-62
+70.8
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+56
+</td>
+<td style="text-align:center;">
+83
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+51.6
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -911,13 +1714,43 @@ Villablanca
 2013
 </td>
 <td style="text-align:center;">
+1999
+</td>
+<td style="text-align:center;">
+2009
+</td>
+<td style="text-align:center;">
 United States
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-165
+60.9
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+258
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+27.0
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+NA
 </td>
 </tr>
 <tr>
@@ -928,13 +1761,43 @@ Wiebers-R
 1998
 </td>
 <td style="text-align:center;">
+1970
+</td>
+<td style="text-align:center;">
+1991
+</td>
+<td style="text-align:center;">
 International
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
-1449
+52.7
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+1065
+</td>
+<td style="text-align:center;">
+1937
+</td>
+<td style="text-align:center;">
+722
+</td>
+<td style="text-align:center;">
+99.6
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+18
+</td>
+<td style="text-align:center;">
+17
 </td>
 </tr>
 <tr>
@@ -945,13 +1808,43 @@ Wiebers-P
 2003
 </td>
 <td style="text-align:center;">
+1991
+</td>
+<td style="text-align:center;">
+1998
+</td>
+<td style="text-align:center;">
 International
 </td>
 <td style="text-align:center;">
 prospective
 </td>
 <td style="text-align:center;">
-1692
+55.2
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+2686
+</td>
+<td style="text-align:center;">
+615
+</td>
+<td style="text-align:center;">
+49.2
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+15
+</td>
+<td style="text-align:center;">
+8
 </td>
 </tr>
 <tr>
@@ -962,13 +1855,43 @@ Wilkinson
 2018
 </td>
 <td style="text-align:center;">
+2000
+</td>
+<td style="text-align:center;">
+2016
+</td>
+<td style="text-align:center;">
 United States
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
+52.0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 17
+</td>
+<td style="text-align:center;">
+22
+</td>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:left;">
+63.6
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+0
 </td>
 </tr>
 <tr>
@@ -979,13 +1902,43 @@ Zylkowski
 2015
 </td>
 <td style="text-align:center;">
+2006
+</td>
+<td style="text-align:center;">
+2013
+</td>
+<td style="text-align:center;">
 Poland
 </td>
 <td style="text-align:center;">
 retrospective
 </td>
 <td style="text-align:center;">
+57.8
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
 70
+</td>
+<td style="text-align:center;">
+110
+</td>
+<td style="text-align:center;">
+22
+</td>
+<td style="text-align:center;">
+35.9
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+1
 </td>
 </tr>
 </tbody>
@@ -997,7 +1950,7 @@ retrospective
 </tr>
 <tr>
 <td style="padding: 0; border: 0;" colspan="100%">
-<sup></sup> Standard deviations are presented in parentheses,Standard deviations are presented in parenthesesStandard deviations are presented in parenthesesStandard deviations are presented in parenthesesStandard deviations are presented in parentheses
+<sup></sup> SAH = Subrachnoid haemorrhage
 </td>
 </tr>
 </tfoot>

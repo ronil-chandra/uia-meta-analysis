@@ -35,20 +35,7 @@ sizedata <- filter(maindata, size == 10)
 
 ```
 
-Assumptions: 
 
-1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
-2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
-
-```{r coalesce patients into aneurysms}
-
-dat <- sizedata %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
-  drop_na(total_size) %>% 
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size)
-
-```
 
 ### Display all included information for all aneurysms 10 mm and less 
 ### Display all included information for all aneurysms 10 mm and less - option 2 = Kable and Kable Extra. 
@@ -57,17 +44,20 @@ dat <- sizedata %>%
 ```{r, results = 'asis'}
 
 sizedata %>%
-  select(auth, pub, country, type, num_tot) %>%
+  select(auth, pub, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah) %>%
   knitr::kable(
     caption = "Table 1: Baseline Study Characteristics",
-    col.names = c("Author", "Publication Year", "Population", "Study Type", "Number of aneurysms"),
-    align = c("l", "c", "c", "c", "c"),
+    col.names = c("Author", "Publication Year", "Study Year Start", "Study Year End", "Source Population", "Study Type", "Mean Age", "Median Age", "Number of Total Patients Observed", "Number of Total Aneurysms Observed", "Number of Total Patients with prior SAH Observed", "Mean Total Follow up (Months)", "Median Total Follow up (Months)", "Number of Patients with rupture", "Number of Patients with prior SAH and rupture"),
+    align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
     longtable=TRUE,
     digits = 1) %>%
-  kableExtra::kable_styling(full_width = FALSE) %>%
+  kableExtra::kable_styling(bootstrap = "striped", 
+                            full_width = FALSE,
+                            font_size = 10,
+                            ) %>%
   footnote(
     general_title = "Footnote:",
-    general = "Standard deviations are presented in parentheses,Standard deviations are presented in parenthesesStandard deviations are presented in parenthesesStandard deviations are presented in parenthesesStandard deviations are presented in parentheses",
+    general = "SAH = Subrachnoid haemorrhage",
     threeparttable=TRUE,
     )
 
