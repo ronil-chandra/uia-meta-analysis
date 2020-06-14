@@ -37,11 +37,10 @@ sizedata <- filter(maindata, size == 10)
 
 
 
-### Display all included information for all aneurysms 10 mm and less 
-### Display all included information for all aneurysms 10 mm and less - option 2 = Kable and Kable Extra. 
+## Table 1 Baseline Characteristics 
 
 
-```{r, results = 'asis'}
+```{r, Table 1, Baseline Characteristics, results = 'asis'}
 
 sizedata %>%
   select(auth, pub, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah) %>%
