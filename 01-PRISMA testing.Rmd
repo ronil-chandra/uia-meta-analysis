@@ -1,0 +1,38 @@
+---
+title: "01-PRISMA"
+author: "Ronil V. Chandra"
+date: "14/06/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Install packages
+
+```{r PRISMA}
+library(PRISMAstatement)
+```
+
+## Create PRISMA
+
+```{r PRISMA creation}
+
+prisma(found = 750,
+       found_other = 123,
+       no_dupes = 776, 
+       screened = 776, 
+       screen_exclusions = 13, 
+       full_text = 763,
+       full_text_exclusions = 17, 
+       qualitative = 746, 
+       quantitative = 319,
+       width = 800, height = 800)
+
+```
+
+
+Not very customisable. Consider graphics program instead to customise
+
+
