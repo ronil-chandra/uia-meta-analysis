@@ -177,43 +177,6 @@ dat <- sizedata %>%
 
 ```
 
-### Display all included information for all aneurysms 10 mm and less - option 1. 
-
-```{r table 1, echo = FALSE, include = TRUE}
-
-tab1 <- sizedata %>%
-  as_hux() %>%
-  theme_article() %>%
-  set_caption("Study Characteristics") %>%
-  select(auth, pub, start, end, country, type, num_anr, psah, fu, rupt, rupt_psah, nos_total) 
-
-
-```
-
-
-```{r table 2, echo = FALSE, include = TRUE}
-
-sizedata_ht <- as_hux(sizedata)
-
-width(sizedata_ht) <- 0.4
-
-sizedata_ht <- sizedata_ht %>%
-  select(auth, pub, country, type, num_anr, rupt, rupt_psah, fu, nos_total) %>%
-  arrange(auth) %>%
-  rename("Author" = auth, "Publication Year" = pub, "Country" = country, "Study Type" = type, "Number of Aneurysms" = num_anr, "Number of Ruptured Aneurysms" = rupt, "Number of Ruptured Aneursysms with Prior SAH" = rupt_psah, "Follow up" = fu, "Newcastle-Ottowa Score" = nos_total) %>%
-  huxtable::add_colnames() %>%
-  set_number_format(0) %>%
-  set_align(1:4, 2, 'right') %>%
-  set_caption("Characteristics of included studies") %>%
-  set_caption_pos("topleft") %>%
-  theme_article() %>%
-  add_footnote("*All aneurysms measuring 10 mm and less")
-
-sizedata_ht
-
-```
-
-
 
 ### Meta-analysis of proportions using GLMM and Wilson CIs
   
@@ -981,8 +944,97 @@ The choice of this potential effect modifier is:
 
 Since we are analysing at a study level, and we do not know the aneurysm characteristics of individual patients, this is an exploratory and hypothesis generating analysis. 
 
+```{r metaregression data setup for size categorisation at study level - data setup}
+
+sizedata10 <- filter(maindata, size == 10)
+
+dat10.metareg <- sizedata10 %>%
+  mutate(total_size10 = coalesce(num_anr,num)) %>%
+  drop_na(total_size10) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size10) %>%
+  rename(rupt10 = rupt)
+
+dat5.metareg <- dat5 %>%
+  rename(rupt5 = rupt) %>%
+  rename(total_size5 = total_size) 
+
+dat.size.metareg <- left_join(dat5.metareg, dat10.metareg) %>%
+  mutate(prop_size = total_size5 / total_size10)
 
 
+
+```
+
+```{r metaregression for size categorised at 5 mm  at study level - execution}
+
+size.metareg = metaprop(rupt10, total_size10,
+                      data=dat.size.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+r3 <- metareg(size.metareg, ~prop_size)
+r3
+```
+
+There is no evidence that the pooled rupture risk varied by the proportion of patients with aneursysms 5mm and less included in the studies (P=.66)
+
+```{r metaregression - option 2 - bubble plot - size}
+
+bubble(r3, studlab=dat.size.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for Aneurysm size")
+
+```
+ 
+### Metaregression to explore size end of study enrollment 
+
+We can analyse whether there is a relationship between the year the last patient was included in the study (potential effect modifier), and the the outcome (rupture proportion). 
+
+The choice of this potential effect modifier is:
+
+* Exploratory 
+* Biologically plausible - since comorbidity profiles, and medical management of comorbidities has changed
+* Relevant to physicians
+
+Since we are analysing at a study level, this is an exploratory and hypothesis generating analysis. 
+
+
+```{r metaregression data setup for study end year}
+
+dat.year.metareg <- sizedata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, end, rupt, total_size) %>%
+  drop_na(end)
+
+```
+
+```{r metaregression for for study end year - execution}
+
+year.metareg = metaprop(rupt, total_size,
+                      data=dat.year.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+r4 <- metareg(year.metareg, ~end)
+r4
+```
+ 
+```{r metaregression - option 2 - bubble plot - year}
+
+bubble(r4, studlab=dat.year.metareg$auth_year, xlim=c(1960, 2020), main="Meta-regression plot for Study End Year")
+
+```
  
  
 ### Sensitivity analysis 
