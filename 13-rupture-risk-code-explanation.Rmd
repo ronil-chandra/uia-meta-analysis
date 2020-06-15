@@ -793,11 +793,10 @@ See that only 2 patients without history of prior SAH ruptured on long term foll
 
 ### Meta-regression 
 
- 
-Exploratory meta-regression to explore length of follow up on rupture outcomes
+Exploratory meta-regression to explore length of follow up on rupture outcomes, including all studies
 
 
-```{r metaregression data setup for length of follow up}
+```{r metaregression data setup for length of follow up, including all studies}
 
 dat.fu.metareg <- sizedata %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)/12) %>%
@@ -810,23 +809,7 @@ dat.fu.metareg <- sizedata %>%
 ```
 
 
-```{r metaanalysis pf proporations for metareg - option 1}
-
-pes.metareg = rma.glmm(xi = rupt, 
-                       ni = total_size,
-                       data=dat.fu.metareg,
-                       method="ML",
-                       measure = "PLO",
-                       mods = ~fu,
-                       ) 
-pes.metareg
-
-```
-
-note that in option 1, I cannot produce a bubble plot, an alternate way to examine this is by doing a meta-analyis of proportions using metaprop, and then using metareg command on the output.
-
-
-```{r metaanalysis pf proporations for metareg - option 2}
+```{r metaanalysis pf proporations for metareg - option 2, including all studies}
 
 fu.metareg = metaprop(rupt, total_size,
                       data=dat.fu.metareg,
@@ -840,15 +823,15 @@ fu.metareg = metaprop(rupt, total_size,
 
 ```
 
-```{r metaregression exploration - option 2}
+```{r metaregression exploration - option 2, including all studies}
 
-r1 <- metareg(fu.metareg, ~fu)
-r1
+fu.metareg.result <- metareg(fu.metareg, ~fu)
+fu.metareg.result
 ```
 
-```{r metaregression - option 2 - bubble plot}
+```{r metaregression - option 2 - bubble plot, including all studies}
 
-bubble(r1, studlab=dat.fu.metareg$auth_year, xlim=c(0, 25), main="Bubble plot")
+bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 25), main="Bubble plot")
 
 ```
 
@@ -861,7 +844,52 @@ Overall, the metaregression result reveals the following
  
  This means that for every 1-unit increase in the covariate fu, thre is a 0.17 increase in the dependent variable which is the logit transformed proportion.  The p value is significant, which rejects the null hypothesis that there is no association between the covariate fu and the dependent variable. 
  
-### Metaregression to explore exposure to prior SAH
+### Exploratory meta-regression to explore length of follow up on rupture outcomes- excluding Juvela
+ 
+
+```{r metaregression data setup for length of follow up - excluding Juvela}
+
+dat.fu.metareg.juvela <- sizedata %>%
+  slice(-12) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)/12) %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size, fu) %>%
+  drop_na(fu)
+
+```
+
+
+```{r metaanalysis pf proporations for metareg - option 2 - excluding Juvela}
+
+fu.metareg.juvela = metaprop(rupt, total_size,
+                      data=dat.fu.metareg.juvela,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+```
+
+```{r metaregression exploration - option 2 - excluding Juvela}
+
+fu.metareg.result.juvela <- metareg(fu.metareg.juvela, ~fu)
+fu.metareg.result.juvela
+```
+
+```{r metaregression - option 2 - bubble plot - excluding Juvela}
+
+bubble(fu.metareg.result.juvela, studlab=dat.fu.metareg.juvela$auth_year, xlim=c(0, 10), main="Bubble plot")
+
+``` 
+
+Once Juvela is excluded, there is no evidence that median follow up per study is associated with rupture risk.   
+ 
+### Metaregression to explore exposure to prior SAH, all studies
 
 We can analyse whether there is a relationship between the proportion of patients with prior SAH included in the study (potential effect modifier), and the the outcome (rupture proportion). 
 
@@ -888,7 +916,8 @@ n1i + n2i = total_anr included with and without prior SAH
 
 total number of events = total number of ruptures = variable rupt
 
-```{r metaregression data setup for prior SAH at study level - data setup}
+
+```{r metaregression data setup for prior SAH at study level, all studies - data setup}
 
 dat.psah.metareg <- sizedata %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
@@ -908,7 +937,7 @@ dat.psah.metareg <- sizedata %>%
 
 ```
 
-```{r metaregression data setup for prior SAH at study level - execution}
+```{r metaregression data setup for prior SAH at study level, all studies - execution}
 
 psah.metareg = metaprop(rupt.total, total_anr,
                       data=dat.psah.metareg,
@@ -920,16 +949,66 @@ psah.metareg = metaprop(rupt.total, total_anr,
                       pscale = 100
                       )
 
-r2 <- metareg(psah.metareg, ~prop)
-r2
+psah.metareg.result <- metareg(psah.metareg, ~prop)
+psah.metareg.result
 ```
 
 
-```{r metaregression - option 2 - bubble plot - psah}
+```{r metaregression - option 2 - bubble plot, all studies - psah}
 
-bubble(r2, studlab=dat.psah.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for prior SAH")
+bubble(psah.metareg.result, studlab=dat.psah.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for prior SAH")
 
 ```
+
+### Metaregression to explore exposure to prior SAH, excluding Juvela
+
+
+```{r metaregression data setup for prior SAH at study level, excluding Juvela - data setup}
+
+dat.psah.metareg.juvela <- sizedata %>%
+  slice(-12) %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai = rupt_psah) %>%
+  rename(rupt.total = rupt) %>%
+  mutate(ci = rupt.total - ai) %>%
+  rename(n1i.temp = psah) %>%
+  mutate(prop = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop * total_anr) %>%
+  mutate(n1i = coalesce(n1i.temp,num_anr_psah)) %>%
+  mutate(n2i = total_anr - n1i) %>%
+  mutate(bi = n1i - ai) %>%
+  mutate(di = n2i - ci) %>%
+  select(auth_year, rupt.total, total_anr, prop)   
+
+```
+
+```{r metaregression data setup for prior SAH at study level, excluding Juvela - execution}
+
+psah.metareg.juvela = metaprop(rupt.total, total_anr,
+                      data=dat.psah.metareg.juvela,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+psah.metareg.result.juvela <- metareg(psah.metareg.juvela, ~prop)
+psah.metareg.result.juvela
+```
+
+
+```{r metaregression - option 2 - bubble plot - , excluding Juvela psah}
+
+bubble(psah.metareg.result.juvela, studlab=dat.psah.metareg.juvela$auth_year, xlim=c(0, 1), main="Meta-regression plot for prior SAH excluding Juvela")
+
+```
+
+Once Juvela is excluded, there is no evidence that proportion fo patients with prior SAH per study is associated with rupture risk.   
+
 
 ### Metaregression to explore size categorised at 5mm
 
@@ -944,7 +1023,7 @@ The choice of this potential effect modifier is:
 
 Since we are analysing at a study level, and we do not know the aneurysm characteristics of individual patients, this is an exploratory and hypothesis generating analysis. 
 
-```{r metaregression data setup for size categorisation at study level - data setup}
+```{r metaregression data setup for size categorisation at 5 mm at study level - data setup}
 
 sizedata10 <- filter(maindata, size == 10)
 
@@ -959,17 +1038,17 @@ dat5.metareg <- dat5 %>%
   rename(rupt5 = rupt) %>%
   rename(total_size5 = total_size) 
 
-dat.size.metareg <- left_join(dat5.metareg, dat10.metareg) %>%
-  mutate(prop_size = total_size5 / total_size10)
+dat.size5.metareg <- left_join(dat5.metareg, dat10.metareg) %>%
+  mutate(prop_size5 = total_size5 / total_size10)
 
 
 
 ```
 
-```{r metaregression for size categorised at 5 mm  at study level - execution}
+```{r metaregression for size categorised at 5 mm at study level - execution}
 
-size.metareg = metaprop(rupt10, total_size10,
-                      data=dat.size.metareg,
+size5.metareg = metaprop(rupt10, total_size10,
+                      data=dat.size5.metareg,
                       studlab=paste(auth_year),
                       method="GLMM",
                       sm="PLOGIT",
@@ -978,17 +1057,67 @@ size.metareg = metaprop(rupt10, total_size10,
                       pscale = 100
                       )
 
-r3 <- metareg(size.metareg, ~prop_size)
-r3
+size5mm.metareg.result <- metareg(size5.metareg, ~prop_size5)
+size5mm.metareg.result
 ```
 
 There is no evidence that the pooled rupture risk varied by the proportion of patients with aneursysms 5mm and less included in the studies (P=.66)
 
-```{r metaregression - option 2 - bubble plot - size}
+```{r metaregression - option 2 - bubble plot - size categorised 5mm}
 
-bubble(r3, studlab=dat.size.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for Aneurysm size")
+bubble(size5mm.metareg.result, studlab=dat.size5.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for 5mm Aneurysm size")
 
 ```
+ 
+### Metaregression to explore size categorised at 3mm
+ 
+```{r metaregression data setup for size categorisation at 3 mm at study level - data setup}
+
+sizedata10 <- filter(maindata, size == 10)
+
+dat10.metareg <- sizedata10 %>%
+  mutate(total_size10 = coalesce(num_anr,num)) %>%
+  drop_na(total_size10) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size10) %>%
+  rename(rupt10 = rupt)
+
+dat3.metareg <- dat3 %>%
+  rename(rupt3 = rupt) %>%
+  rename(total_size3 = total_size) 
+
+dat.size3.metareg <- left_join(dat3.metareg, dat10.metareg) %>%
+  mutate(prop_size3 = total_size3 / total_size10)
+
+
+```
+
+```{r metaregression for size categorised at 5 mm at study level - execution}
+
+size3.metareg = metaprop(rupt10, total_size10,
+                      data=dat.size3.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+size3mm.metareg.result <- metareg(size3.metareg, ~prop_size3)
+size3mm.metareg.result
+```
+
+There is no evidence that the pooled rupture risk varied by the proportion of patients with aneursysms 3mm and less included in the studies (P=.92)
+
+```{r metaregression - option 2 - bubble plot - size categorised 3mm}
+
+bubble(size3mm.metareg.result, studlab=dat.size3.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for 3mm Aneurysm size")
+
+```
+ 
+
+
  
 ### Metaregression to explore size end of study enrollment 
 
@@ -1026,13 +1155,13 @@ year.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-r4 <- metareg(year.metareg, ~end)
-r4
+year.metareg.result <- metareg(year.metareg, ~end)
+year.metareg.result
 ```
  
 ```{r metaregression - option 2 - bubble plot - year}
 
-bubble(r4, studlab=dat.year.metareg$auth_year, xlim=c(1960, 2020), main="Meta-regression plot for Study End Year")
+bubble(year.metareg.result, studlab=dat.year.metareg$auth_year, xlim=c(1960, 2020), main="Meta-regression plot for Study End Year")
 
 ```
  
