@@ -828,10 +828,13 @@ ci = patients without prior history of SAH who were included in studies with gre
 
 See that only 2 patients without history of prior SAH ruptured on long term follow up. Although the data are sparse, there is minimal extractable data on the outcomes of unruptured aneurysms beyond 5 years. 
 
-#### Meta-regression to explore length of follow up on rupture outcomes
+### Meta-regression 
+
+ 
+Exploratory meta-regression to explore length of follow up on rupture outcomes
 
 
-```{r metaregression data setup}
+```{r metaregression data setup for length of follow up}
 
 dat.fu.metareg <- sizedata %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)/12) %>%
@@ -880,12 +883,6 @@ r1 <- metareg(fu.metareg, ~fu)
 r1
 ```
 
-```{r metaregression exploration 3}
-
-r1 <- metareg(fu.metareg, ~fu)
-r1
-```
-
 ```{r metaregression - option 2 - bubble plot}
 
 bubble(r1, studlab=dat.fu.metareg$auth_year, xlim=c(0, 25), main="Bubble plot")
@@ -900,6 +897,93 @@ Overall, the metaregression result reveals the following
  estimate 0.1654 (95% CI 0.1078 - 0.2230) p value <.0001
  
  This means that for every 1-unit increase in the covariate fu, thre is a 0.17 increase in the dependent variable which is the logit transformed proportion.  The p value is significant, which rejects the null hypothesis that there is no association between the covariate fu and the dependent variable. 
+ 
+### Metaregression to explore exposure to prior SAH
+
+We can analyse whether there is a relationship between the proportion of patients with prior SAH included in the study (potential effect modifier), and the the outcome (rupture proportion). 
+
+The choice of this potential effect modifier is:
+
+* Pre-specified
+* Biologically plausible
+* Supported by published observational data
+* Relevant to physicians
+
+Since we are analysing at a study level, and we do not know the characteristics of individual patients, this is an exploratory and hypothesis generating analysis. 
+
+Note that 
+
+ai = prior SAH and rupture +ve = variable rupt_psah
+bi = prior SAH and rupture -ve
+ci = no prior SAH and rupture +ve = rupt minus rupt_psah
+di = no prior SAH, and rupture -ve 
+
+n1i = ai + bi = total aneurysms with prior SAH
+n2i = ci + di = total aneurysms without prior SAH
+
+n1i + n2i = total_anr included with and without prior SAH
+
+total number of events = total number of ruptures = variable rupt
+
+```{r metaregression data setup for prior SAH at study level - data setup}
+
+dat.psah.metareg <- sizedata %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(total_anr = coalesce(num_anr,num)) %>%
+  drop_na(total_anr) %>%
+  rename(ai = rupt_psah) %>%
+  rename(rupt.total = rupt) %>%
+  mutate(ci = rupt.total - ai) %>%
+  rename(n1i.temp = psah) %>%
+  mutate(prop = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop * total_anr) %>%
+  mutate(n1i = coalesce(n1i.temp,num_anr_psah)) %>%
+  mutate(n2i = total_anr - n1i) %>%
+  mutate(bi = n1i - ai) %>%
+  mutate(di = n2i - ci) %>%
+  select(auth_year, rupt.total, total_anr, prop)  
+
+```
+
+```{r metaregression data setup for prior SAH at study level - execution}
+
+psah.metareg = metaprop(rupt.total, total_anr,
+                      data=dat.psah.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+r2 <- metareg(psah.metareg, ~prop)
+r2
+```
+
+
+```{r metaregression - option 2 - bubble plot - psah}
+
+bubble(r2, studlab=dat.psah.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for prior SAH")
+
+```
+
+### Metaregression to explore size categorised at 5mm
+
+We can analyse whether there is a relationship between the proportion of patients with aneurysms measuring 5mm and less included in the study (potential effect modifier), and the the outcome (rupture proportion). 
+
+The choice of this potential effect modifier is:
+
+* Pre-specified
+* Biologically plausible
+* Supported by published observational data
+* Relevant to physicians
+
+Since we are analysing at a study level, and we do not know the aneurysm characteristics of individual patients, this is an exploratory and hypothesis generating analysis. 
+
+
+
+ 
  
 ### Sensitivity analysis 
 
