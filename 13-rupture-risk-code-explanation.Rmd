@@ -1165,6 +1165,42 @@ bubble(year.metareg.result, studlab=dat.year.metareg$auth_year, xlim=c(1960, 202
 
 ```
  
+We can repeat this excluding Juvela. 
+
+```{r metaregression data setup for study end year, excluding Juvela}
+
+dat.year.metareg.juvela <- sizedata %>%
+  slice(-12) %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, end, rupt, total_size) %>%
+  drop_na(end)
+
+```
+
+```{r metaregression for for study end year - execution}
+
+year.metareg.juvela = metaprop(rupt, total_size,
+                      data=dat.year.metareg.juvela,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+year.metareg.result.juvela <- metareg(year.metareg.juvela, ~end)
+year.metareg.result.juvela
+```
+ 
+```{r metaregression - option 2 - bubble plot - year, excluding Juvela}
+
+bubble(year.metareg.result.juvela, studlab=dat.year.metareg.juvela$auth_year, xlim=c(1960, 2020), main="Meta-regression plot for Study End Year")
+
+``` 
+ 
  
 ### Sensitivity analysis 
 
