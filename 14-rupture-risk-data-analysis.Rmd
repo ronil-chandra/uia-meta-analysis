@@ -1108,7 +1108,7 @@ dat.size3.metareg <- left_join(dat3.metareg, dat10.metareg) %>%
 
 ```
 
-```{r metaregression for size categorised at 5 mm at study level - execution}
+```{r metaregression for size categorised at 3 mm at study level - execution}
 
 size3.metareg = metaprop(rupt10, total_size10,
                       data=dat.size3.metareg,
@@ -1159,7 +1159,7 @@ dat.year.metareg <- sizedata %>%
 
 ```
 
-```{r metaregression for for study end year - execution}
+```{r metaregression for study end year - execution}
 
 year.metareg = metaprop(rupt, total_size,
                       data=dat.year.metareg,
@@ -1197,7 +1197,7 @@ dat.year.metareg.juvela <- sizedata %>%
 
 ```
 
-```{r metaregression for for study end year - execution}
+```{r metaregression for study end year, excluding Juvela - execution}
 
 year.metareg.juvela = metaprop(rupt, total_size,
                       data=dat.year.metareg.juvela,
