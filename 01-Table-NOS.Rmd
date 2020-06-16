@@ -1,0 +1,89 @@
+---
+title: "NOS Table"
+author: "Ronil V. Chandra"
+date: "16/06/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Load packages
+
+```{r load packages, echo = FALSE, include = FALSE}
+
+library(tidyverse)
+library(kableExtra)
+```
+
+### Load required data
+
+A single excel data file is loaded to carry out all data table creation, with all steps documented below to ensure reproducibility of research.
+
+```{r load data, echo = FALSE, include = FALSE}
+
+nosdata <- read_csv("data-raw/NOS_LAS.csv")
+
+```
+
+
+### Calculate Quality Scores and convert to AHRQ thresholds
+
+Poor quality 
+
+```{r calculate quality scoring as per AHRQ thresholds - poor quality}
+
+nos.poor <- nosdata %>%
+  filter(nos_select == 0 | nos_select == 1 | nos_compare == 0 | nos_outcome == 0 | nos_outcome == 1) 
+
+```
+
+Fair quality 
+
+```{r calculate quality scoring as per AHRQ thresholds - poor quality}
+
+nos.fair <- nosdata %>%
+  filter(nos_select == 2) %>%
+  filter(nos_compare == 1 | nos_compare == 2) %>%
+  filter(nos_outcome == 2 | nos_outcome == 3)
+
+```
+
+
+Good Quality 
+
+```{r calculate quality scoring as per AHRQ thresholds - good quality}
+
+nos.good <- nosdata %>%
+  filter(nos_select == 3 | nos_select == 4 ) %>%
+  filter(nos_compare == 1 | nos_compare == 2) %>%
+  filter(nos_outcome == 2 | nos_outcome == 3)
+
+```
+
+## Table 1 Quality Assessment 
+
+
+```{r, Table 1, Baseline Characteristics, results = 'asis'}
+
+sizedata %>%
+  select(auth, pub, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah) %>%
+  knitr::kable(
+    caption = "Table 1: Baseline Study Characteristics",
+    col.names = c("Author", "Publication Year", "Study Year Start", "Study Year End", "Source Population", "Study Type", "Mean Age", "Median Age", "Number of Total Patients Observed", "Number of Total Aneurysms Observed", "Number of Total Patients with prior SAH Observed", "Mean Total Follow up (Months)", "Median Total Follow up (Months)", "Number of Patients with rupture", "Number of Patients with prior SAH and rupture"),
+    align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
+    longtable=TRUE,
+    digits = 1) %>%
+  kableExtra::kable_styling(bootstrap = "striped", 
+                            full_width = FALSE,
+                            font_size = 10,
+                            ) %>%
+  footnote(
+    general_title = "Footnote:",
+    general = "SAH = Subrachnoid haemorrhage",
+    threeparttable=TRUE,
+    )
+
+
+```

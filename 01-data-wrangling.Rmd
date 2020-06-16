@@ -19,9 +19,11 @@ library(tidyverse)
 
 #### Load required data
 
+160620 - added NOS data from LAS
+
 ```{r load data, echo=TRUE, include = TRUE}
 
-maindata <- read_csv("data-raw/psash-290420.csv")
+maindata <- read_csv("data-raw/psash-160620.csv")
 
 ```
 
@@ -54,7 +56,7 @@ view(maindata)
 
 ```{r export csv}
 
-write_csv(maindata, path = "data/maindata.csv")
+write_csv(maindata, path = "data/maindata160620.csv")
 
 ```
 
