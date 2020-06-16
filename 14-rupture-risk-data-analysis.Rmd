@@ -305,9 +305,13 @@ Meta-regression
 
 Sensitivity analysis
 
-1. Prespecified sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies rated as poor or fair quality using AHRQ thresholds of NOS quality scoring. 
-2. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies with sample sizes of less than 500 aneurysms. 
-3. Post hoc sensitivity analysis excluding studies that are identified using a Baujat plot. 
+1. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with utilisation of a fixed or random effects meta-analysis method. 
+2. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies rated as poor or fair quality using AHRQ thresholds of NOS quality scoring. 
+3. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies with sample sizes of less than 500 aneurysms. 
+4. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studie that are identified as contributing considerably to the overall heterogeneity and having a strong influence on the overall result using a Baujat plot.
+5. Repeat metagression with exlusion of Juvela et al to consider whether proportion of patients with exposure to prior SAH in the study was an important source of heterogeneity. 
+6. Repeat metagression with exlusion of Juvela et al to consider whether duration of follow up in the study analysed as a continuous variable was an important source of heterogeneity
+7. Repeat metagression with exlusion of Juvela et al to consider whether year of last enrollment in the study analysed as a continuous variable was an important source of heterogeneity
 
 To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one posthoc potential effect modifier is considered for metaregression each time. 
 
@@ -655,7 +659,6 @@ This exploratory analysis considers the proportion of ruptures that occur in stu
 
 ```{r create new column with length of follow up}
 
-view(sizedata)
 dat.fu <- sizedata %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
@@ -671,7 +674,6 @@ Now that the column with length of follow up is created, we can perform a subgro
 
 dat.fu.int <- dat.fu %>%
   filter(fu < 60)
-view(dat.fu.int)
 
 pes.summary.glmmint = metaprop(rupt, total_size,
                             data=dat.fu.int,
