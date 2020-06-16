@@ -25,7 +25,7 @@ The statistical approaches will be tailored to the source dataset and structure 
 1. Rupture of an intracranial aneurysm in a single patient is a rare event.
 2. Small number of rupture outcome events in the sample populations, with the proportion very close to zero.
 3. While the outcome of rupture is binomial, in the sample population, the distribution of rupture outcomes over time is is better described by the non-central hypergeometric distribution.
-4. there are a wide range of size in sample populations identified by the systemaic review, with both very small studies and very large studies included.
+4. there are a wide range of size in sample populations identified by the systematic review, with both very small studies and very large studies included.
 
 To achieve these aims, the various packages and source dataset in R are loaded, and each part carried out with an explanation of the rationale for the data analysis. Version control is carred out with GitHub. 
 
@@ -287,14 +287,29 @@ Subgroup analyses require splitting of the data into subgroups to make compariso
 
 Meta-regression allows the effects of multiple continuous and categorical variables to be investigated simultaneously, unlike subgroup analysis which considered categorical variables only. This generallly utilises a random effect model to conduct the analysis in each subgroup, and then consider additional statistical testing to compare the pooled results across the subgroups. Meta-regression should generally not be considered when there are less than ten studies in a meta-analysis. The meta-regression cooeffient obtained describes how the outcome (dependent variable) changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. *Cochrane Handbook 10.11.4*
 
-We shall choose to pool the data, and explore heterogeneity with the following analyses
+We shall choose to pool the data, and explore heterogeneity with sub-group analyses and meta-regression. 
+
+Sub-group analyses
 
 1. Prespecified sub-group analysis of rupture risk by size of aneurysm (10mm or less, 7mm and less, 5mm and less, and 3mm and less)
 2. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage. 
 3. Post hoc sub-group analysis of rupture risk with length of follow up categorised as intermediate (5 years or less), or long term (>5 years)
-5. Post hoc metagression to consider whether duration of follow up analysed as a continuous variable was an important source of heterogeneity. 
 
-To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one posthoc potential effect modifier of duration of follow up is chosen, based on the clinical hypotheses that longer follow up durations may be required for rupture events to occur. 
+Meta-regression
+
+1. Prespecified metagression to consider whether proportion of patients with exposure to prior SAH in the study was an important source of heterogeneity. 
+2. Prespecified metagression to consider whether proportion of patients with aneurysms 5mm and less in the study was an important source of heterogeneity. 
+3. Prespecified metagression to consider whether proportion of patients with aneurysms 3mm and less in the study was an important source of heterogeneity.
+4. Post hoc metagression to consider whether duration of follow up in the study analysed as a continuous variable was an important source of heterogeneity. 
+5. Post hoc metagression to consider whether year of last enrollment in the study analysed was an important source of heterogeneity. 
+
+Sensitivity analysis
+
+1. Prespecified sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies rated as poor or fair quality using AHRQ thresholds of NOS quality scoring. 
+2. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies with sample sizes of less than 500 aneurysms. 
+3. Post hoc sensitivity analysis excluding studies that are identified using a Baujat plot. 
+
+To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one posthoc potential effect modifier is considered for metaregression each time. 
 
 Regardless, the outcomes of these subgroup analysis or meta-regression analyses are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data.  
 
@@ -1324,7 +1339,7 @@ Studies with sample size > 500 aneurysms  1.7312 [1.2165; 2.4584]
 Notably, the confidence intervals overlap, and I2 has reduced. Overall, suggests that the original pooled result needs to be interpreted with caution. 
 
 
-#### Sensitivity analysis - exploratory - using Baujat plots to visually assess which studies contribute most to heterogeniety
+#### Sensitivity analysis - using Baujat plots to identify which studies contribute most to heterogeniety
 
 These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. *Baujat 2002* 
 
@@ -1385,45 +1400,7 @@ baujat(pes.summary.glmm.juvela,
 
 ```
 
-Overall, there seems to be an acceptable level of heterogeniety given the samples that are available. 
-
-#### Sensitivity analysis - exploratory - leave each study out 
-
-note that traditional leave-1-out testing jn metafor does not apply to generalized linear mixed models, and thus individual studies are left out, and the summary pooled proportion re-calculated. 
-
-An example below is performed for study 1, this will be repeated for all 30 studies to assess the impact on the pooled effect size. For the interest of space for initial draft code review, this is not included below. 
-
-```{r leave 1 out sensitivity analysis - study 1}
-
-dat.1 <- slice(dat, -1)
-pes.summary.glmm.1 = metaprop(rupt, total_size,
-                            data=dat.1,
-                            studlab=paste(auth_year),
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            ) 
-print(pes.summary.glmm.1)
-
-```
-
-
-```{r leave 1 out sensitivity analysis - study 2}
-
-dat.2 <- slice(dat, -2)
-pes.summary.glmm.2 = metaprop(rupt, total_size,
-                            data=dat.2,
-                            studlab=paste(auth_year),
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            ) 
-
-leave1out(pes.summary.glmm.2)
-```
-
+Overall, there seems to be an acceptable level of heterogeniety given the samples that are available, and there are no studies that contribute both to heterogeniety and influence on the overall result apart from Juvela. 
 
 ### Funnel plots  - exploratory for small study publication bias 
 
