@@ -153,6 +153,7 @@ We will choose the Wilson method for CI for the following reasons:
 
 This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *Newcombe 1998* and *Brown 2001*. 
 
+
 ### Analyse total cohort of all aneurysms 10 mm and less 
 
 ```{r select total cohort}
@@ -1620,3 +1621,36 @@ The predicted OR and log OR both have confidence intervals that cross 1, and the
 Overall, taking into account the limitations of the data, prior SAH may not increase rupture risk in small unruptured aneurysms measuring 10 mm or less. In addition, the overall rupture risk for conservatively managed aneurysms is more uncertain than previously considered with up to 2% risk of rupture.   
 
 These synthesised data analyses are considered exploratory and hypothesis generating, and additional data are required. 
+
+### Exploratory - try and put the size subgroups all on one plot
+
+
+
+```{r tibble set up}
+dat <- maindata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size, size, type)
+
+```
+
+
+```{r}
+
+pes.summary = metaprop(rupt, total_size,
+                            data=dat,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            byvar = size,
+                            control=list(stepadj=0.5,maxiter=1000),
+                            sm="PLOGIT",
+                            method.tau = "ML",
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary
+
+```
+
+
