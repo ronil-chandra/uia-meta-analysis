@@ -35,18 +35,21 @@ Poor quality
 ```{r calculate quality scoring as per AHRQ thresholds - poor quality}
 
 nos.poor <- nosdata %>%
-  filter(nos_select == 0 | nos_select == 1 | nos_compare == 0 | nos_outcome == 0 | nos_outcome == 1) 
+  filter(nos_select == 0 | nos_select == 1 | nos_compare == 0 | nos_outcome == 0 | nos_outcome == 1) %>%
+  mutate(ahrq = "Poor")
 
 ```
 
 Fair quality 
 
-```{r calculate quality scoring as per AHRQ thresholds - poor quality}
+```{r calculate quality scoring as per AHRQ thresholds - fair quality}
 
 nos.fair <- nosdata %>%
   filter(nos_select == 2) %>%
   filter(nos_compare == 1 | nos_compare == 2) %>%
-  filter(nos_outcome == 2 | nos_outcome == 3)
+  filter(nos_outcome == 2 | nos_outcome == 3) %>%
+  mutate(ahrq = "Fair")
+
 
 ```
 
@@ -58,17 +61,66 @@ Good Quality
 nos.good <- nosdata %>%
   filter(nos_select == 3 | nos_select == 4 ) %>%
   filter(nos_compare == 1 | nos_compare == 2) %>%
-  filter(nos_outcome == 2 | nos_outcome == 3)
+  filter(nos_outcome == 2 | nos_outcome == 3) %>%
+  mutate(ahrq = "Good")
 
 ```
 
-## Table 1 Quality Assessment 
+Join tables
+
+```{r join tibbles}
+
+nos.temp <- full_join(nos.poor, nos.fair)
+
+nos.final <- full_join(nos.temp,nos.good) %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, sel_1, sel_2, sel_3, sel_4, nos_compare, out_1, out_2, out_3, nos_total, ahrq) %>%
+  
 
 
-```{r, Table 1, Baseline Characteristics, results = 'asis'}
+```
 
-sizedata %>%
-  select(auth, pub, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah) %>%
+
+
+
+
+
+### Quality Assessment Table
+
+
+```{r, Quality Table, results = 'asis'}
+
+nos.final %>%
+  
+  knitr::kable(
+    caption = "Risk of bias assessment for non-randomized studies", 
+    col.names = c("Study", "Representativeness of the exposed cohort", "Selection of the non-exposed cohort", "Ascertainment of prior subarachnoid haemorrhage", "Demonstration that outcome of interest was not present at start of study", "Comparability of cohorts on the basis of the design or analysis", "Assessment of outcome", "Was follow-up long enough for outcomes to occur?", "Adequacy of follow up of cohorts", "NOS Quality Score", "AHRQ Standards"),
+    align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c")
+    ) %>%
+  kableExtra::kable_styling(bootstrap = "striped", 
+                            full_width = FALSE,
+                            font_size = 10,
+                            ) %>%
+  add_header_above(c(" " = 1, "Selection" = 4, "Comparability" = 1, "Outcome" = 3, "Total Scores" = 2 )) %>%
+  footnote(
+    general_title = "Footnote:",
+    general = "Thresholds for converting the Newcastle-Ottawa scales to AHRQ standards (good, fair, and poor): 
+    Good quality: 3 or 4 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
+    Fair quality: 2 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
+    Poor quality: 0 or 1 star in selection domain OR 0 stars in comparability domain OR 0 or 1 stars in outcome/exposure domain",
+    threeparttable=TRUE,
+    )
+
+
+```
+
+
+
+
+
+```{r, Quality Table, results = 'asis'}
+
+nos.final %>%
   knitr::kable(
     caption = "Table 1: Baseline Study Characteristics",
     col.names = c("Author", "Publication Year", "Study Year Start", "Study Year End", "Source Population", "Study Type", "Mean Age", "Median Age", "Number of Total Patients Observed", "Number of Total Aneurysms Observed", "Number of Total Patients with prior SAH Observed", "Mean Total Follow up (Months)", "Median Total Follow up (Months)", "Number of Patients with rupture", "Number of Patients with prior SAH and rupture"),
@@ -87,3 +139,10 @@ sizedata %>%
 
 
 ```
+
+
+
+
+
+
+
