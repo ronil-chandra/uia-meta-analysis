@@ -172,7 +172,7 @@ dat <- sizedata %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size)
+  select(auth_year, rupt, total_size, type)
 
 ```
 
@@ -185,6 +185,8 @@ dat <- sizedata %>%
 pes.summary.glmm = metaprop(rupt, total_size,
                             data=dat,
                             studlab=paste(auth_year),
+                            byvar = type,
+                            bylab = "Study Type",
                             method="GLMM",
                             sm="PLOGIT",
                             method.tau = "ML", 
