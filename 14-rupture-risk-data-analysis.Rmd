@@ -10,7 +10,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Objectives:
+### Objectives:
 
 My goal is to learn how to conduct a quantitative synthesis to better understand the current literature on the rupture of an intracranial aneurysm with conservative management. 
 
@@ -177,7 +177,7 @@ dat <- sizedata %>%
 ```
 
 
-### Meta-analysis of proportions using GLMM and Wilson CIs
+#### Meta-analysis of proportions using GLMM and Wilson CIs
   
 
 ```{r meta-analysis of proportions using glmm}
@@ -215,7 +215,7 @@ forest(pes.summary.glmm,
 
 ```
 
-### Display meta-analysis result using a publication quality forest plot
+#### Display meta-analysis result using a publication quality forest plot
 
 ```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
 
@@ -665,7 +665,7 @@ forest(pes.summary.psahneg,
 
 
 
-### Subgroup analyis for length of follow up
+#### Subgroup analyis for length of follow up
 
 A clinical hypothesis to explore is that the proportion of patients that rupture may be associated with the length of follow up in the study. 
 
@@ -876,7 +876,7 @@ estimate 0.1654 (95% CI 0.1078 - 0.2230) p value <.0001
  
 This suggests that study median follow up duration is associated with pooled rupture risk, however, the I2 = 55.8 meaning that there remains moderate between-study variance around the regression line. 
 
-### Exploratory meta-regression to explore length of follow up on rupture outcomes- excluding Juvela
+#### Exploratory meta-regression to explore length of follow up on rupture outcomes- excluding Juvela
  
 
 ```{r metaregression data setup for length of follow up - excluding Juvela}
@@ -921,7 +921,7 @@ bubble(fu.metareg.result.juvela, studlab=dat.fu.metareg.juvela$auth_year, xlim=c
 
 Once Juvela is excluded, there is no evidence that median follow up per study is associated with rupture risk.   
  
-### Metaregression to explore exposure to prior SAH, all studies
+#### Metaregression to explore exposure to prior SAH, all studies
 
 We can analyse whether there is a relationship between the proportion of patients with prior SAH included in the study (potential effect modifier), and the the outcome (rupture proportion). 
 
@@ -994,7 +994,7 @@ bubble(psah.metareg.result, studlab=dat.psah.metareg$auth_year, xlim=c(0, 1), ma
 
 
 
-### Metaregression to explore exposure to prior SAH, excluding Juvela
+#### Metaregression to explore exposure to prior SAH, excluding Juvela
 
 
 ```{r metaregression data setup for prior SAH at study level, excluding Juvela - data setup}
@@ -1044,7 +1044,7 @@ bubble(psah.metareg.result.juvela, studlab=dat.psah.metareg.juvela$auth_year, xl
 Once Juvela is excluded, there is no evidence that proportion fo patients with prior SAH per study is associated with rupture risk.   
 
 
-### Metaregression to explore size categorised at 5mm
+#### Metaregression to explore size categorised at 5mm
 
 We can analyse whether there is a relationship between the proportion of patients with aneurysms measuring 5mm and less included in the study (potential effect modifier), and the the outcome (rupture proportion). 
 
@@ -1103,7 +1103,7 @@ bubble(size5mm.metareg.result, studlab=dat.size5.metareg$auth_year, xlim=c(0, 1)
 
 ```
  
-### Metaregression to explore size categorised at 3mm
+#### Metaregression to explore size categorised at 3mm
  
 ```{r metaregression data setup for size categorisation at 3 mm at study level - data setup}
 
@@ -1152,8 +1152,7 @@ bubble(size3mm.metareg.result, studlab=dat.size3.metareg$auth_year, xlim=c(0, 1)
  
 
 
- 
-### Metaregression to explore size end of study enrollment 
+#### Metaregression to explore size end of study enrollment 
 
 We can analyse whether there is a relationship between the year the last patient was included in the study (potential effect modifier), and the the outcome (rupture proportion). 
 
@@ -1240,7 +1239,7 @@ bubble(year.metareg.result.juvela, studlab=dat.year.metareg.juvela$auth_year, xl
  
 Once Juvela is excluded, then there is no evidence of an association between rupture risk and study end year. 
 
-### Multivariable meta-regression
+#### Multivariable meta-regression
 
 In the previous scenarios we have considered the impact of a single study-level effect modifier on the outcome of rupture risk. 
 
@@ -1513,9 +1512,9 @@ In our case, the most likely explanation for this appearance of the funnel plot 
 In general, testing for funnel plot assymetry should always be performed in the context of visual assessment, and while there are many potential statistical tests for funnel plots including Egger 1997, Harbord 2006, Peters 2006 or Rücker 2008, even Cochrane suggests that tests for funnel plot asymmetry should be used in only a minority of meta-analyses (Ioannidis 2007b).
 
 
-## Exploratory analysis 
+### Exploratory analysis 
 
-### How do we assess the effect of exposure to prior SAH for participants that arise from the same population ?
+#### How do we assess the effect of exposure to prior SAH for participants that arise from the same population ?
 
 Consider the data in the form of a 2 x 2 table, prior SAH as the exposure and rupture as the outcome. 
 
