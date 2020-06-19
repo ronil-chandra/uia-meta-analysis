@@ -1636,7 +1636,7 @@ dat <- maindata %>%
 ```
 
 
-```{r}
+```{r explore}
 
 pes.summary = metaprop(rupt, total_size,
                             data=dat,
