@@ -23,7 +23,7 @@ A single excel data file is loaded to carry out all data table creation, with al
 
 ```{r load data, echo = FALSE, include = FALSE}
 
-maindata <- read_csv("data/maindata.csv")
+maindata <- read_csv("data/maindata160620.csv")
 ```
 
 
@@ -31,7 +31,10 @@ maindata <- read_csv("data/maindata.csv")
 
 ```{r select total cohort}
 
-sizedata <- filter(maindata, size == 10)
+sizedata <- filter(maindata, size == 10) %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah, nos_total) %>%
+  arrange(desc(nos_total), desc(num))
 
 ```
 
@@ -43,11 +46,10 @@ sizedata <- filter(maindata, size == 10)
 ```{r, Table 1, Baseline Characteristics, results = 'asis'}
 
 sizedata %>%
-  select(auth, pub, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah) %>%
   knitr::kable(
     caption = "Table 1: Baseline Study Characteristics",
-    col.names = c("Author", "Publication Year", "Study Year Start", "Study Year End", "Source Population", "Study Type", "Mean Age", "Median Age", "Number of Total Patients Observed", "Number of Total Aneurysms Observed", "Number of Total Patients with prior SAH Observed", "Mean Total Follow up (Months)", "Median Total Follow up (Months)", "Number of Patients with rupture", "Number of Patients with prior SAH and rupture"),
-    align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
+    col.names = c("Study", "Study Year Start", "Study Year End", "Source Population", "Study Type", "Mean Age", "Median Age", "Number of Total Patients Observed", "Number of Total Aneurysms Observed", "Number of Total Patients with prior SAH Observed", "Mean Total Follow up (Months)", "Median Total Follow up (Months)", "Number of Patients with rupture", "Number of Patients with prior SAH and rupture", "NOS Quality Score"),
+    align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
     longtable=TRUE,
     digits = 1) %>%
   kableExtra::kable_styling(bootstrap = "striped", 
