@@ -68,22 +68,45 @@ nos.good <- nosdata %>%
 
 Join tables
 
-```{r join tibbles}
+```{r join tibbles, and arrange according to AHRQ}
 
 nos.temp <- full_join(nos.poor, nos.fair)
 
 nos.final <- full_join(nos.temp,nos.good) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, sel_1, sel_2, sel_3, sel_4, nos_compare, out_1, out_2, out_3, nos_total, ahrq) %>%
-  
-
+  arrange(match(ahrq, c("Good", "Fair", "Poor")), desc(nos_total))
 
 ```
 
 
+```{r recode variables to star system for NOS}
 
+nos.final$sel_1 <- as.character(nos.final$sel_1)
+nos.final$sel_1 <- recode(nos.final$sel_1, "1" = "*", "0" = " ")
 
+nos.final$sel_2 <- as.character(nos.final$sel_2)
+nos.final$sel_2 <- recode(nos.final$sel_2, "1" = "*", "0" = " ")
 
+nos.final$sel_3 <- as.character(nos.final$sel_3)
+nos.final$sel_3 <- recode(nos.final$sel_3, "1" = "*", "0" = " ")
+
+nos.final$sel_4 <- as.character(nos.final$sel_4)
+nos.final$sel_4 <- recode(nos.final$sel_4, "1" = "*", "0" = " ")
+
+nos.final$nos_compare <- as.character(nos.final$nos_compare)
+nos.final$nos_compare <- recode(nos.final$nos_compare, "1" = "*", "2" = "* *", "0" = " ")
+
+nos.final$out_1 <- as.character(nos.final$out_1)
+nos.final$out_1 <- recode(nos.final$out_1, "1" = "*", "0" = " ")
+
+nos.final$out_2 <- as.character(nos.final$out_2)
+nos.final$out_2 <- recode(nos.final$out_2, "1" = "*", "0" = " ")
+
+nos.final$out_3 <- as.character(nos.final$out_3)
+nos.final$out_3 <- recode(nos.final$out_3, "1" = "*", "0" = " ")
+
+```
 
 ### Quality Assessment Table
 
@@ -101,6 +124,10 @@ nos.final %>%
                             full_width = FALSE,
                             font_size = 10,
                             ) %>%
+  pack_rows("AHRQ Good Standard", 1, 11) %>%
+  pack_rows("AHRQ Fair Standard", 12, 13) %>%
+  pack_rows("AHRQ Poor Standard", 14, 31) %>%
+  
   add_header_above(c(" " = 1, "Selection" = 4, "Comparability" = 1, "Outcome" = 3, "Total Scores" = 2 )) %>%
   footnote(
     general_title = "Footnote:",
@@ -108,32 +135,6 @@ nos.final %>%
     Good quality: 3 or 4 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
     Fair quality: 2 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
     Poor quality: 0 or 1 star in selection domain OR 0 stars in comparability domain OR 0 or 1 stars in outcome/exposure domain",
-    threeparttable=TRUE,
-    )
-
-
-```
-
-
-
-
-
-```{r, Quality Table, results = 'asis'}
-
-nos.final %>%
-  knitr::kable(
-    caption = "Table 1: Baseline Study Characteristics",
-    col.names = c("Author", "Publication Year", "Study Year Start", "Study Year End", "Source Population", "Study Type", "Mean Age", "Median Age", "Number of Total Patients Observed", "Number of Total Aneurysms Observed", "Number of Total Patients with prior SAH Observed", "Mean Total Follow up (Months)", "Median Total Follow up (Months)", "Number of Patients with rupture", "Number of Patients with prior SAH and rupture"),
-    align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
-    longtable=TRUE,
-    digits = 1) %>%
-  kableExtra::kable_styling(bootstrap = "striped", 
-                            full_width = FALSE,
-                            font_size = 10,
-                            ) %>%
-  footnote(
-    general_title = "Footnote:",
-    general = "SAH = Subrachnoid haemorrhage",
     threeparttable=TRUE,
     )
 
