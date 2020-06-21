@@ -717,6 +717,24 @@ dat.fu <- sizedata %>%
 
 ```
 
+Calculate mean and median follow up in included studies
+
+```{r calculate mean follow up across the studies}
+
+dat.fu.mean <- dat.fu %>% 
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+dat.fu.mean
+
+dat.fu.median <- dat.fu %>% 
+  drop_na(fu) %>%
+  summarise(median = median(fu, na.rm = TRUE))
+dat.fu.median
+
+```
+
+Mean follow up length across included studies is 51 months, and median is 38 months. It seems more appropriate to utilise the means as a summary compared to the median. 
+
 Now that the column with length of follow up is created, we can perform a subgroup meta-analysis of studies with intermediate and long term follow up. 
 
 ```{r subgroup analysis with intermediate of follow up}
@@ -1560,13 +1578,13 @@ In general, testing for funnel plot assymetry should always be performed in the 
 
 Consider the data in the form of a 2 x 2 table, prior SAH as the exposure and rupture as the outcome. 
 
-ai = prior SAH and rupture +ve 
-bi = prior SAH and rupture -ve
-ci = no prior SAH and rupture +ve
-di = no prior SAH, and rupture -ve
+* ai = prior SAH and rupture +ve 
+* bi = prior SAH and rupture -ve
+* ci = no prior SAH and rupture +ve
+* di = no prior SAH, and rupture -ve
 
-n1i = ai + bi = total aneurysms with prior SAH
-n2i = ci + di = total aneurysms without prior SAH
+* n1i = ai + bi = total aneurysms with prior SAH
+* n2i = ci + di = total aneurysms without prior SAH
 
 Rupture of the aneurysm is considered a rare event ie <1%, and the data are sparse with single 0s or double 0s in the 2 x 2 table. 
 
@@ -1603,13 +1621,13 @@ Structure the data in this format
 
 Author	This signifies the column for the study label (i.e., the first author)
 
-ai = prior SAH and rupture +ve 
-bi = prior SAH and rupture -ve
-ci = no prior SAH and rupture +ve
-di = no prior SAH, and rupture -ve 
+* ai = prior SAH and rupture +ve 
+* bi = prior SAH and rupture -ve
+* ci = no prior SAH and rupture +ve
+* di = no prior SAH, and rupture -ve 
 
-n1i = ai + bi = total aneurysms with prior SAH
-n2i = ci + di = total aneurysms without prior SAH
+* n1i = ai + bi = total aneurysms with prior SAH
+* n2i = ci + di = total aneurysms without prior SAH
 
 Assumptions
 
@@ -1646,16 +1664,7 @@ forest(res)
 
 ```
 
-transform the log OR to OR
 
-```{r convert log OR to OR}
-res2 <- predict(res, transf=exp, 
-                digits=2
-                )
-res2
-```
-
-The predicted OR and log OR both have confidence intervals that cross 1, and the confidence intervals are wide. 
 
 Overall, taking into account the limitations of the data, prior SAH may not increase rupture risk in small unruptured aneurysms measuring 10 mm or less. In addition, the overall rupture risk for conservatively managed aneurysms is more uncertain than previously considered with up to 2% risk of rupture.   
 
