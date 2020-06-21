@@ -1672,3 +1672,14 @@ These synthesised data analyses are considered exploratory and hypothesis genera
 
 ### Exploratory - try and put the size subgroups all on one plot
 
+additional code suggested by Thanh, 
+
+however, unlike retrospective / prospective subgroup analyisis, the subgroups are not mutually exclusive when conidering poportion of patients included with various size categories, ie numbers of 3 mm and less are included in 5 mm and less and so on. Thus I think that individual plots for size subgroup analysis submitted as supplementary files are more appropriate. 
+
+we can do additional subgroup analysis and combined plots for study quality etc. 
+
+
+
+
+
+
