@@ -199,7 +199,6 @@ dat <- sizedata %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size, type)
   
-
 ```
 
 
@@ -585,10 +584,10 @@ forest(pes.summary.glmm3,
 
 Firstly structure the data in individual studies with authors in a 2 x 2 table
 
-ai = prior SAH and rupture +ve = variable rupt_psah
-bi = prior SAH and rupture -ve
-ci = no prior SAH and rupture +ve = rupt minus rupt_psah
-di = no prior SAH, and rupture -ve 
+ai = aneuryms with exposure to prior SAH and rupture +ve = variable rupt_psah
+bi = aneuryms with exposure to prior SAH and rupture -ve
+ci = aneuryms with no exposure to prior SAH, and rupture +ve = rupt minus rupt_psah
+di = aneuryms with no exposure to prior SAH, and rupture -ve 
 
 n1i = ai + bi = total aneurysms with prior SAH
 n2i = ci + di = total aneurysms without prior SAH
@@ -597,13 +596,15 @@ n1i + n2i = total_anr included with and without prior SAH
 
 total number of events = total number of ruptures = variable rupt
 
-assumptions:
-if number of aneurysms in the size criteria are not reported, number of patients are carried forward, assuming 1 patient has 1 aneurysm. 
-If the number of patients with prior is SAH is known, this is utilised as n1i. 
- 
-If the patients of patients with prior is SAH is unknown, then the proportion of patients with prior SAH in the total observation cohort of all aneurysms is carried forward and applied to the number of aneurysms, and an estimated number of patients with prior SAH calculated based on the total observation cohort. 
+Assumptions:
 
-Data analysis is limited to studies in which there are known values of ai, bi, ci, and di. If there are NAs in the 2 x 2 table, then that study is excluded. 
+1. Only 1 aneurysm ruptures per patient. 
+2. If the patients of patients with prior is SAH is unknown, then the proportion of patients with prior SAH in the total observation cohort of all aneurysms is carried forward and applied to the number of aneurysms, and an estimated number of patients with prior SAH calculated based on the total observation cohort. 
+2. Aneurysm mutiplicity is not taken into account, to avoid multiple assumptions regarding proportion with prior SAH and proportion with multiple aneurysms and to avoid greater inaccuracy in this analysis. 
+3. Thus it is assumed for this analysis that each patient has 1 aneurysm. 
+4. Data analysis is limited to studies in which there are known or calculated values of ai, bi, ci, and di using the assumptions. If there are NAs in the 2 x 2 table, then that study is excluded. 
+
+
 
 ```{r restructure to 2 x 2 table for PSAH}
 
