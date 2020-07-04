@@ -170,45 +170,37 @@ sizedata <- filter(maindata, size == 10)
 
 Assumptions: 
 
-1. If the number of aneurysms for a particular size criteria in the study has been reported, this has been extracted and utilised for analysis. 
-1. If the number of number of aneuryms is not known for the specific size criteria, the assumption is that a patient with multiple aneurysms has 2 aneurysms. 
-2. This can be caculated using the proportion of patients with multiple aneuryms *variable multi_tot* in the total observation cohort *variable num_tot*, and multiplying it by the number of patients in that specific size criteria. This is the number of patients that we can assume has 2 aneurysms. 
-3. The total number of aneurysms is then calculated as *variable num_multi*
+If the number of aneurysms for a particular size criteria in the study has been reported, this has been extracted and utilised for analysis. 
 
-```{r coalesce patients into aneurysms}
+If the number of number of aneuryms is not known for the specific size criteria, and we do know the proportion of patients with multiple aneuryms in the total observation cohort:
 
-dat.temp <- sizedata %>%
-  mutate(prop_multi = multi_tot / num_tot) %>%
-  mutate(num_multi = prop_multi * num + num) %>%
-  mutate(num_multi_temp = coalesce(num_anr, num_multi))
-  
-  
+1. The assumption is that a patient with multiple aneurysms has 2 aneurysms, and we can calculate the total number of aneurysms for that size criteria.   
+2. This can be caculated using the proportion of patients with multiple aneuryms *variable multi_tot* in the total observation cohort *variable num_tot*. 
+3. This proportion *prop_multi* can be multiplied by the number of patients in that specific size criteria. This is the number of patients that we can assume has 2 aneurysms. 
+4. The total number of aneurysms for that size *variable total_size* is then calculated by adding variable num. 
+5. We have now calculated the total number of aneurysms in that size category, taking into account aneurysm multiplicity. 
 
-```
+If the number of number of aneuryms is not known for the specific size criteria, and we do *NOT* know the proportion of patients with multiple aneuryms in the total observation cohort, then 1 patient is assumed to have 1 aneurysm. 
 
-
-1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
-2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+ 
 
 
 
-```{r coalesce patients into aneurysms}
+```{r calculate total number of aneurysms for specific size criteria 10 mm and less}
 
 dat <- sizedata %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
+  mutate(prop_multi = multi_tot / num_tot) %>%
+  mutate(num_multi = prop_multi * num + num) %>%
+  mutate(num_multi_temp = coalesce(num_anr, num_multi)) %>%
+  mutate(total_size_temp = coalesce(num_anr, num)) %>%
+  mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
+  mutate(total_size = round(total_size_temp_2, 0)) %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size, type)
+  
 
 ```
-
-
-
-)
-  mutate(total_size = coalesce(num_anr,num)) %>%
-  drop_na(total_size) %>% 
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size, type)
 
 
 #### Meta-analysis of proportions using GLMM and Wilson CIs
@@ -231,7 +223,7 @@ pes.summary.glmm
 
 The output from the random effects meta-analysis using the GLMM: 
 
-Summary estimate is 1.22 with 95% CI 0.77 to 1.92
+Summary estimate is 1.2112 [0.7844; 1.8659]
 
 Note that for GLMMs no continuity correction is used. *Meta documentation* Given our rationale for choosing the GLMM, this should produce the least biased result and reasonable coverage probabilities for the 95% CI, as suggested by *Stinjen 2010*. Note CIs are using Wilson score method.
 
@@ -390,21 +382,21 @@ sizedata7 <- filter(maindata, size == 7)
 
 ```
 
-Assumptions: 
 
-1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
-2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
-
-```{r coalesce patients into aneurysms for 7 mm}
+```{r calculate total number of aneurysms for specific size criteria 7 mm and less}
 
 dat7 <- sizedata7 %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
+  mutate(prop_multi = multi_tot / num_tot) %>%
+  mutate(num_multi = prop_multi * num + num) %>%
+  mutate(num_multi_temp = coalesce(num_anr, num_multi)) %>%
+  mutate(total_size_temp = coalesce(num_anr, num)) %>%
+  mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
+  mutate(total_size = round(total_size_temp_2, 0)) %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size)
+  select(auth_year, rupt, total_size, type)
 
 ```
-
 
 
 #### Meta-analysis of proportions of 7 mm aneurysms and less using GLMM and Wilson CIs
@@ -455,19 +447,21 @@ sizedata5 <- filter(maindata, size == 5)
 
 ```
 
-Assumptions: 
 
-1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
-2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
-
-```{r coalesce patients into aneurysms for 5 mm}
+```{r calculate total number of aneurysms for specific size criteria 5 mm and less}
 
 dat5 <- sizedata5 %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
+  mutate(prop_multi = multi_tot / num_tot) %>%
+  mutate(num_multi = prop_multi * num + num) %>%
+  mutate(num_multi_temp = coalesce(num_anr, num_multi)) %>%
+  mutate(total_size_temp = coalesce(num_anr, num)) %>%
+  mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
+  mutate(total_size = round(total_size_temp_2, 0)) %>%
   drop_na(total_size) %>% 
   drop_na(rupt) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size)
+  select(auth_year, rupt, total_size, type)
+
 
 ```
 
@@ -522,19 +516,19 @@ sizedata3 <- filter(maindata, size == 3)
 ```
 
 
-Assumptions: 
-
-1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
-2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
-
-
-```{r coalesce patients into aneurysms for 3 mm}
+```{r calculate total number of aneurysms for specific size criteria 3 mm and less}
 
 dat3 <- sizedata3 %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
+  mutate(prop_multi = multi_tot / num_tot) %>%
+  mutate(num_multi = prop_multi * num + num) %>%
+  mutate(num_multi_temp = coalesce(num_anr, num_multi)) %>%
+  mutate(total_size_temp = coalesce(num_anr, num)) %>%
+  mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
+  mutate(total_size = round(total_size_temp_2, 0)) %>%
   drop_na(total_size) %>% 
+  drop_na(rupt) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size)
+  select(auth_year, rupt, total_size, type)
 
 ```
 
