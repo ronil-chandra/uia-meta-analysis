@@ -101,13 +101,13 @@ Given unique characteristics of the data that we are synthesising listed above, 
 
 ##### Choice of meta-analytical method
 
-Classical meta-analytical methods have the potential to contribute to additional sparse data bias and give misleading results for rare events *Bradburn 2007* from Cochrane. 
+Classical meta-analytical methods have the potential to contribute to additional sparse data bias and give misleading results for rare events. *Bradburn 2007 from Cochrane*
 
-The first step is to improve the statistical properties of a skewed dataset in terms of the data distribution and variance prior to synthesis. To achieve this, the data is transformed in order to approximate a normal distribution to enhance the validity of the statistical procedures. The most common transformation methods are the logit and the double arcine transformation. 
+The first step is to improve the statistical properties of a skewed dataset in terms of the data distribution and variance prior to synthesis. Variance is the squared difference from the mean. To achieve this, the data is transformed in order to approximate a normal distribution to enhance the validity of the statistical procedures. The most common transformation methods are the logit and the double arcine transformation. 
 
 In the logit transformation, proportions are converted to the natural logarithm of the proportions (i.e., the logit), and assumed to follow the normal distribution. All analyses are performed on the logit proportion, and then the logits converted back to raw proportions for reporting. However, if there are no ruptures and pi = 0, then the logit and variance become undefined. Furthermore, if there is high between-study variablity or small study sample sizes, the logit transformed proportion is underestimated. *Hamza 2008* To overcome this statistical limitation, typically a continuity correction of 0.5 is applied. In our analysis, this creates risk of introducing additional sparse data bias and reducing the validity of the result, especially given that pi is close to 0.
 
-The alternate method of transformation to consider which can better stabilise the variance, and normalise the distribution especially for small sample sizes or rare event rates, is the double arcine transformation of Freeman-Tukey *Freeman and Tukey 1950*. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller *Miller 1978*. However, the Miller back transformation utilises the harmonic mean of the sample sizes. This affects the backtransformed proportion as described by *Schwarzer 2019*, and leads to misleading results. This issue is particularly evident when there is a large range of sample sizes. This issue does affect our specific dataset since n in the studies varies from 22 to over 3323. 
+The alternate method of transformation to consider which can better normalises the distribution and variance especially for small sample sizes or rare event rates, is the double arcine transformation of Freeman-Tukey *Freeman and Tukey 1950*. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller *Miller 1978*. However, the Miller back transformation utilises the harmonic mean of the sample sizes. This affects the backtransformed proportion as described by *Schwarzer 2019*, and leads to misleading results. This issue is particularly evident when there is a large range of sample sizes. This issue does affect our specific dataset since n in the studies varies from 22 to over 3323. 
 
 In the classical meta-analytical methods, after transformation and statistical procedures, the results are backtransformed to study level results, and synthesised. Data synthesis can be carried out using the generic inverse variance method, which calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. A variation on the generic inverse variance method incorporates an assumption that there is some variation between studies, ie heterogeneity, while measuring the same effect. This produces a random effects meta-analysis, the most common of which is the the DerSimonian and Laird method *DerSimonian 1986*. This is the most commonly utilised method in medical meta-analysis. 
 
@@ -170,8 +170,27 @@ sizedata <- filter(maindata, size == 10)
 
 Assumptions: 
 
+1. If the number of aneurysms for a particular size criteria in the study has been reported, this has been extracted and utilised for analysis. 
+1. If the number of number of aneuryms is not known for the specific size criteria, the assumption is that a patient with multiple aneurysms has 2 aneurysms. 
+2. This can be caculated using the proportion of patients with multiple aneuryms *variable multi_tot* in the total observation cohort *variable num_tot*, and multiplying it by the number of patients in that specific size criteria. This is the number of patients that we can assume has 2 aneurysms. 
+3. The total number of aneurysms is then calculated as *variable num_multi*
+
+```{r coalesce patients into aneurysms}
+
+dat.temp <- sizedata %>%
+  mutate(prop_multi = multi_tot / num_tot) %>%
+  mutate(num_multi = prop_multi * num + num) %>%
+  mutate(num_multi_temp = coalesce(num_anr, num_multi))
+  
+  
+
+```
+
+
 1. If number of aneurysms is unkown, then assume that 1 patient has 1 aneurysm ie variable num carries forward to num_anr, and is called new vaariable total_size. 
 2. If the number of aneuryms for that size criteria are known, then then variable num ie number of patients is **not** carried forward. 
+
+
 
 ```{r coalesce patients into aneurysms}
 
@@ -182,6 +201,14 @@ dat <- sizedata %>%
   select(auth_year, rupt, total_size, type)
 
 ```
+
+
+
+)
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size, type)
 
 
 #### Meta-analysis of proportions using GLMM and Wilson CIs
