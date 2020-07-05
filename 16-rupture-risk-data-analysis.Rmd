@@ -182,9 +182,13 @@ If the number of number of aneuryms is not known for the specific size criteria,
 
 If the number of number of aneuryms is not known for the specific size criteria, and we do *NOT* know the proportion of patients with multiple aneuryms in the total observation cohort, then 1 patient is assumed to have 1 aneurysm. 
 
- 
+For patients with exposure to prior SAH. The number of aneurysms in patients with prior SAH is unknown ie these patients may have multiple aneurysms.  
 
-```{r calculate total number of aneurysms for specific size criteria 10 mm and less}
+1. We can assume that the proportion of patients with multiple aneurysms in the total cohort, is the same as the proportion of patients with multiple aneurysms with prior SAH, and calculate this if we know the number of patients with exposure to prior SAH in the specific size category. 
+2. If the number of patients with exposure to prior SAH in the specific size category is unknown, then we can assume that the proportion of patients with prior SAH in the total observation cohort is the same proportion as those in that size category. Thus if we know the total number of aneurysms in that size category, we can calculate the proportion that have had exposure to prior SAH. 
+ 
+ 
+```{r calculate total number of aneurysms and prior SAH exposure for specific size criteria 10 mm and less}
 
 dat <- sizedata %>%
   mutate(prop_multi = multi_tot / num_tot) %>%
@@ -209,6 +213,9 @@ dat <- sizedata %>%
 
 
 ```{r meta-analysis of proportions using glmm}
+
+dat <- dat %>%
+  drop_na(total_size)
 
 pes.summary.glmm = metaprop(rupt, total_size,
                             data=dat,
@@ -433,9 +440,16 @@ dat7 <- sizedata7 %>%
   mutate(total_size_temp = coalesce(num_anr, num)) %>%
   mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
   mutate(total_size = round(total_size_temp_2, 0)) %>%
-  drop_na(total_size) %>% 
+  mutate(psah_size_temp = psah * prop_multi + psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_size) %>%
+  mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
+  mutate(psah_size = round(size_psah_temp, 0)) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size, type)
+  mutate(pop = fct_collapse(sizedata$country, 
+             "Japanese" = "Japan",
+             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")
+             ))
 
 ```
 
@@ -444,6 +458,9 @@ dat7 <- sizedata7 %>%
   
 
 ```{r meta-analysis of proportions using glmm for 7mm}
+
+dat7 <- dat7 %>%
+  drop_na(total_size)
 
 pes.summary.glmm7 = metaprop(rupt, total_size,
                             data=dat7,
@@ -498,10 +515,16 @@ dat5 <- sizedata5 %>%
   mutate(total_size_temp = coalesce(num_anr, num)) %>%
   mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
   mutate(total_size = round(total_size_temp_2, 0)) %>%
-  drop_na(total_size) %>% 
-  drop_na(rupt) %>%
+  mutate(psah_size_temp = psah * prop_multi + psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_size) %>%
+  mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
+  mutate(psah_size = round(size_psah_temp, 0)) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size, type)
+  mutate(pop = fct_collapse(sizedata$country, 
+             "Japanese" = "Japan",
+             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")
+             ))
 
 
 ```
@@ -512,6 +535,10 @@ dat5 <- sizedata5 %>%
   
 
 ```{r meta-analysis of proportions using glmm for 5 mm}
+
+dat5 <- dat5 %>%
+  drop_na(total_size) %>%
+  drop_na(rupt)
 
 pes.summary.glmm5 = metaprop(rupt, total_size,
                             data=dat5,
@@ -566,10 +593,17 @@ dat3 <- sizedata3 %>%
   mutate(total_size_temp = coalesce(num_anr, num)) %>%
   mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
   mutate(total_size = round(total_size_temp_2, 0)) %>%
-  drop_na(total_size) %>% 
-  drop_na(rupt) %>%
+  mutate(psah_size_temp = psah * prop_multi + psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_size) %>%
+  mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
+  mutate(psah_size = round(size_psah_temp, 0)) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size, type)
+  mutate(pop = fct_collapse(sizedata$country, 
+             "Japanese" = "Japan",
+             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")
+             ))
+
 
 ```
 
@@ -580,6 +614,10 @@ dat3 <- sizedata3 %>%
 
 
 ```{r meta-analysis of proportions using glmm for 3mm}
+
+dat3 <- dat3 %>%
+  drop_na(total_size) %>%
+  drop_na(rupt)
 
 pes.summary.glmm3 = metaprop(rupt, total_size,
                             data=dat3,
