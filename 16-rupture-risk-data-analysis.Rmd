@@ -203,10 +203,8 @@ dat <- sizedata %>%
   mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
   mutate(psah_size = round(size_psah_temp, 0)) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(pop = fct_collapse(sizedata$country, 
-             "Japanese" = "Japan",
-             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")
-             ))
+  mutate(pop = fct_collapse(sizedata$country, "Japanese" = "Japan", "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")))
+        
 ```
 
 #### Meta-analysis of proportions using GLMM and Wilson CIs
@@ -834,6 +832,49 @@ Mean follow up length across included studies is 51 months, and median is 38 mon
 
 Now that the column with length of follow up is created, we can perform a subgroup meta-analysis of studies with intermediate and long term follow up. 
 
+```{r subgroup analysis with both intermediate and long term follow up - data set up}
+
+dat.fu.total <- dat.fu %>%
+  mutate(fu_5yr = case_when(fu <= 60 ~ "Less than 5 Years", fu > 60 ~ "Greater than 5 years")) %>%
+  drop_na(fu_5yr)
+
+```
+
+```{r subgroup analysis with both intermediate and long term follow up - execution}
+
+pes.summary.glmm.fu.5yr = metaprop(rupt, total_size,
+                            data=dat.fu.total,
+                            studlab=paste(auth_year),
+                            byvar = fu_5yr,
+                            bylab = "Follow up length",
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.fu.5yr
+
+```
+
+```{r forest for publication using GLMM for subgroup analysis by follow up at 5 years, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm.fu.5yr,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
 ```{r subgroup analysis with intermediate of follow up}
 
 dat.fu.int <- dat.fu %>%
@@ -980,9 +1021,8 @@ Exploratory meta-regression to explore length of follow up on rupture outcomes, 
 
 ```{r metaregression data setup for length of follow up, including all studies}
 
-dat.fu.metareg <- sizedata %>%
+dat.fu.metareg <- dat %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)/12) %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size, fu) %>%
@@ -1034,10 +1074,9 @@ However, it does seem that this could be explained by the Juvela et al study hav
 
 ```{r metaregression data setup for length of follow up - excluding Juvela}
 
-dat.fu.metareg.juvela <- sizedata %>%
+dat.fu.metareg.juvela <- dat %>%
   slice(-12) %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)/12) %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size, fu) %>%
@@ -1104,27 +1143,18 @@ total number of events = total number of ruptures = variable rupt
 
 ```{r metaregression data setup for prior SAH at study level, all studies - data setup}
 
-dat.psah.metareg <- sizedata %>%
+dat.psah.metareg <- dat %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(total_anr = coalesce(num_anr,num)) %>%
-  drop_na(total_anr) %>%
-  rename(ai = rupt_psah) %>%
-  rename(rupt.total = rupt) %>%
-  mutate(ci = rupt.total - ai) %>%
-  rename(n1i.temp = psah) %>%
-  mutate(prop = psah_tot / num_tot) %>%
-  mutate(num_anr_psah = prop * total_anr) %>%
-  mutate(n1i = coalesce(n1i.temp,num_anr_psah)) %>%
-  mutate(n2i = total_anr - n1i) %>%
-  mutate(bi = n1i - ai) %>%
-  mutate(di = n2i - ci) %>%
-  select(auth_year, rupt.total, total_anr, prop)  
+  select(auth_year, rupt, total_size, prop_psah) %>%
+  drop_na(total_size) %>%
+  drop_na(prop_psah)
 
 ```
 
+
 ```{r metaregression data setup for prior SAH at study level, all studies - execution}
 
-psah.metareg = metaprop(rupt.total, total_anr,
+psah.metareg = metaprop(rupt, total_size,
                       data=dat.psah.metareg,
                       studlab=paste(auth_year),
                       method="GLMM",
@@ -1134,7 +1164,7 @@ psah.metareg = metaprop(rupt.total, total_anr,
                       pscale = 100
                       )
 
-psah.metareg.result <- metareg(psah.metareg, ~prop)
+psah.metareg.result <- metareg(psah.metareg, ~prop_psah)
 psah.metareg.result
 ```
 
@@ -1152,28 +1182,18 @@ Here again, metaregression reveals that the proportion of patients with prior SA
 
 ```{r metaregression data setup for prior SAH at study level, excluding Juvela - data setup}
 
-dat.psah.metareg.juvela <- sizedata %>%
+dat.psah.metareg.juvela <- dat %>%
   slice(-12) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(total_anr = coalesce(num_anr,num)) %>%
-  drop_na(total_anr) %>%
-  rename(ai = rupt_psah) %>%
-  rename(rupt.total = rupt) %>%
-  mutate(ci = rupt.total - ai) %>%
-  rename(n1i.temp = psah) %>%
-  mutate(prop = psah_tot / num_tot) %>%
-  mutate(num_anr_psah = prop * total_anr) %>%
-  mutate(n1i = coalesce(n1i.temp,num_anr_psah)) %>%
-  mutate(n2i = total_anr - n1i) %>%
-  mutate(bi = n1i - ai) %>%
-  mutate(di = n2i - ci) %>%
-  select(auth_year, rupt.total, total_anr, prop)   
+  select(auth_year, rupt, total_size, prop_psah) %>%
+  drop_na(total_size) %>%
+  drop_na(prop_psah) 
 
 ```
 
 ```{r metaregression data setup for prior SAH at study level, excluding Juvela - execution}
 
-psah.metareg.juvela = metaprop(rupt.total, total_anr,
+psah.metareg.juvela = metaprop(rupt, total_size,
                       data=dat.psah.metareg.juvela,
                       studlab=paste(auth_year),
                       method="GLMM",
@@ -1183,7 +1203,7 @@ psah.metareg.juvela = metaprop(rupt.total, total_anr,
                       pscale = 100
                       )
 
-psah.metareg.result.juvela <- metareg(psah.metareg.juvela, ~prop)
+psah.metareg.result.juvela <- metareg(psah.metareg.juvela, ~prop_psah)
 psah.metareg.result.juvela
 ```
 
@@ -1410,19 +1430,18 @@ Since we are analysing at a study level, this is an exploratory and hypothesis g
 
 ```{r r metaregression for Japanese - data set up}
 
-dat.jap.metareg <- sizedata %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
+dat.jap.metareg <- dat %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, end, rupt, total_size) %>%
-  drop_na(end)
+  select(auth_year, pop, rupt, total_size) %>%
+  drop_na(pop)
 
 ```
 
 ```{r metaregression for for Japanese - execution}
 
-year.metareg = metaprop(rupt, total_size,
-                      data=dat.year.metareg,
+jap.metareg = metaprop(rupt, total_size,
+                      data=dat.jap.metareg,
                       studlab=paste(auth_year),
                       method="GLMM",
                       sm="PLOGIT",
@@ -1431,13 +1450,13 @@ year.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-year.metareg.result <- metareg(year.metareg, ~end)
-year.metareg.result
+jap.metareg.result <- metareg(jap.metareg, ~pop)
+jap.metareg.result
 ```
  
 ```{r metaregression - option 2 - bubble plot - year}
 
-bubble(year.metareg.result, studlab=dat.year.metareg$auth_year, xlim=c(1960, 2020), main="Meta-regression plot for Study End Year")
+bubble(jap.metareg.result, studlab=dat.jap.metareg$auth_year, xlim=c(1960, 2020), main="Meta-regression plot for Study End Year")
 
 ```
  
