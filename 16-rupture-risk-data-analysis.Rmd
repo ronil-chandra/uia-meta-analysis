@@ -184,8 +184,6 @@ If the number of number of aneuryms is not known for the specific size criteria,
 
  
 
-
-
 ```{r calculate total number of aneurysms for specific size criteria 10 mm and less}
 
 dat <- sizedata %>%
@@ -195,15 +193,17 @@ dat <- sizedata %>%
   mutate(total_size_temp = coalesce(num_anr, num)) %>%
   mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
   mutate(total_size = round(total_size_temp_2, 0)) %>%
-  drop_na(total_size) %>% 
+  mutate(psah_size_temp = psah * prop_multi + psah) %>%
+  mutate(prop_psah = psah_tot / num_tot) %>%
+  mutate(num_anr_psah = prop_psah * total_size) %>%
+  mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
+  mutate(psah_size = round(size_psah_temp, 0)) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(pop = fct_collapse(dat$country, 
+  mutate(pop = fct_collapse(sizedata$country, 
              "Japanese" = "Japan",
              "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")
              ))
-   
 ```
-
 
 #### Meta-analysis of proportions using GLMM and Wilson CIs
 
@@ -1360,6 +1360,56 @@ bubble(year.metareg.result.juvela, studlab=dat.year.metareg.juvela$auth_year, xl
  
  
 Once Juvela is excluded, then there is no evidence of an association between rupture risk and study end year. 
+
+#### Metaregression to explore Japanese population vs non-Japanese
+
+We can analyse whether there is a relationship between whether the source population for the study was Japan (potential effect modifier), and the outcome (rupture proportion). 
+
+The choice of this potential effect modifier is:
+
+* Exploratory 
+* Biologically plausible - since it remains unclear why Japanese population has a higher SAH rate compared to the rest of the world
+* Relevant to physicians
+
+Since we are analysing at a study level, this is an exploratory and hypothesis generating analysis. 
+
+
+
+```{r r metaregression for Japanese - data set up}
+
+dat.jap.metareg <- sizedata %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, end, rupt, total_size) %>%
+  drop_na(end)
+
+```
+
+```{r metaregression for for Japanese - execution}
+
+year.metareg = metaprop(rupt, total_size,
+                      data=dat.year.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+year.metareg.result <- metareg(year.metareg, ~end)
+year.metareg.result
+```
+ 
+```{r metaregression - option 2 - bubble plot - year}
+
+bubble(year.metareg.result, studlab=dat.year.metareg$auth_year, xlim=c(1960, 2020), main="Meta-regression plot for Study End Year")
+
+```
+ 
+
+
 
 #### Multivariable meta-regression
 
