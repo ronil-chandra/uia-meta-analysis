@@ -679,27 +679,22 @@ total number of events = total number of ruptures = variable rupt
 Assumptions:
 
 1. Only 1 aneurysm ruptures per patient. 
-2. If the patients of patients with prior is SAH is unknown, then the proportion of patients with prior SAH in the total observation cohort of all aneurysms is carried forward and applied to the number of aneurysms, and an estimated number of patients with prior SAH calculated based on the total observation cohort. 
-2. Aneurysm mutiplicity is not taken into account, to avoid multiple assumptions regarding proportion with prior SAH and proportion with multiple aneurysms and to avoid greater inaccuracy in this analysis. 
-3. Thus it is assumed for this analysis that each patient has 1 aneurysm. 
-4. Data analysis is limited to studies in which there are known or calculated values of ai, bi, ci, and di using the assumptions. If there are NAs in the 2 x 2 table, then that study is excluded. 
+2. If numbe of patients with prior SAH is known, then this is multiplied by the multiplicity proportion to calculate number of aneurysms with exposure to prior SAH in the specific size criteria. 
+2. If the patients of patients with prior is SAH for the size criteria is unknown, then the proportion of patients with prior SAH in the total observation cohort of all aneurysms is carried forward and applied to the number of aneurysms, and an estimated number of aneurysms with prior SAH is calculated based on the total observation cohort. 
+3. Data analysis is limited to studies in which there are known or calculated values of ai, bi, ci, and di using the assumptions. If there are NAs in the 2 x 2 table, then that study is excluded. 
 
 
 
 ```{r restructure to 2 x 2 table for PSAH}
 
-dat.psah <- sizedata %>%
+dat.psah <- dat %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(total_anr = coalesce(num_anr,num)) %>%
-  drop_na(total_anr) %>%
+  drop_na(total_size) %>%
   rename(ai = rupt_psah) %>%
   rename(rupt.total = rupt) %>%
   mutate(ci = rupt.total - ai) %>%
-  rename(n1i.temp = psah) %>%
-  mutate(prop = psah_tot / num_tot) %>%
-  mutate(num_anr_psah = prop * total_anr) %>%
-  mutate(n1i = coalesce(n1i.temp,num_anr_psah)) %>%
-  mutate(n2i = total_anr - n1i) %>%
+  rename(n1i = psah_size) %>%
+  mutate(n2i = total_size - n1i) %>%
   mutate(bi = n1i - ai) %>%
   mutate(di = n2i - ci) %>%
   select(auth_year, ai, bi, ci, di, n1i, n2i) %>%
@@ -707,6 +702,7 @@ dat.psah <- sizedata %>%
   mutate_if(is.numeric, round, 0)
 
 ```
+
 
 then create new tibble for patients with and without history of prior subarachnoid haemorrhage. 
 
@@ -810,9 +806,8 @@ This exploratory analysis considers the proportion of ruptures that occur in stu
 
 ```{r create new column with length of follow up}
 
-dat.fu <- sizedata %>%
+dat.fu <- dat %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, rupt, total_size, fu) 
