@@ -341,6 +341,59 @@ To reduce the risk of false positives, and to ensure that there are adequate stu
 
 Regardless, the outcomes of these subgroup analysis or meta-regression analyses are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data. 
 
+
+#### Find outliers and influential studies
+
+Outlier studies with extreme effect sizes can cause increased between study heterogenieity. This may arise from small or low quality studies. In addition, overly influential studies can push the pooled effect size higher or lower, which means that the pooled result is less robust since it relies on 1 or a small number of studies. 
+
+There are a number of ways to detect outliers and influential studies. 
+
+### Outlier assessment
+
+One way to identify statistical outliers is to see if the confidence intervals of one study do not overlap with the pooled effect size. This outlier has an extreme effect size, which means that it cannot be included in the total study population pooled to create the pooled effect size. This is because inclusion of the statistical outlier reduces the robustness of the pooled effect size result.  
+
+A common way to detect an outlier are to identify studies where
+
+1. The upper bound of the 95% CI is lower than the lower bound of the pooled effect 95% CI (i.e., extremely small effects)
+2. The lower bound of the 95% CI is higher than the upper bound of the pooled effect CI (i.e., extremely large effects)
+
+The current results reveal that that the pooled rupture risk is 1.2112 [0.7844; 1.8659]. So lets identify studies that are outliers. 
+
+```{r find outliers using 95% CI}
+
+find.outliers(pes.summary.glmm)
+
+```
+
+Here using the random effects model, Juvela is identified as the outlier, and the pooled rupture risk changes from 1.2112 [0.7844; 1.8659] to 1.2625 [0.9445; 1.6858], and I2 has reduced from 82 t 42%. 
+
+### Influence analysis
+
+Apart from excluding statistical outliers which reduce the robustness of the pooled result, it is important to identify studies in the meta-analysis that extert high influence on the pooled results. If 1 study very highly influences the pooled effect size result, this makes the pooled effect size result less robust and less generalisable. 
+
+A common method to identify influential studies is the leave-1-out method, where the results of the meta-analysis are recalculated leaving out 1 study at a time. This helps identify individual studies that may exert veru high influence on the result, pushing the pooled effect size higher or lower. 
+
+```{r influence analysis}
+
+inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm,
+                                  random = TRUE)
+
+```
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
 #### Sub-group analysis based on study type - retrospective compared to prospective
 
 
