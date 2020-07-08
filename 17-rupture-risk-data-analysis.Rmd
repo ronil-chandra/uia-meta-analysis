@@ -14,6 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 My goal is to learn how to conduct a quantitative synthesis to better understand the current literature on the rupture of an intracranial aneurysm with conservative management. 
 
+The goal is to improve the precision of estimation of rupture risk with conservative management of an unruptured brain aneurysm, to help clinicians balance the risk of preventative treatment vs active surveillance. 
+
 After performing my systematic review, I have three aims:
 
 1. To quantitatively synthesise the data in order to calculate a summary pooled proportion.
@@ -297,11 +299,15 @@ For interest, the tau-squared = 0.9098 and the Q-statistic is < 0.0001 which als
 
 ### How to explore and address heterogeneity 
 
-There are various strategies to explore and adddress heterogeneity. If there is considerable heterogeniety, there are 2 options. 
+There are various strategies to explore and adddress heterogeneity. Remember that clinical and methodological heterogeneity always occur in a meta-analysis, and thus statistical heterogeneity is inevitable (Higgins et al 2003).
+
+If there is considerable statistical heterogeniety, there are 2 options. 
 
 1. Avoid quantitative data synthesis and pooling studies. If clinical and methodological heterogeneity are substantial, then a quantitative data synthesis shuld not be peformed. 
 
 2. Choosing to pool the data, while exploring heterogeneity. Heterogeneity can be explored through sub-group analysis or metaregression to help identify study-level effect modifiers. This is where the outcome varies in different population or intervention characteristics. Such sub-group and metaregression analyses are best be pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating. 
+
+3. Exclude studies. 1 or 2 studies may be outliers or have high influence on the pooled effect size. In general, exclusion of studies should be avoided, since it may introduce bias. However, if there is an obvious reason for the outlying result, then the study can be excluded with confidence. Overall, it is often best to perform the analysis both with and without the outlier / influential study as part of a sensitivity analysis. 
 
 Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data are available for pooling. Nonetheless, we will perform the sub-group meta-analysis above to explore heterogeneity and consider the limitations of the analyses.  
 
@@ -431,6 +437,15 @@ We can see that the precision of the pooled effect size estimate improved with e
 These findings corroborate the findings of the outlier analysis, the Baujat plots, and influence analysis  proposed by Viechtbauer and Cheung. 
 
 Since the outlier and influence analysis are concordant that Juvela is the main source of heterogeniety, is an outlier which influences the pooled effect estimate and reduces the precision of the pooled effect estimate, the analysis should exclude this study based on grounds of clinical and statistical heterogeneity.   
+
+### Addressing heterogeniety 
+
+There are several strategies to deal with heterogeniety
+
+
+
+
+
 
 
 #### Sub-group analysis based on study type - retrospective compared to prospective
