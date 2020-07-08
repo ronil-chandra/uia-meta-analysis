@@ -371,27 +371,66 @@ Here using the random effects model, Juvela is identified as the outlier, and th
 
 Apart from excluding statistical outliers which reduce the robustness of the pooled result, it is important to identify studies in the meta-analysis that extert high influence on the pooled results. If 1 study very highly influences the pooled effect size result, this makes the pooled effect size result less robust and less generalisable. 
 
-A common method to identify influential studies is the leave-1-out method, where the results of the meta-analysis are recalculated leaving out 1 study at a time. This helps identify individual studies that may exert veru high influence on the result, pushing the pooled effect size higher or lower. 
+A common method to identify influential studies is the leave-1-out method, where the results of the meta-analysis are recalculated leaving out 1 study at a time. This helps identify individual studies that may exert very high influence on the result, pushing the pooled effect size higher or lower. 
 
-```{r influence analysis}
+```{r influence analysis - execution}
 
-inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm,
-                                  random = TRUE)
+inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm, 
+                                  random = TRUE,
+                                  subplot.heights = c(30,18),
+                                  subplot.widths = c(30,30),
+                                  forest.lims = c(0,0.03))
+
+```
+
+
+```{r influence analysis - review}
+
+summary(inf.analysis)
 
 ```
 
 
 
+```{r influence analysis - plot Baujat Plots}
+
+plot(inf.analysis, "baujat")
+
+```
+
+The Baujat Plot (Baujat et al. 2002) is a diagnostic plot to detect studies overly contributing to the heterogeneity. The study contribution to Cochran’s Q is plotted on the horizontal axis, and the study influence on the pooled effect size on the vertical axis. All studies on the right side of the plot are of interest, since the contribute to heterogeniety. 
+
+
+```{r influence analysis - plot influence characteristics}
+
+plot(inf.analysis, "influence")
+
+```
+
+These plots proposed by Viechtbauer & Cheung (2010) demonstrate that the Juvela study is not only a statistical outlier, but also an influential study. This is important because this further corroborates that the Juvela study is responsible for the between group heterogenieity, reducing the robustnesss of the pooled result. 
 
 
 
+```{r influence analysis - Forest Plot for the Leave-One-Out Analysis, sorted by Effect Size }
+
+plot(inf.analysis, "es")
+
+```
 
 
+```{r influence analysis - Forest Plot for the Leave-One-Out Analysis, sorted by 𝐼2}
 
+plot(inf.analysis, "i2")
 
- 
+```
 
+In these 2 plots, we can see the impact of the leave 1 out analysis on the pooled effect size. The first plot is ordered by effect size, and the second by I2. 
 
+We can see that the precision of the pooled effect size estimate improved with exlcusion of Juvela et al, and that the I2 reduces the most with exclusion of Juvela et al. 
+
+These findings corroborate the findings of the outlier analysis, the Baujat plots, and influence analysis  proposed by Viechtbauer and Cheung. 
+
+Since the outlier and influence analysis are concordant that Juvela is the main source of heterogeniety, is an outlier which influences the pooled effect estimate and reduces the precision of the pooled effect estimate, the analysis should exclude this study based on grounds of clinical and statistical heterogeneity.   
 
 
 #### Sub-group analysis based on study type - retrospective compared to prospective
