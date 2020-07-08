@@ -12,9 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Objectives:
 
-My goal is to learn how to conduct a quantitative synthesis to better understand the current literature on the rupture of an intracranial aneurysm with conservative management. 
+The purpose of this project is to improve the precision, or understand the imprecision, of the risk estimate for rupture of a brain aneurysm managed with active surveillance. This will help clinicians better convey the rupture risks to patients, and help on the journey toward personalised and patient centred decision making. 
 
-The goal is to improve the precision of estimation of rupture risk with conservative management of an unruptured brain aneurysm, to help clinicians balance the risk of preventative treatment vs active surveillance. 
+My goal is to learn how to conduct a quantitative synthesis to better understand the current literature on the rupture of an intracranial aneurysm with conservative managemen
 
 After performing my systematic review, I have three aims:
 
