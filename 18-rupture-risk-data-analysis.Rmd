@@ -12,20 +12,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Objectives:
 
-The purpose of this project is to improve the precision, or understand the imprecision, of the risk estimate for rupture of a brain aneurysm managed with active surveillance. This will help clinicians better convey the rupture risks to patients, and help on the journey toward personalised and patient centred decision making. 
+The purpose of this project is to improve the precision,and understanding of the risk estimate for rupture of a brain aneurysm managed with active surveillance. 
 
-My goal is to learn how to conduct a quantitative synthesis to better understand the current literature on the rupture of an intracranial aneurysm with conservative managemen
+This will help clinicians better convey the rupture risks to patients, and is part of the journey toward personalised and patient centred decision making for patients with brain aneurysms. 
 
-After performing my systematic review, I have three aims:
+After performing my systematic review, I have three additional aims:
 
 1. To quantitatively synthesise the data in order to calculate a summary pooled proportion.
 2. To calculate heterogeniety across the studies to help consider whether pooling is appropriate. 
-3. If pooling is appropriate, then to explore the heterogeneity by considering pre-specified and post hoc sub-group analysis and meteregression. 
+3. If pooling is appropriate, then to explore the heterogeneity by considering outliers and influential studies, and both pre-specified and post hoc sub-group analysis and meteregression. 
 
 The statistical approaches will be tailored to the source dataset and structure of the data which is characterised by the following:
 
-1. Rupture of an intracranial aneurysm in a single patient is a rare event.
-2. Small number of rupture outcome events in the sample populations, with the proportion very close to zero.
+1. Rupture of an intracranial aneurysm in a single patient is a rare event, usually estimated at 1% per year or less.
+2. There are a small number of rupture outcome events in the sample populations, with the proportion very close to zero.
 3. While the outcome of rupture is binomial, in a sample population, the distribution of rupture outcomes over time is is better described by the non-central hypergeometric distribution, since some aneurysms are considered at higher risk of rupture.
 4. There are a wide range of size in sample populations identified by the systematic review, with both very small studies and very large studies included.
 5. The rate of rupture over time does not appear to be constant when biological factors and current published data are considered, thus the risk of rupture will be considered. 
@@ -34,7 +34,7 @@ To achieve these aims, the various packages and source dataset in R are loaded, 
 
 #### Load required packages
 
-The following R packages were loaded: tidyverse, meta, metafor and BiasedUrn.
+The following R packages were loaded: tidyverse, meta, metafor, BiasedUrn and dmetar.
 
 ```{r load packages, echo=TRUE, include = FALSE}
 library(tidyverse)
@@ -94,40 +94,47 @@ These can then be combined across studies to consider a meta-analyis of proporti
 * calculate the weighting for each individual study 
 * choose a random-effect or fixed effect assumption
 * calculate the pooled summary statistic
-* calculate the p value which communicates the strength of the evidence against the null hypothesis (if there is an intervention group and a control group)
+* calculate the p value which communicates the strength of the evidence against the null hypothesis (if there is an intervention group and a control group, but not in our case with a summary proportion)
 * derive the confidence intervals which communicates the level of precision or certainty of the summary estimate
 * display the meta-analysis result as a forest plot
 
 For every dataset, a suitable effect measure must be chosen, and a choice should be made regarding the meta-analytical methods. Most meta-analytical methods weight the individual effect sizes from each study to create a pooled effect size. In this study, we will consider individual study proportions, and create a pooled summary proportion for rupture risk. 
 
-Given unique characteristics of the data that we are synthesising listed above, means that appropriate statistical methods for meta-analysis and calculation of the confidence intervals must be considered. 
+Given unique characteristics of the data that we are synthesising, appropriate statistical methods for meta-analysis and calculation of the confidence intervals must be considered. 
 
 ##### Choice of meta-analytical method
 
-Classical meta-analytical methods have the potential to contribute to additional sparse data bias and give misleading results for rare events. *Bradburn 2007 from Cochrane*
+The dataset is sparse, and the overall distribution of rupture events across all studies is highly skewed towards zero.  
 
 The first step is to improve the statistical properties of a skewed dataset in terms of the data distribution and variance prior to synthesis. Variance is the squared difference from the mean. To achieve this, the data is transformed in order to approximate a normal distribution to enhance the validity of the statistical procedures. The most common transformation methods are the logit and the double arcine transformation. 
 
-In the logit transformation, proportions are converted to the natural logarithm of the proportions (i.e., the logit), and assumed to follow the normal distribution. All analyses are performed on the logit proportion, and then the logits converted back to raw proportions for reporting. However, if there are no ruptures and pi = 0, then the logit and variance become undefined. Furthermore, if there is high between-study variablity or small study sample sizes, the logit transformed proportion is underestimated. *Hamza 2008* To overcome this statistical limitation, typically a continuity correction of 0.5 is applied. In our analysis, this creates risk of introducing additional sparse data bias and reducing the validity of the result, especially given that pi is close to 0.
+In the logit transformation, proportions are converted to the natural logarithm of the proportions (i.e., the logit), and assumed to follow the normal distribution. All statistical procedures are performed on the logit proportion, and then the logits converted back to raw proportions for reporting. However, if there are no ruptures and pi = 0, then the logit and variance are undefined. Furthermore, if there is high between-study variablity or small study sample sizes, the logit transformed proportion is underestimated. *Hamza 2008* To overcome this statistical limitation, typically a continuity correction of 0.5 is applied. In our analysis, this creates risk of introducing additional sparse data bias and reducing the validity of the result, especially given that pi is close to 0.
 
-The alternate method of transformation to consider which can better normalises the distribution and variance especially for small sample sizes or rare event rates, is the double arcine transformation of Freeman-Tukey *Freeman and Tukey 1950*. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller *Miller 1978*. However, the Miller back transformation utilises the harmonic mean of the sample sizes. This affects the backtransformed proportion as described by *Schwarzer 2019*, and leads to misleading results. This issue is particularly evident when there is a large range of sample sizes. This issue does affect our specific dataset since n in the studies varies from 22 to over 3323. 
+The alternate method of transformation to consider which can better normalises the distribution and variance especially for small sample sizes or rare event rates, is the double arcine transformation of Freeman-Tukey *Freeman and Tukey 1950*. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller *Miller 1978*. However, the Miller back transformation utilises the harmonic mean of the sample sizes. This affects the backtransformed proportion as described by *Schwarzer 2019*, and leads to misleading results. This issue is particularly evident when there is a large range of sample sizes. This issue is of particular concern and can lead to misleading results given that the sample sizes on our dataset vary from 22 to 3323. 
 
-In the classical meta-analytical methods, after transformation and statistical procedures, the results are backtransformed to study level results, and synthesised. Data synthesis can be carried out using the generic inverse variance method, which calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. A variation on the generic inverse variance method incorporates an assumption that there is some variation between studies, ie heterogeneity, while measuring the same effect. This produces a random effects meta-analysis, the most common of which is the the DerSimonian and Laird method *DerSimonian 1986*. This is the most commonly utilised method in medical meta-analysis. 
+In the classical meta-analytical methods, after transformation and statistical procedures, the results are backtransformed to study level results, and synthesised.
 
-Above, we have highlighted significant statistical limitations of the classical meta-analytical methods with our specific dataset and research question. To overcome these statistical limitations, we can instead utilise the random intercept logistic regression model for statistical procedures and data synthesis, a type of generalised linear mixed model, as recommended by *Stinjen 2010* and *Schwarzer 2019*. 
+Data synthesis can be carried out using the generic inverse variance method, which calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. A variation on the generic inverse variance method incorporates an assumption that there is some variation between studies, ie heterogeneity, while measuring the same effect. This produces a random effects meta-analysis, the most common of which is the the DerSimonian and Laird method *DerSimonian 1986*. This is the most commonly utilised method in medical meta-analysis. 
+
+However, when outcome events are rare, such as in our dataset, these classical meta-analytical methods for data-synthesis also have the potential to contribute to additional sparse data bias and give misleading results. *Bradburn 2007 from Cochrane*
+
+In summary, there are significant statistical limitations of the classical meta-analytical methods of transformation and synthesis with our specific dataset and research question. 
+
+To overcome these statistical limitations, we can instead utilise the random intercept logistic regression model for statistical procedures and data synthesis, a type of generalised linear mixed model, as recommended by *Stinjen 2010* and *Schwarzer 2019*. 
 
 Our rationale for choice of a GLMM for statistical procedures and data synthesis is based on the following:
 
 * The GLMM is an exact likelihood model based on the the binomial distribution, and thus accounts for the binomial outcome of aneurysm rupture.*Hamza 2008*  
+* The GLMM has greater accuracy of the logit proportion and coverage percentages of the corresponding confidence intervals compared to standard normal approximation logit transformation, especially when there are small sample sizes and greater between-study heterogneity. *Hamza 2008*  
 * GLMMs can be fitted using the logit transformation, and results backtransformed to the original scale, in our case a proportion.
-* Standard normal approximation logit transformed proportions are underestimated and biased downwards with smaller sample sizes and greater the between-study variation, which is a characteristic of our dataset. The GLMM is not affected by this issue. *Hamza 2008*
-* The GLMM has greater accuracy of the logit proportion and coverage percentages of the corresponding confidence intervals compared to standard normal approximation logit transformation. *Hamza 2008*  
 * The sample populations range from 22 to 3323, which creates misleading results when utilising the Freeman-Tukey methods of transformation and backtransformation of Miller. *Schwarzer 2019*
 * The outcome is very rare, with proportions less than 0.05 is almost all studies, and thus generic inverse variance and DL methods for data synthesis can lead to misleadong results *Stinjen 2010*
 * The GLMM does not require a continuity correction even if pi = 0.  *Hamza 2008* 
 * Additional calculations to consider covariates can be performed using noncentral hypergeometric models. 
 
-The limitation of this statistical approach is that individual study weights utilised to pool the individual studies to create the pooled proportion will not be available. In the past, utilisation of a GLMM for meta-analysis was not practical due to its computationally intensive nature, and lack of availabilty in standard statistical software packages. However these limitations are now overcome, with statistical modules for GLMMs now available in both SAS and R stastical packages. 
+The limitation of this statistical approach is that individual study weights utilised to pool the individual studies to create the pooled proportion will not be available. 
+
+In the past, utilisation of a GLMM for meta-analysis was not practical due to its computationally intensive nature, and lack of availabilty in standard statistical software packages. However these limitations are now overcome, with statistical modules for GLMMs now available in both SAS and R stastical packages. 
 
 ##### Choice of confidence interval
 
@@ -173,7 +180,15 @@ sizedata <- filter(maindata, size == 10)
 
 Assumptions: 
 
-If the number of aneurysms for a particular size criteria in the study has been reported, this has been extracted and utilised for analysis. 
+Number of patients vs number of aneurysms at entry 
+
+Some studies report the number of patients at study entry for a size criteria, while others report the number of aneurysms at study entry, and others report both the number of patients and aneurysms at study entry. Typically the proportion of patients with multiple aneurysms is also reported. 
+
+Given that only 1 aneurysm in 1 patient ruptures, which is the outcome, and that the number of aneurysms in that size criteria is most consistently reported, the analysis is performed with the outcome of number of aneurysm ruptures per 100 aneurysms. 
+
+This makes biological sense, since aneurysm rupture is considered to be strongly influenced by aneurysm characteristics, 1 patients may have multiple aneurysms with a large range eg 1 to 8 aneurysms, and that conveying a rupture risk per aneurysm is easy to understand from a patient perspective when they harbour multiple aneurysms. 
+
+Thus, if the number of aneurysms for a particular size criteria in the study has been reported, this has been extracted and utilised for analysis. 
 
 If the number of number of aneuryms is not known for the specific size criteria, and we do know the proportion of patients with multiple aneuryms in the total observation cohort:
 
@@ -183,7 +198,7 @@ If the number of number of aneuryms is not known for the specific size criteria,
 4. The total number of aneurysms for that size *variable total_size* is then calculated by adding variable num. 
 5. We have now calculated the total number of aneurysms in that size category, taking into account aneurysm multiplicity. 
 
-If the number of number of aneuryms is not known for the specific size criteria, and we do *NOT* know the proportion of patients with multiple aneuryms in the total observation cohort, then 1 patient is assumed to have 1 aneurysm. 
+If the number of number of aneuryms is not known for the specific size criteria, and we do *NOT* know the proportion of patients with multiple aneuryms in the total observation cohort, but we do know the number of patients in that size category, then 1 patient is assumed to have 1 aneurysm. 
 
 For patients with exposure to prior SAH. The number of aneurysms in patients with prior SAH is unknown ie these patients may have multiple aneurysms.  
 
@@ -212,6 +227,7 @@ dat <- sizedata %>%
 
 #### Meta-analysis of proportions using GLMM and Wilson CIs
 
+Now that we have taken into account the number of aneurysms specific to that size category, we can now perform our statistical procedures on that dataset, starting with a meta-analysis of proportions using the GLMM
 
 ```{r meta-analysis of proportions using glmm}
 
@@ -242,6 +258,8 @@ Remember that the confidence interval from this random-effects meta-analysis des
 
 #### Display meta-analysis result using a publication quality forest plot
 
+The easiest way to communicate the result of the statistical procedure is via a forest plot. 
+
 ```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
 
 forest(pes.summary.glmm,
@@ -260,7 +278,9 @@ forest(pes.summary.glmm,
 ```
 
 
-### Calculate heterogeniety across the studies 
+### Heterogeniety 
+
+#### What is heterogeniety 
 
 Heterogeniety refers to all types of variation across studies. Heterogeniety can be considered in terms of 
 
@@ -268,17 +288,21 @@ Heterogeniety refers to all types of variation across studies. Heterogeniety can
 2. Methodological heterogeneity, which refers to variablity in study designs eg randomization, blinding etc. 
 3. Statistical heterogeneity, which refers to the situation when variation across studies is greater than variation or random error within a study. 
 
-Clinical and methodolocal heterogeniety cannot be calculated. These are both subjectively evaluated by the meta-analyst. If there is substantial clinical and/or methdological heterogeneity, a quantitative synthesis should not be performed to create a pooled effect measure, and instead a qualitative systematic review performed. 
+Clinical and methodolocal heterogeniety cannot be calculated. These are both subjectively evaluated by the meta-analyst. If clinical and methodological differences are not significant, then quantative synthesis is considered appropriate. 
 
-If clinical and methodological differences are not significant, then quantative synthesis is considered appropriate. 
+If there is substantial clinical and/or methdological heterogeneity, a quantitative synthesis should not be performed to create a pooled effect measure. A qualitative or narrative systematic review should be performed. This is because, the observed effects across studies are greater than what is expected due to random chance alone, which  limits the generalisability of the result. The analogy is that a systematic review brings together apples and oranges, and that combining these in the setting of high heterogeneity yields a meaningless result.
+
+Since statistical heterogeneity is a consequence of clinical and/or methodological heterogeniety, this always occurs in a meta-analysis, statistical heterogeneity is inevitable *Higgins et al 2003*
+
+#### How to identify and measure statistical heterogeniety 
 
 Overall, identification of heterogeniety is critical to assist in interpreting the results of the meta-analyis. This gives the reader confidence that the effect demonstrated is generalisable. It is impossible to completely avoid heterogeneity, however clinical and methodological heterogeneity can be minimised by using strict inclusion criteria during systematic review.   
 
-Statitical heterogeneity is most commonly calculated using Cochrane's Q statistic, tau-squared statistic or the Inconsistency measure I^2 statistic. 
+Statitical heterogeneity is most commonly measured using Cochrane's Q statistic, tau-squared statistic or the Inconsistency measure I^2 statistic. 
 
 1. Cochrane's Q. This test performs poorly for small numbers of studies. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity.
 2. tau-squared statistic. Uncommonly reported. An estimate of the between-study variance. When tau-squared is zero this is indicative of no heterogeneity.
-3. I^2 statistic. I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high variance, respectively. 95% CIs can also be calculated for the I^2 statistic to demonstrate the uncertainty of the result. 
+3. I^2 statistic. I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high heterogeneity, respectively. 95% CIs can also be calculated for the I^2 statistic to demonstrate the uncertainty of the result. 
 
 We will choose the I^2 statistic for the following reasons:
 
@@ -299,7 +323,7 @@ For interest, the tau-squared = 0.9098 and the Q-statistic is < 0.0001 which als
 
 ### How to explore and address heterogeneity 
 
-There are various strategies to explore and adddress heterogeneity. Remember that clinical and methodological heterogeneity always occur in a meta-analysis, and thus statistical heterogeneity is inevitable (Higgins et al 2003).
+There are various strategies to explore and adddress heterogeneity. 
 
 If there is considerable statistical heterogeniety, there are 2 options. 
 
