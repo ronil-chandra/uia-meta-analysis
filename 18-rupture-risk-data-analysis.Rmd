@@ -225,16 +225,16 @@ dat <- sizedata %>%
         
 ```
 
-#### Meta-analysis of proportions using GLMM and Wilson CIs
+#### Meta-analysis of proportions using GLMM and Wilson CIs with all studies 
 
 Now that we have taken into account the number of aneurysms specific to that size category, we can now perform our statistical procedures on that dataset, starting with a meta-analysis of proportions using the GLMM
 
 ```{r meta-analysis of proportions using glmm}
 
-dat <- dat %>%
+dat.all <- dat %>%
   drop_na(total_size)
 
-pes.summary.glmm = metaprop(rupt, total_size,
+pes.summary.glmm.all = metaprop(rupt, total_size,
                             data=dat,
                             studlab=paste(auth_year),
                             method="GLMM",
@@ -243,7 +243,7 @@ pes.summary.glmm = metaprop(rupt, total_size,
                             method.ci = "WS",
                             pscale = 100
                             ) 
-pes.summary.glmm
+pes.summary.glmm.all
 
 ```
 
@@ -262,7 +262,7 @@ The easiest way to communicate the result of the statistical procedure is via a 
 
 ```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
 
-forest(pes.summary.glmm,
+forest(pes.summary.glmm.all,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
@@ -435,13 +435,32 @@ plot(inf.analysis, "i2")
 
 ```
 
-In these 2 plots, we can see the impact of the leave 1 out analysis on the pooled effect size. The first plot is ordered by effect size, and the second by I2. 
+In these 2 plots, we can see the impact of the leave 1 out analysis on the pooled effect size. This is ordered by the reduction in statistical heterogeneity as measured by I2. 
 
-We can see that the precision of the pooled effect size estimate improved with exlcusion of Juvela et al, and that the I2 reduces the most with exclusion of Juvela et al. 
+We can again see that the precision of the pooled effect size estimate improves with exlcusion of Juvela et al, and that the I2 reduces the most with exclusion of Juvela et al. 
 
-These findings corroborate the findings of the outlier analysis, the Baujat plots, and influence analysis  proposed by Viechtbauer and Cheung. 
+These findings corroborate the findings of the outlier analysis, the Baujat plots, and influence analysis proposed by Viechtbauer and Cheung that Juvela is the main source of heterogeniety. 
 
-Since the outlier and influence analysis are concordant that Juvela is the main source of heterogeniety, is an outlier which influences the pooled effect estimate and reduces the precision of the pooled effect estimate, the analysis should exclude this study based on grounds of clinical and statistical heterogeneity.   
+### Why Juvela et al excluded. 
+
+The outlier and influence analysis are concordant that Juvela et al is an outlier which influences the pooled effect estimate and reduces the precision of the pooled effect estimate. This is on the basis of statistical heterogeneity, and that the rupture proportion observed in the Juvela et al study varies greater than what is expected due to random chance alone. 
+
+The analogy is that while the remaining studies are different varieties of apples, that Juvela study is an orange, and that combining this study with all other studies will yield much less meaningful result.
+
+Since statistical heterogeneity is a consequence of clinical and/or methodological heterogeniety, we can explore if there are particular clinical or methodogical factors that are likely to be responsible. 
+
+Proposed factors to explore are proportion of patients with exposure to prior subarachnoid haemorrhage, patient enrollment period, and length of follow up. 
+
+
+
+
+
+
+
+
+
+
+our main analysis will exclude this study based on grounds of clinical and statistical heterogeneity.   
 
 
 Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data are available for pooling. Nonetheless, we will perform the sub-group meta-analysis above to explore heterogeneity and consider the limitations of the analyses.  
