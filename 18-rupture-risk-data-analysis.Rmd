@@ -376,11 +376,17 @@ find.outliers(pes.summary.glmm)
 
 ```
 
-Here using the random effects model, Juvela is identified as the outlier, and the pooled rupture risk changes from 1.2112 [0.7844; 1.8659] to 1.2625 [0.9445; 1.6858], and I2 has reduced from 82 t 42%. 
+Here using the random effects model, Juvela is identified as the outlier. 
+
+The pooled rupture risk changes with Juvela et al is 1.2112 [0.7844; 1.8659] 
+
+The pooled rupture risk without Juvela et al is 1.2625 [0.9445; 1.6858]. 
+
+Although the pooled rupture risk is still between 1-2%, the precision of the estimate has improved, and the I2 has reduced from 82 to 42%, which makes the result more robust and more generalisable. 
 
 ### Influence analysis
 
-Apart from excluding statistical outliers which reduce the robustness of the pooled result, it is important to identify studies in the meta-analysis that extert high influence on the pooled results. If 1 study very highly influences the pooled effect size result, this makes the pooled effect size result less robust and less generalisable. 
+Apart from excluding statistical outliers which reduce the robustness of the pooled result, it is important to identify studies in the meta-analysis that extert high influence on the pooled results. If 1 study very highly influences the pooled effect size result, this also makes the pooled effect size result less robust and less generalisable. 
 
 A common method to identify influential studies is the leave-1-out method, where the results of the meta-analysis are recalculated leaving out 1 study at a time. This helps identify individual studies that may exert very high influence on the result, pushing the pooled effect size higher or lower. 
 
@@ -411,6 +417,8 @@ plot(inf.analysis, "baujat")
 
 The Baujat Plot (Baujat et al. 2002) is a diagnostic plot to detect studies overly contributing to the heterogeneity. The study contribution to Cochran’s Q is plotted on the horizontal axis, and the study influence on the pooled effect size on the vertical axis. All studies on the right side of the plot are of interest, since the contribute to heterogeniety. 
 
+Here Juvela et al is identified as both a high contributor to heterogeneity, and high influence on the pooled result. 
+
 
 ```{r influence analysis - plot influence characteristics}
 
@@ -418,15 +426,7 @@ plot(inf.analysis, "influence")
 
 ```
 
-These plots proposed by Viechtbauer & Cheung (2010) demonstrate that the Juvela study is not only a statistical outlier, but also an influential study. This is important because this further corroborates that the Juvela study is responsible for the between group heterogenieity, reducing the robustnesss of the pooled result. 
-
-
-
-```{r influence analysis - Forest Plot for the Leave-One-Out Analysis, sorted by Effect Size }
-
-plot(inf.analysis, "es")
-
-```
+We can also perform additional plots to assess influence of each study. These plots proposed by Viechtbauer & Cheung (2010) also demonstrate that the Juvela study is not only a statistical outlier, but also an influential study. This is important because this further corroborates that the Juvela study adds statistical heterogeneity, and influences the overall pooled result. 
 
 
 ```{r influence analysis - Forest Plot for the Leave-One-Out Analysis, sorted by 𝐼2}
@@ -1890,6 +1890,17 @@ There are many possible sources of funnel plot assymetry - selection bias from p
 In our case, the most likely explanation for this appearance of the funnel plot is due to the outlier rupture risk in the Juvela study that contributes to true heterogeniety from true differences in rupture proportion.
 
 In general, testing for funnel plot assymetry should always be performed in the context of visual assessment, and while there are many potential statistical tests for funnel plots including Egger 1997, Harbord 2006, Peters 2006 or Rücker 2008, even Cochrane suggests that tests for funnel plot asymmetry should be used in only a minority of meta-analyses (Ioannidis 2007b).
+
+Sensitiity analysis
+
+
+```{r influence analysis - Forest Plot for the Leave-One-Out Analysis, sorted by Effect Size }
+
+plot(inf.analysis, "es")
+
+```
+
+Here we rank the effect on the pooled rupture proportion using the leave-1-out method
 
 
 ### Exploratory analysis 
