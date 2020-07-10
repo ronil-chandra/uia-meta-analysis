@@ -206,6 +206,10 @@ For patients with exposure to prior SAH. The number of aneurysms in patients wit
 2. If the number of patients with exposure to prior SAH in the specific size category is unknown, then we can assume that the proportion of patients with prior SAH in the total observation cohort is the same proportion as those in that size category. Thus if we know the total number of aneurysms in that size category, we can calculate the proportion that have had exposure to prior SAH. 
  
  
+*****
+pipe the mutate together
+*****
+ 
 ```{r calculate total number of aneurysms and prior SAH exposure for specific size criteria 10 mm and less}
 
 dat <- sizedata %>%
@@ -851,7 +855,7 @@ forest(pes.summary.glmm.pop,
 
 
 ****************
-how about changing categorising this as proportion of patients in study with prior SAH at <10% vs 10% or more? 9 studies vs other. 
+how about changing categorising this as proportion of patients in study with prior SAH at <10% vs 10% or more? 9 studies vs other - yes 
 ****************
 
 
