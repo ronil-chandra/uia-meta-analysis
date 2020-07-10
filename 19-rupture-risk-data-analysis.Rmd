@@ -328,7 +328,7 @@ We will choose the I^2 statistic for the following reasons:
 
 ```{r heterogeniety}
 
-pes.summary.glmm
+pes.summary.glmm.all
 
 ```
 
@@ -376,7 +376,7 @@ The current results reveal that that the pooled rupture risk is 1.2112 [0.7844; 
 
 ```{r find outliers using 95% CI}
 
-find.outliers(pes.summary.glmm)
+find.outliers(pes.summary.glmm.all)
 
 ```
 
@@ -396,7 +396,7 @@ A common method to identify influential studies is the leave-1-out method, where
 
 ```{r influence analysis - execution}
 
-inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm, 
+inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm.all, 
                                   random = TRUE,
                                   subplot.heights = c(30,18),
                                   subplot.widths = c(30,30),
@@ -487,7 +487,7 @@ Summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8%.
 
 The easiest way to communicate the result of the statistical procedure is via a forest plot. 
 
-```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+```{r forest for publication using GLMM with Juvela excluded, fig.height= 10, fig.width = 10}
 
 forest(pes.summary.glmm,
        layout = "meta",
@@ -1496,7 +1496,7 @@ year.metareg.result <- metareg(year.metareg, ~end)
 year.metareg.result
 ```
  
-```{r metaregression - option 2 - bubble plot - year}
+```{r metaregression - option 2 - bubble plot - year} 2
 
 bubble(year.metareg.result, studlab=dat.year.metareg$auth_year, xlim=c(1980, 2020), main="Meta-regression plot for Study End Year")
 
