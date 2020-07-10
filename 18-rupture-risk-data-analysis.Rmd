@@ -351,50 +351,9 @@ There are various strategies to explore and adddress heterogeneity.
 5. Exclude studies. 1 or 2 studies may be outliers or have high influence on the pooled effect size. In general, exclusion of studies should be avoided, since it may introduce bias. However, if there is an obvious reason for the outlying result, then the study can be excluded with confidence. Overall, it is often best to perform the analysis both with and without the outlier / influential study as part of a sensitivity analysis. 
 
 
+### Investigating heterogeneity
 
-
-
-
-Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data are available for pooling. Nonetheless, we will perform the sub-group meta-analysis above to explore heterogeneity and consider the limitations of the analyses.  
-
-Meta-regression allows the effects of multiple continuous and categorical variables to be investigated simultaneously, unlike subgroup analysis which considers one categorical variable only. This generally utilises a random effect model to conduct the analysis in each subgroup, and then considers additional statistical testing to compare the pooled results across the subgroups. Meta-regression should generally not be considered when there are less than ten studies in a meta-analysis. The meta-regression cooeffient obtained describes how the outcome (dependent variable) changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. *Cochrane Handbook 10.11.4*
-
-Meta-regression and sub-group analysis are non-randomized and observational in nature. It may not be possible to ajust for all potential confounders and thus they can can lead to misleading conclusions. Even if there are a large number of covariates adjusted for, we cannot be certain that all potential confounders have been identified. These analyses cannot prove causality, and at best, they can be considered hypothesis generating. 
-
-Moving forward, we shall choose to pool the data, and explore heterogeneity with sub-group analyses and meta-regression. 
-
-Sub-group analyses
-
-1. Post hoc sub-group analysis of rupture risk comparing prospective studies to retrospective studies. 
-2. Prespecified sub-group analysis of rupture risk by size of aneurysm (7mm and less, 5mm and less, and 3mm and less)
-3. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage. 
-4. Post hoc sub-group analysis of rupture risk with length of follow up categorised as intermediate (5 years or less), or long term (>5 years)
-
-Meta-regression
-
-1. Prespecified metagression to consider whether proportion of patients with exposure to prior SAH in the studies was an important source of heterogeneity. 
-2. Prespecified metagression to consider whether proportion of patients with aneurysms 5mm and less in the studies was an important source of heterogeneity. 
-3. Prespecified metagression to consider whether proportion of patients with aneurysms 3mm and less in the studies was an important source of heterogeneity.
-4. Post hoc metagression to consider whether duration of follow up in the studies analysed as a continuous variable was an important source of heterogeneity. 
-5. Post hoc metagression to consider whether year of last enrollment in the studies analysed was an important source of heterogeneity. 
-
-Sensitivity analysis
-
-1. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with utilisation of a fixed or random effects meta-analysis method. 
-2. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies rated as poor or fair quality using AHRQ thresholds of NOS quality scoring. 
-3. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies with sample sizes of less than 500 aneurysms. 
-4. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studie that are identified as contributing considerably to the overall heterogeneity and having a strong influence on the overall result using a Baujat plot.
-5. Repeat metagression with exlusion of Juvela et al to consider whether proportion of patients with exposure to prior SAH in the study was an important source of heterogeneity. 
-6. Repeat metagression with exlusion of Juvela et al to consider whether duration of follow up in the study analysed as a continuous variable was an important source of heterogeneity
-7. Repeat metagression with exlusion of Juvela et al to consider whether year of last enrollment in the study analysed as a continuous variable was an important source of heterogeneity
-8. Post hoc multivariable metaregression to consider whether inclusion of 2 covariates - proportion of patients with exposure to prior SAH in the study and year of last enrollment in the study - was associated with pooled rupture risk and a source of heterogeniety.  
-
-To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one posthoc potential effect modifier is considered for metaregression each time, and in the multivariable model only 2 potential effect modifiers are considered. 
-
-Regardless, the outcomes of these subgroup analysis or meta-regression analyses are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data. 
-
-
-#### Find outliers and influential studies
+The forest plot reveals an outlier with the Juvela et al study. To commence our investigation into heterogeneity, we will first consider outlier and influence analysis.
 
 Outlier studies with extreme effect sizes can cause increased between study heterogenieity. This may arise from small or low quality studies. In addition, overly influential studies can push the pooled effect size higher or lower, which means that the pooled result is less robust since it relies on 1 or a small number of studies. 
 
@@ -483,6 +442,47 @@ We can see that the precision of the pooled effect size estimate improved with e
 These findings corroborate the findings of the outlier analysis, the Baujat plots, and influence analysis  proposed by Viechtbauer and Cheung. 
 
 Since the outlier and influence analysis are concordant that Juvela is the main source of heterogeniety, is an outlier which influences the pooled effect estimate and reduces the precision of the pooled effect estimate, the analysis should exclude this study based on grounds of clinical and statistical heterogeneity.   
+
+
+Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data are available for pooling. Nonetheless, we will perform the sub-group meta-analysis above to explore heterogeneity and consider the limitations of the analyses.  
+
+Meta-regression allows the effects of multiple continuous and categorical variables to be investigated simultaneously, unlike subgroup analysis which considers one categorical variable only. This generally utilises a random effect model to conduct the analysis in each subgroup, and then considers additional statistical testing to compare the pooled results across the subgroups. Meta-regression should generally not be considered when there are less than ten studies in a meta-analysis. The meta-regression cooeffient obtained describes how the outcome (dependent variable) changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. *Cochrane Handbook 10.11.4*
+
+Meta-regression and sub-group analysis are non-randomized and observational in nature. It may not be possible to ajust for all potential confounders and thus they can can lead to misleading conclusions. Even if there are a large number of covariates adjusted for, we cannot be certain that all potential confounders have been identified. These analyses cannot prove causality, and at best, they can be considered hypothesis generating. 
+
+Moving forward, we shall choose to pool the data, and explore heterogeneity with sub-group analyses and meta-regression. 
+
+Sub-group analyses
+
+1. Post hoc sub-group analysis of rupture risk comparing prospective studies to retrospective studies. 
+2. Prespecified sub-group analysis of rupture risk by size of aneurysm (7mm and less, 5mm and less, and 3mm and less)
+3. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage. 
+4. Post hoc sub-group analysis of rupture risk with length of follow up categorised as intermediate (5 years or less), or long term (>5 years)
+
+Meta-regression
+
+1. Prespecified metagression to consider whether proportion of patients with exposure to prior SAH in the studies was an important source of heterogeneity. 
+2. Prespecified metagression to consider whether proportion of patients with aneurysms 5mm and less in the studies was an important source of heterogeneity. 
+3. Prespecified metagression to consider whether proportion of patients with aneurysms 3mm and less in the studies was an important source of heterogeneity.
+4. Post hoc metagression to consider whether duration of follow up in the studies analysed as a continuous variable was an important source of heterogeneity. 
+5. Post hoc metagression to consider whether year of last enrollment in the studies analysed was an important source of heterogeneity. 
+
+Sensitivity analysis
+
+1. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with utilisation of a fixed or random effects meta-analysis method. 
+2. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies rated as poor or fair quality using AHRQ thresholds of NOS quality scoring. 
+3. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies with sample sizes of less than 500 aneurysms. 
+4. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studie that are identified as contributing considerably to the overall heterogeneity and having a strong influence on the overall result using a Baujat plot.
+5. Repeat metagression with exlusion of Juvela et al to consider whether proportion of patients with exposure to prior SAH in the study was an important source of heterogeneity. 
+6. Repeat metagression with exlusion of Juvela et al to consider whether duration of follow up in the study analysed as a continuous variable was an important source of heterogeneity
+7. Repeat metagression with exlusion of Juvela et al to consider whether year of last enrollment in the study analysed as a continuous variable was an important source of heterogeneity
+8. Post hoc multivariable metaregression to consider whether inclusion of 2 covariates - proportion of patients with exposure to prior SAH in the study and year of last enrollment in the study - was associated with pooled rupture risk and a source of heterogeniety.  
+
+To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one posthoc potential effect modifier is considered for metaregression each time, and in the multivariable model only 2 potential effect modifiers are considered. 
+
+Regardless, the outcomes of these subgroup analysis or meta-regression analyses are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data. 
+
+
 
 ### Addressing heterogeniety 
 
