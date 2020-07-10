@@ -298,11 +298,22 @@ Since statistical heterogeneity is a consequence of clinical and/or methodologic
 
 Overall, identification of heterogeniety is critical to assist in interpreting the results of the meta-analyis. This gives the reader confidence that the effect demonstrated is generalisable. It is impossible to completely avoid heterogeneity, however clinical and methodological heterogeneity can be minimised by using strict inclusion criteria during systematic review.   
 
-Statitical heterogeneity is most commonly measured using Cochrane's Q statistic, tau-squared statistic or the Inconsistency measure I^2 statistic. 
+A simple way to identify heterogeneity is to review the forest plot, and see if the confidence intervals overlap. If there is poor overlap, there is statistical heterogeneity. 
+
+Statitical heterogeneity can also be measured using Cochrane's Q statistic, tau-squared statistic or the Inconsistency measure I^2 statistic. 
 
 1. Cochrane's Q. This test performs poorly for small numbers of studies. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity.
 2. tau-squared statistic. Uncommonly reported. An estimate of the between-study variance. When tau-squared is zero this is indicative of no heterogeneity.
-3. I^2 statistic. I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety. I^2 thresholds within 25, 50, and 75% represent low, moderate, and high heterogeneity, respectively. 95% CIs can also be calculated for the I^2 statistic to demonstrate the uncertainty of the result. 
+3. I^2 Inconsistency statistic. I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety, and can be classified into the degree of heterogeneity. 
+
+From Cochrane: 
+
+0% to 40%: might not be important
+30% to 60%: may represent moderate heterogeneity
+50% to 90%: may represent substantial heterogeneity
+75% to 100%: considerable heterogeneity
+
+95% CIs can also be calculated for the I^2 statistic to demonstrate the uncertainty of the result. 
 
 We will choose the I^2 statistic for the following reasons:
 
@@ -317,21 +328,32 @@ pes.summary.glmm
 
 ```
 
-I^2 = 84.4%, which is high, which means that the between study variation due to clinical and methodological variation between studies is high, and greater than that expected by random chance variation within studies. This may be explained by co-variates and thus consideration should be made to avoid data-sythesis or expore reasons for heterogeneity. 
+I^2 = 82.7%, which is high, which means that the between study variation due to clinical and methodological variation between studies is high, and greater than that expected by random chance variation within studies. 
+
+This may be explained by co-variates and thus consideration should be made to avoid data-sythesis or expore reasons for heterogeneity. 
 
 For interest, the tau-squared = 0.9098 and the Q-statistic is < 0.0001 which also confirms high between-study heterogeniety. 
+
+We could have identified the heterogeneity by reviewing the overlap between confidence intervals in the forest plot, as we can see that there is a clear outlier - Juvela et al. 
 
 ### How to explore and address heterogeneity 
 
 There are various strategies to explore and adddress heterogeneity. 
 
-If there is considerable statistical heterogeniety, there are 2 options. 
+1. Check for any manual data entry errors. If data has been entered into the statistical software incorrectly, this can result in inaccurate results. By utilising a single excel file as the source of data, with no additional manual data entry, this risk is minimised. 
 
-1. Avoid quantitative data synthesis and pooling studies. If clinical and methodological heterogeneity are substantial, then a quantitative data synthesis shuld not be peformed. 
+2. Check that a random-effects meta-analysis was performed. Clinical and methodological heterogeneity is always present in medical studies, and in our case a random-effects model has ben used. 
 
-2. Choosing to pool the data, while exploring heterogeneity. Heterogeneity can be explored through sub-group analysis or metaregression to help identify study-level effect modifiers. This is where the outcome varies in different population or intervention characteristics. Such sub-group and metaregression analyses are best be pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating. 
+3. Avoid quantitative data synthesis and pooling studies. If clinical and methodological heterogeneity are substantial, then a quantitative data synthesis shuld not be peformed. A narrative or qualitative review should be performed instead.  
 
-3. Exclude studies. 1 or 2 studies may be outliers or have high influence on the pooled effect size. In general, exclusion of studies should be avoided, since it may introduce bias. However, if there is an obvious reason for the outlying result, then the study can be excluded with confidence. Overall, it is often best to perform the analysis both with and without the outlier / influential study as part of a sensitivity analysis. 
+4. Choosing to pool the data, while exploring heterogeneity. Heterogeneity can be explored through sub-group analysis or metaregression to help identify study-level effect modifiers. This is where the outcome varies in different population or intervention characteristics. Such sub-group and metaregression analyses are best be pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating. 
+
+5. Exclude studies. 1 or 2 studies may be outliers or have high influence on the pooled effect size. In general, exclusion of studies should be avoided, since it may introduce bias. However, if there is an obvious reason for the outlying result, then the study can be excluded with confidence. Overall, it is often best to perform the analysis both with and without the outlier / influential study as part of a sensitivity analysis. 
+
+
+
+
+
 
 Subgroup analyses require splitting of the data into subgroups to make comparison. Typically this data is hard to extract from the published literature, and thus are better utilised when individual patient level data are available for pooling. Nonetheless, we will perform the sub-group meta-analysis above to explore heterogeneity and consider the limitations of the analyses.  
 
