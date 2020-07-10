@@ -515,102 +515,27 @@ This is an important concept, because if subgroup analysis or metaregression fin
 
 Moving forward, we shall choose to pool the data, and explore heterogeneity in the synthesised data with sub-group analyses and meta-regression. 
 
-
-
 ### Subgroup analysis
 
 
-Sub-group analyses
+The following sub-group group analyses will be performed. 
 
-1. Post hoc sub-group analysis of rupture risk comparing prospective studies to retrospective studies. 
-2. Prespecified sub-group analysis of rupture risk by size of aneurysm (7mm and less, 5mm and less, and 3mm and less)
-3. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage. 
-4. Post hoc sub-group analysis of rupture risk with length of follow up categorised as intermediate (5 years or less), or long term (>5 years)
+1. Pre-specified sub-group analysis of rupture risk by size of aneurysm (7mm and less, 5mm and less, and 3mm and less).
 
+2. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage.
 
+***********
+or study proportion with PSAH?
 
+**********
 
-#### Sub-group analysis based on study type - retrospective compared to prospective
+3. Post hoc sub-group analysis of rupture risk comparing prospective studies to retrospective studies. 
 
+4. Post hoc sub-group analysis of rupture risk comparing study source population from Japan vs non-Japanese popultions. 
 
-```{r meta-analysis of proportions using glmm with prospective and retrospective subgroup analysis}
+5. Post hoc sub-group analysis of rupture risk with length of follow up categorised as intermediate (5 years or less), or long term (>5 years)
 
-pes.summary.glmm.type = metaprop(rupt, total_size,
-                            data=dat,
-                            studlab=paste(auth_year),
-                            byvar = type,
-                            bylab = "Study Type",
-                            method="GLMM",
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            ) 
-pes.summary.glmm.type
-
-```
-
-There is greater imprecision in the result for prospective studies with very high heterogeniety. Retrospective studies have less heterogeneity and narrower confidence intervals, but are subject to greater degrees of bias.   
-
-```{r forest for publication using GLMM for subgroup analysis by study type, fig.height= 10, fig.width = 10}
-
-forest(pes.summary.glmm.type,
-       layout = "meta",
-       comb.fixed = FALSE,
-       comb.random = TRUE,
-       leftlabs = c("Study", "Ruptures", "Total"),
-       rightcols = c("effect", "ci"),
-       rightlabs = c("Ruptures per 100", "95% CI"),
-       smlab = " ",
-       xlim=c(0,10),
-       xlab = "Rupture Proportion per 100",
-       pooled.events = TRUE,
-       ) 
-
-```
-
-
-#### Sub-group analysis based on study population - Japanese vs non-Japanese
-
-```{r meta-analysis of proportions using glmm by population}
-
-pes.summary.glmm.pop = metaprop(rupt, total_size,
-                            data=dat,
-                            studlab=paste(auth_year),
-                            byvar = pop,
-                            bylab = "Population",
-                            method="GLMM",
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            ) 
-pes.summary.glmm.pop
-
-```
-
-
-```{r forest for publication using GLMM for subgroup analysis by population, fig.height= 10, fig.width = 10}
-
-forest(pes.summary.glmm.pop,
-       layout = "meta",
-       comb.fixed = FALSE,
-       comb.random = TRUE,
-       leftlabs = c("Study", "Ruptures", "Total"),
-       rightcols = c("effect", "ci"),
-       rightlabs = c("Ruptures per 100", "95% CI"),
-       smlab = " ",
-       xlim=c(0,10),
-       xlab = "Rupture Proportion per 100",
-       pooled.events = TRUE,
-       ) 
-
-```
-
-
-
-
-#### sub-group analysis based on aneurysm size 7 mm and less 
+### Subgroup analysis - aneurysm size categories
 
 ```{r select 7 mm and less}
 
@@ -648,6 +573,7 @@ dat7 <- sizedata7 %>%
 ```{r meta-analysis of proportions using glmm for 7mm}
 
 dat7 <- dat7 %>%
+  slice(-12) %>%
   drop_na(total_size)
 
 pes.summary.glmm7 = metaprop(rupt, total_size,
@@ -663,7 +589,7 @@ pes.summary.glmm7
 
 ```
 
-Here we can see that the I^2 = 82.6% within the sub-group, which means that there remains high between-study variation, even within the subgroup. In other words, even if the study falls within this subgroup, we cannot accurately estimate the pooled rupture risk.
+
 
 #### Publication quality forest plots for 7mm and less 
 
@@ -725,6 +651,7 @@ dat5 <- sizedata5 %>%
 ```{r meta-analysis of proportions using glmm for 5 mm}
 
 dat5 <- dat5 %>%
+  slice(-12) %>%
   drop_na(total_size) %>%
   drop_na(rupt)
 
@@ -740,8 +667,6 @@ pes.summary.glmm5 = metaprop(rupt, total_size,
 pes.summary.glmm5
 
 ```
-
-Here we can see that the I^2 = 79.8% within the sub-group, which means that there remains high between-study variation, even within the subgroup. In other words, even if the study falls within this subgroup, we cannot accurately estimate the pooled rupture risk.
 
 #### Publication quality forest plots for 5mm and less 
 
@@ -804,6 +729,7 @@ dat3 <- sizedata3 %>%
 ```{r meta-analysis of proportions using glmm for 3mm}
 
 dat3 <- dat3 %>%
+  slice(-12) %>%
   drop_na(total_size) %>%
   drop_na(rupt)
 
@@ -820,13 +746,6 @@ pes.summary.glmm3 = metaprop(rupt, total_size,
 pes.summary.glmm3
 
 ```
-
-Here we can see that the I^2 = 72.9% within the sub-group, which means that there remains high between-study variation, even within the subgroup. In other words, even if the study falls within this subgroup, we cannot accurately estimate the pooled rupture risk.
-
-Note that the Fisher scoring algorith failed to converge to calculate the tau2 using the maximum-likelihood estimator after the default 100 iterations; this also fails after attempting 1000 iterations. This was be corrected by reducing the step length, and the model converges. 
-
-Another option to consider is usting a penalised maximum likelihood estimation using the Firth method. The penalisation allows for convergence to finite estimates even with very sparse data.
-
 
 #### Publication quality forest plots for 3mm and less 
 
@@ -848,7 +767,93 @@ forest(pes.summary.glmm3,
 ```
 
 
+#### Sub-group analysis based on study type - retrospective compared to prospective
+
+
+```{r meta-analysis of proportions using glmm with prospective and retrospective subgroup analysis}
+
+pes.summary.glmm.type = metaprop(rupt, total_size,
+                            data=dat,
+                            studlab=paste(auth_year),
+                            byvar = type,
+                            bylab = "Study Type",
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.type
+
+```
+
+There is greater imprecision in the result for prospective studies with higher heterogeniety. Retrospective studies have less heterogeneity and narrower confidence intervals, but are subject to greater degrees of bias.   
+
+```{r forest for publication using GLMM for subgroup analysis by study type, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm.type,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
+#### Sub-group analysis based on study population - Japanese vs non-Japanese
+
+```{r meta-analysis of proportions using glmm by population}
+
+pes.summary.glmm.pop = metaprop(rupt, total_size,
+                            data=dat,
+                            studlab=paste(auth_year),
+                            byvar = pop,
+                            bylab = "Population",
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.pop
+
+```
+
+
+```{r forest for publication using GLMM for subgroup analysis by population, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm.pop,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       ) 
+
+```
+
+
+
+
 #### Sub-group meta-analysis of proportions for risk of rupture in patients with and without exposure to prior SAH
+
+
+****************
+how about changing categorising this as proportion of patients in study with prior SAH at <10% vs 10% or more? 9 studies vs other. 
+****************
+
 
 Firstly structure the data in individual studies with authors in a 2 x 2 table
 
@@ -867,7 +872,7 @@ total number of events = total number of ruptures = variable rupt
 Assumptions:
 
 1. Only 1 aneurysm ruptures per patient. 
-2. If numbe of patients with prior SAH is known, then this is multiplied by the multiplicity proportion to calculate number of aneurysms with exposure to prior SAH in the specific size criteria. 
+2. If number of patients with prior SAH is known, then this is multiplied by the multiplicity proportion to calculate number of aneurysms with exposure to prior SAH in the specific size criteria. 
 2. If the patients of patients with prior is SAH for the size criteria is unknown, then the proportion of patients with prior SAH in the total observation cohort of all aneurysms is carried forward and applied to the number of aneurysms, and an estimated number of aneurysms with prior SAH is calculated based on the total observation cohort. 
 3. Data analysis is limited to studies in which there are known or calculated values of ai, bi, ci, and di using the assumptions. If there are NAs in the 2 x 2 table, then that study is excluded. 
 
@@ -920,9 +925,6 @@ pes.summary.psahpos = metaprop(ai, n1i,
 pes.summary.psahpos
 ```
 
-Here we can see that the I^2 = 79.6% within the sub-group, which means that there remains high between-study variation, even within the subgroup. In other words, even if the study falls within this subgroup, we cannot accurately estimate the pooled rupture risk.
-
-In addition, the confidence intervals are wide, and driven primarily by 2 studies. This is probably described qualitatively rather than displayed using a forest plot, but one is constructed below for interest. 
 
 
 ```{r forest for psahpos using GLMM with Juvela, fig.height= 10, fig.width = 10}
@@ -1018,9 +1020,13 @@ dat.fu.median
 
 ```
 
-Mean follow up length across included studies is 51 months, and median is 38 months. It seems more appropriate to utilise the means as a summary compared to the median. 
+Mean follow up length across included studies is 43 months, and median is 38 months. It seems more appropriate to utilise the means as a summary compared to the median. 
 
 Now that the column with length of follow up is created, we can perform a subgroup meta-analysis of studies with intermediate and long term follow up. 
+
+***********
+should we consider short term follow up vs longer term follow up categorised at 3 years given that median was 3 years?
+***********
 
 ```{r subgroup analysis with both intermediate and long term follow up - data set up}
 
@@ -1085,7 +1091,7 @@ pes.summary.glmmint
 
 ```
 
-Here we can see that the I^2 = 52.5% within the sub-group, which means that there remains moderate between-study variation, even within the subgroup. In other words, even if the study falls within this subgroup, we cannot accurately estimate the pooled rupture risk.
+
 
 #### Subgroup forest plots for patients with less than 5 years of follow up
 
@@ -1127,10 +1133,7 @@ pes.summary.glmmlong = metaprop(rupt, total_size,
 pes.summary.glmmlong
 
 ```
-
-Here we can see that the I^2 = 94.5% within the sub-group, which means that there is high between-study variation, even within the subgroup. In other words, even if the study falls within this subgroup, we cannot accurately estimate the pooled rupture risk. Moreover, there are very few studies in this subgroup and the effect is driven mainly by 1 study. 
-
-This is best described qualitatively, however a forest plot is constructed below for interest. 
+ 
 
 
 ```{r forest for publication using GLMM long, fig.height= 10, fig.width = 10}
@@ -1215,8 +1218,9 @@ Meta-regression
 5. Post hoc metagression to consider whether year of last enrollment in the studies analysed was an important source of heterogeneity. 
 
 
+To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one posthoc potential effect modifier is considered for metaregression each time. 
 
-To reduce the risk of false positives, and to ensure that there are adequate studies to consider pos hoc meta-regression, only one posthoc potential effect modifier is considered for metaregression each time, and in the multivariable model only 2 potential effect modifiers are considered. 
+In the multivariable meta-regression model only 2 potential effect modifiers are considered at a time.
 
 Regardless, the outcomes of these subgroup analysis or meta-regression analyses are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, the level of statistical significance of the results within subgroups cannot be compared, and may not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data. 
 
@@ -1259,67 +1263,18 @@ fu.metareg.result
 
 ```{r metaregression - option 2 - bubble plot, including all studies}
 
-bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 25), main="Meta-regression plot for length of FU")
+bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 10), main="Meta-regression plot for length of FU")
 
 ```
 
 
 
-Overall, the metaregression result reveals the following
+Overall, the metaregression result reveals that there is no association between study follow up length and rupture risk. 
 
-estimate 0.1654 (95% CI 0.1078 - 0.2230) p value <.0001
- 
- This means that for every 1-unit increase in the covariate fu, thre is a 0.17 increase in the dependent variable which is the logit transformed proportion.  The p value is significant, which rejects the null hypothesis that there is no association between the covariate fu and the dependent variable. 
- 
-This suggests that study median follow up duration is associated with pooled rupture risk, however, the I2 = 55.8 meaning that there remains moderate between-study variance around the regression line. 
-
-However, it does seem that this could be explained by the Juvela et al study having significant influence on the metaregression result. This can be explored with a sensitivity analysis by excluding the Juvela study. 
-
-#### Exploratory meta-regression to explore length of follow up on rupture outcomes- excluding Juvela
+estimate 0.0040 (95% CI -0.1364 to 0.1445) p value <.0001
  
 
-```{r metaregression data setup for length of follow up - excluding Juvela}
-
-dat.fu.metareg.juvela <- dat %>%
-  slice(-12) %>%
-  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)/12) %>%
-  drop_na(total_size) %>% 
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size, fu) %>%
-  drop_na(fu)
-
-```
-
-
-```{r metaanalysis pf proporations for metareg - option 2 - excluding Juvela}
-
-fu.metareg.juvela = metaprop(rupt, total_size,
-                      data=dat.fu.metareg.juvela,
-                      studlab=paste(auth_year),
-                      method="GLMM",
-                      sm="PLOGIT",
-                      method.tau = "ML", 
-                      method.ci = "WS",
-                      pscale = 100
-                      )
-
-```
-
-```{r metaregression exploration - option 2 - excluding Juvela}
-
-fu.metareg.result.juvela <- metareg(fu.metareg.juvela, ~fu)
-fu.metareg.result.juvela
-```
-
-```{r metaregression - option 2 - bubble plot - excluding Juvela}
-
-bubble(fu.metareg.result.juvela, studlab=dat.fu.metareg.juvela$auth_year, xlim=c(0, 10), main="Meta-regression plot for FU excluding Juvela")
-
-``` 
-
-Once Juvela is excluded, there is no evidence that median follow up per study is associated with rupture risk.   
- 
-#### Metaregression to explore exposure to prior SAH, all studies
+#### Metaregression to explore exposure to prior SAH
 
 We can analyse whether there is a relationship between the proportion of patients with prior SAH included in the study (potential effect modifier), and the the outcome (rupture proportion). 
 
@@ -1381,46 +1336,7 @@ bubble(psah.metareg.result, studlab=dat.psah.metareg$auth_year, xlim=c(0, 1), ma
 
 ```
 
-Here again, metaregression reveals that the proportion of patients with prior SAH included in the study (potential effect modifier) is associated with the outcome (rupture proportion). We can again explore if this association remains significant if we exclude the Juvela et al study. 
-
-#### Metaregression to explore exposure to prior SAH, excluding Juvela
-
-
-```{r metaregression data setup for prior SAH at study level, excluding Juvela - data setup}
-
-dat.psah.metareg.juvela <- dat %>%
-  slice(-12) %>%
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size, prop_psah) %>%
-  drop_na(total_size) %>%
-  drop_na(prop_psah) 
-
-```
-
-```{r metaregression data setup for prior SAH at study level, excluding Juvela - execution}
-
-psah.metareg.juvela = metaprop(rupt, total_size,
-                      data=dat.psah.metareg.juvela,
-                      studlab=paste(auth_year),
-                      method="GLMM",
-                      sm="PLOGIT",
-                      method.tau = "ML", 
-                      method.ci = "WS",
-                      pscale = 100
-                      )
-
-psah.metareg.result.juvela <- metareg(psah.metareg.juvela, ~prop_psah)
-psah.metareg.result.juvela
-```
-
-
-```{r metaregression - option 2 - bubble plot - , excluding Juvela psah}
-
-bubble(psah.metareg.result.juvela, studlab=dat.psah.metareg.juvela$auth_year, xlim=c(0, 1), main="Meta-regression plot for prior SAH excluding Juvela")
-
-```
-
-Once Juvela is excluded, there is no evidence that proportion of patients with prior SAH per study is associated with rupture risk.   
+Here again, metaregression reveals that the proportion of patients with prior SAH included in the study (potential effect modifier) is not associated with the outcome (rupture proportion). 
 
 
 #### Metaregression to explore size categorised at 5mm
@@ -1441,6 +1357,7 @@ Since we are analysing at a study level, and we do not know the aneurysm charact
 sizedata10 <- filter(maindata, size == 10)
 
 dat10.metareg <- sizedata10 %>%
+  slice(-12) %>%
   mutate(total_size10 = coalesce(num_anr,num)) %>%
   drop_na(total_size10) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
@@ -1482,7 +1399,7 @@ bubble(size5mm.metareg.result, studlab=dat.size5.metareg$auth_year, xlim=c(0, 1)
 ```
  
  
-There is no evidence that the pooled rupture risk varied by the proportion of patients with aneursysms 5mm and less included in the studies (P=.66)
+There is no evidence of that there is an association between pooled rupture risk and theproportion of patients with aneursysms 5mm and less included in the studies 
  
 #### Metaregression to explore size categorised at 3mm
  
@@ -1491,6 +1408,7 @@ There is no evidence that the pooled rupture risk varied by the proportion of pa
 sizedata10 <- filter(maindata, size == 10)
 
 dat10.metareg <- sizedata10 %>%
+  slice(-12) %>%
   mutate(total_size10 = coalesce(num_anr,num)) %>%
   drop_na(total_size10) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
@@ -1531,7 +1449,7 @@ bubble(size3mm.metareg.result, studlab=dat.size3.metareg$auth_year, xlim=c(0, 1)
 
 ```
  
-There is no evidence that the pooled rupture risk varied by the proportion of patients with aneursysms 3mm and less included in the studies (P=.92)
+There is no evidence that the pooled rupture risk varied by the proportion of patients with aneursysms 3mm and less included in the studies.
 
 #### Metaregression to explore size end of study enrollment 
 
@@ -1549,6 +1467,7 @@ Since we are analysing at a study level, this is an exploratory and hypothesis g
 ```{r metaregression data setup for study end year}
 
 dat.year.metareg <- sizedata %>%
+  slice(-12) %>%
   mutate(total_size = coalesce(num_anr,num)) %>%
   drop_na(total_size) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
@@ -1575,11 +1494,11 @@ year.metareg.result
  
 ```{r metaregression - option 2 - bubble plot - year}
 
-bubble(year.metareg.result, studlab=dat.year.metareg$auth_year, xlim=c(1960, 2020), main="Meta-regression plot for Study End Year")
+bubble(year.metareg.result, studlab=dat.year.metareg$auth_year, xlim=c(1980, 2020), main="Meta-regression plot for Study End Year")
 
 ```
  
-This plot suggests that there is an association between end of study year and rupture risk of aneurysms. 
+This plot suggests that there is no association between end of study year and rupture risk of aneurysms. 
 
 We can repeat this excluding Juvela. 
 
