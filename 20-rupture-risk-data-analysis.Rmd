@@ -1,7 +1,7 @@
 ---
 title: "Rupture Risk Data Analysis"
 author: "Ronil V. Chandra"
-date: "08/07/2020"
+date: "11/07/2020"
 output: html_document
 ---
 
@@ -12,20 +12,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Objectives:
 
-The purpose of this project is to improve the precision,and understanding of the risk estimate for rupture of a brain aneurysm managed with active surveillance. 
+The purpose of this project is to improve the understanding of the risk estimate for rupture of a brain aneurysm managed with active surveillance. 
 
-This will help clinicians better convey the rupture risks to patients, and is part of the journey toward personalised and patient centred decision making for patients with brain aneurysms. 
+This will help clinicians more accurately convey the uncertainty in the rupture risk estimate utilising the current state of medical knowledge to patients. This is a step in the journey toward personalised and greater patient centred decision making for patients with brain aneurysms. 
 
 After performing my systematic review, I have three additional aims:
 
-1. To quantitatively synthesise the data in order to calculate a summary pooled proportion.
-2. To calculate heterogeniety across the studies to help consider whether pooling is appropriate. 
-3. If pooling is appropriate, then to explore the heterogeneity by considering outliers and influential studies, and both pre-specified and post hoc sub-group analysis and meteregression. 
+1. If appropriate, to quantitatively synthesise the data in order to calculate a summary pooled proportion.
+2. To identify and measure heterogeniety across the studies to help consider whether data synthesis is appropriate. 
+3. If data synthesis is appropriate, then to explore the reasons for heterogeneity by considering outliers and influential studies, and both pre-specified and post hoc sub-group analysis and meteregression. 
 
 The statistical approaches will be tailored to the source dataset and structure of the data which is characterised by the following:
 
 1. Rupture of an intracranial aneurysm in a single patient is a rare event, usually estimated at 1% per year or less.
-2. There are a small number of rupture outcome events in the sample populations, with the proportion very close to zero.
+2. There are a small number of rupture outcome events in the sample populations, with the rupture proportion very close to zero.
 3. While the outcome of rupture is binomial, in a sample population, the distribution of rupture outcomes over time is is better described by the non-central hypergeometric distribution, since some aneurysms are considered at higher risk of rupture.
 4. There are a wide range of size in sample populations identified by the systematic review, with both very small studies and very large studies included.
 5. The rate of rupture over time does not appear to be constant when biological factors and current published data are considered, thus the risk of rupture will be considered. 
@@ -100,7 +100,7 @@ These can then be combined across studies to consider a meta-analyis of proporti
 
 For every dataset, a suitable effect measure must be chosen, and a choice should be made regarding the meta-analytical methods. Most meta-analytical methods weight the individual effect sizes from each study to create a pooled effect size. In this study, we will consider individual study proportions, and create a pooled summary proportion for rupture risk. 
 
-Given unique characteristics of the data that we are synthesising, appropriate statistical methods for meta-analysis and calculation of the confidence intervals must be considered. 
+Given unique characteristics of the data that we are synthesising, appropriate statistical methods for meta-analysis and calculation of the confidence intervals must be considered. This is important, because different statistical approaches to synthesising the data can produce different results leading to different conclusions. *Cornell et al AIM 2014*
 
 ##### Choice of meta-analytical method
 
@@ -114,11 +114,11 @@ The alternate method of transformation to consider which can better normalises t
 
 In the classical meta-analytical methods, after transformation and statistical procedures, the results are backtransformed to study level results, and synthesised.
 
-Data synthesis can be carried out using the generic inverse variance method, which calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. A variation on the generic inverse variance method incorporates an assumption that there is some variation between studies, ie heterogeneity, while measuring the same effect. This produces a random effects meta-analysis, the most common of which is the the DerSimonian and Laird method *DerSimonian 1986*. This is the most commonly utilised method in medical meta-analysis. 
+Data synthesis can be carried out using the generic inverse variance method, which calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. 
 
-However, when outcome events are rare, such as in our dataset, these classical meta-analytical methods for data-synthesis also have the potential to contribute to additional sparse data bias and give misleading results. *Bradburn 2007 from Cochrane*
+A variation on the generic inverse variance method incorporates an assumption that there is some variation between studies, ie heterogeneity, while measuring the same effect. This produces a random effects meta-analysis, the most common of which is the the DerSimonian and Laird method *DerSimonian 1986*. This is the most commonly utilised method in medical meta-analysis, and the default method in many statistical packages. However the DL method is known to produces confidence bounds that are too narrow and p values that are too small when the number of studies is small or in the setting of high heterogeneity. In addition, when outcome events are rare, such as in our dataset, these classical meta-analytical methods for data-synthesis also have the potential to contribute to additional sparse data bias and give misleading results. *Bradburn 2007 from Cochrane*
 
-In summary, there are significant statistical limitations of the classical meta-analytical methods of transformation and synthesis with our specific dataset and research question. 
+In summary, there are significant statistical limitations of the classical DL meta-analytical methods of transformation and synthesis with our specific dataset and research question. 
 
 To overcome these statistical limitations, we can instead utilise the random intercept logistic regression model for statistical procedures and data synthesis, a type of generalised linear mixed model, as recommended by *Stinjen 2010* and *Schwarzer 2019*. 
 
@@ -186,9 +186,13 @@ Some studies report the number of patients at study entry for a size criteria, w
 
 Given that only 1 aneurysm in 1 patient ruptures, which is the outcome, and that the number of aneurysms in that size criteria is most consistently reported, the analysis is performed with the outcome of number of aneurysm ruptures per 100 aneurysms. 
 
-This makes biological sense, since aneurysm rupture is considered to be strongly influenced by aneurysm characteristics, 1 patients may have multiple aneurysms with a large range eg 1 to 8 aneurysms, and that conveying a rupture risk per aneurysm is easy to understand from a patient perspective when they harbour multiple aneurysms. 
+The rationale for this is:
 
-Thus, if the number of aneurysms for a particular size criteria in the study has been reported, this has been extracted and utilised for analysis. 
+1. Makes biological sense, since aneurysm rupture is considered to be strongly influenced by aneurysm characteristics
+2. One patients may have multiple aneurysms with a large range eg 1 to 8 aneurysms
+3. Conveying a rupture risk per aneurysm is easy to understand from a patient perspective when they harbour multiple aneurysms. 
+
+Thus, if the number of aneurysms for a particular size criteria in the study has been reported, this is the most accurate information, and is utilised for analysis. 
 
 If the number of number of aneuryms is not known for the specific size criteria, and we do know the proportion of patients with multiple aneuryms in the total observation cohort:
 
@@ -209,35 +213,42 @@ For patients with exposure to prior SAH. The number of aneurysms in patients wit
 *****
 pipe the mutate together
 *****
- 
+
 ```{r calculate total number of aneurysms and prior SAH exposure for specific size criteria 10 mm and less}
 
-dat <- sizedata %>%
-  mutate(prop_multi = multi_tot / num_tot) %>%
-  mutate(num_multi = prop_multi * num + num) %>%
-  mutate(num_multi_temp = coalesce(num_anr, num_multi)) %>%
-  mutate(total_size_temp = coalesce(num_anr, num)) %>%
-  mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
-  mutate(total_size = round(total_size_temp_2, 0)) %>%
-  mutate(psah_size_temp = psah * prop_multi + psah) %>%
-  mutate(prop_psah = psah_tot / num_tot) %>%
-  mutate(num_anr_psah = prop_psah * total_size) %>%
-  mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
-  mutate(psah_size = round(size_psah_temp, 0)) %>%
+dat10 <- sizedata %>%
+  mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(pop = fct_collapse(sizedata$country, "Japanese" = "Japan", "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")))
+  mutate(pop = fct_collapse(sizedata$country, 
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+         )
         
 ```
+
 
 #### Meta-analysis of proportions using GLMM and Wilson CIs with all studies 
 
 Now that we have taken into account the number of aneurysms specific to that size category, we can now perform our statistical procedures on that dataset, starting with a meta-analysis of proportions using the GLMM
 
+
 ```{r meta-analysis of proportions using glmm}
 
 dat.all <- dat %>%
   drop_na(total_size)
-
+  
 pes.summary.glmm.all = metaprop(rupt, total_size,
                             data=dat.all,
                             studlab=paste(auth_year),
@@ -251,14 +262,23 @@ pes.summary.glmm.all
 
 ```
 
+
+
+```{r calculate mean FU of all included studies}
+
+dat.all %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
 The output from the random effects meta-analysis using the GLMM: 
 
-Summary estimate is 1.2112 [0.7844; 1.8659]
+Summary estimate is 1.2112 [0.7844; 1.8659] over study level mean of 51 months. 
 
 Note that for GLMMs no continuity correction is used. *Meta documentation* Given our rationale for choosing the GLMM, this should produce the least biased result and reasonable coverage probabilities for the 95% CI, as suggested by *Stinjen 2010*. Note CIs are using Wilson score method.
 
 Remember that the confidence interval from this random-effects meta-analysis describes uncertainty in the location of average proportion across the individual studies. Thus there is likely to be an even higher degree of uncertainty in the true population rupture risk. *Cochrane handbook 10.10.4.2*
-
 
 #### Display meta-analysis result using a publication quality forest plot
 
@@ -275,7 +295,7 @@ forest(pes.summary.glmm.all,
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture Proportion per 100",
+       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 51 months",
        pooled.events = TRUE,
        ) 
 
@@ -453,7 +473,8 @@ The analogy is that while the remaining studies are different varieties of apple
 
 Since statistical heterogeneity is a consequence of clinical and/or methodological heterogeniety, we can explore if there are particular clinical or methodogical factors that are likely to be responsible. 
 
-Proposed factors to explore are proportion of patients with exposure to prior subarachnoid haemorrhage, patient enrollment period, and length of follow up. 
+Clinical and methodological factors likely to explain the statistical heterogeneity are are proportion of patients with exposure to prior subarachnoid haemorrhage, patient enrollment period, and length of follow up. 
+
 
 #### Meta-analysis of proportions using GLMM and Wilson CIs with Juvela excluded 
 
@@ -478,9 +499,19 @@ pes.summary.glmm
 
 ```
 
+
+
+```{r calculate mean FU of included studies without Juvela}
+
+dat %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
 The output from the random effects meta-analysis using the GLMM: 
 
-Summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8%.
+Summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
 
 
 #### Display meta-analysis result using a publication quality forest plot
@@ -498,7 +529,7 @@ forest(pes.summary.glmm,
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture Proportion per 100",
+       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 43 months",
        pooled.events = TRUE,
        ) 
 
