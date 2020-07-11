@@ -297,8 +297,10 @@ forest(pes.summary.glmm.all,
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 51 months",
+       xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 51 months",
+       JAMA.pval = TRUE,
        ) 
 
 ```
@@ -533,8 +535,10 @@ forest(pes.summary.glmm,
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 43 months",
+       xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 43 months",
+       JAMA.pval = TRUE,
        ) 
 
 ```
@@ -660,8 +664,10 @@ forest(pes.summary.glmm7,
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 42 months",
+       xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 42 months",
+       JAMA.pval = TRUE,
        ) 
 
 ```
@@ -752,8 +758,10 @@ forest(pes.summary.glmm5,
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 42 months",
+       xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 42 months",
+       JAMA.pval = TRUE,
        ) 
 
 ```
@@ -843,8 +851,10 @@ forest(pes.summary.glmm3,
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 47 months",
+       xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 47 months",
+       JAMA.pval = TRUE,
        ) 
 
 ```
@@ -914,6 +924,9 @@ forest(pes.summary.glmm.type,
        pooled.events = TRUE,
        test.subgroup.random = TRUE,
        label.test.effect.subgroup.random = TRUE,
+       text.addline1 = "Mean prospective study-level follow up: 32 months",
+       text.addline2 = "Mean retrospective study-level follow up: 47 months",
+       JAMA.pval = TRUE,
        ) 
 
 ```
@@ -993,6 +1006,7 @@ forest(pes.summary.glmm.pop,
        pooled.events = TRUE,
        test.subgroup.random = TRUE,
        label.test.effect.subgroup.random = TRUE,
+       JAMA.pval = TRUE,
        ) 
 
 ```
