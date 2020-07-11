@@ -209,14 +209,10 @@ For patients with exposure to prior SAH. The number of aneurysms in patients wit
 1. We can assume that the proportion of patients with multiple aneurysms in the total cohort, is the same as the proportion of patients with multiple aneurysms with prior SAH, and calculate this if we know the number of patients with exposure to prior SAH in the specific size category. 
 2. If the number of patients with exposure to prior SAH in the specific size category is unknown, then we can assume that the proportion of patients with prior SAH in the total observation cohort is the same proportion as those in that size category. Thus if we know the total number of aneurysms in that size category, we can calculate the proportion that have had exposure to prior SAH. 
  
- 
-*****
-pipe the mutate together
-*****
 
 ```{r calculate total number of aneurysms and prior SAH exposure for specific size criteria 10 mm and less}
 
-dat10 <- sizedata %>%
+dat <- sizedata %>%
   mutate(prop_multi = multi_tot / num_tot,
          num_multi = prop_multi * num + num,
          num_multi_temp = coalesce(num_anr, num_multi),
