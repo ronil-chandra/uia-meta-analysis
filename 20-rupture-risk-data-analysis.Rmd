@@ -290,6 +290,8 @@ forest(pes.summary.glmm.all,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
        leftlabs = c("Study", "Ruptures", "Total"),
        rightcols = c("effect", "ci"),
        rightlabs = c("Ruptures per 100", "95% CI"),
@@ -524,6 +526,8 @@ forest(pes.summary.glmm,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
        leftlabs = c("Study", "Ruptures", "Total"),
        rightcols = c("effect", "ci"),
        rightlabs = c("Ruptures per 100", "95% CI"),
@@ -548,27 +552,30 @@ Meta-regression and sub-group analysis are non-randomized and observational in n
 
 This is an important concept, because if subgroup analysis or metaregression findings are presented as definitive conclusions there is risk of people being denied an effective intervention or treated with an ineffective or harmful intervention. This can also generate misleading recommendations about future research directions, which if followed would waste scarce research resources.
 
-Moving forward, we shall choose to pool the data, and explore heterogeneity in the synthesised data with sub-group analyses and meta-regression. 
+Moreover, when reporting results from a sub-group analysis additional important factors should be considered:
 
-### Subgroup analysis
+1. Ehether a statistically significant subgroup difference (interaction) was detected
+2. The covariate distribution (i.e. the number of trials and participants contributing to each subgroup)
+3. The plausibility of the interaction or lack of interaction 
+4. The importance of the interaction or lack of interaction 
+5. The possibility of confounding
 
+Moving forward, we shall choose to pool the data, explore heterogeneity in the synthesised data with sub-group analyses and meta-regression, and accurately report the interpretation of the sub-group analyses and meta-regression with clinical context. 
+
+### Subgroup analysis 
 
 The following sub-group group analyses will be performed. 
 
-1. Pre-specified sub-group analysis of rupture risk by size of aneurysm (7mm and less, 5mm and less, and 3mm and less).
+Main figures
 
-2. Prespecified sub-group analysis of rupture risk by size of aneurysm by exposure to prior subarachnoid haemorrhage.
+1. Pre-specified sub-group analysis comparing rupture risk in studies with aneurysm size categorised at 5mm and less vs >5-10 mm
 
-***********
-or study proportion with PSAH?
+Supplemental figures
 
-**********
+2. Pre-specified sub-group analysis summarising rupture risk by size of aneurysm (7mm and less, 5mm and less, and 3mm and less).
+3. Post hoc sub-group analysis of high quality vs non-high quality studies. 
+4. Post hoc sub-group analysis comparing study source population from Japan vs non-Japanese popultions. 
 
-3. Post hoc sub-group analysis of rupture risk comparing prospective studies to retrospective studies. 
-
-4. Post hoc sub-group analysis of rupture risk comparing study source population from Japan vs non-Japanese popultions. 
-
-5. Post hoc sub-group analysis of rupture risk with length of follow up categorised as intermediate (5 years or less), or long term (>5 years)
 
 ### Subgroup analysis - aneurysm size categories
 
@@ -582,22 +589,24 @@ sizedata7 <- filter(maindata, size == 7)
 ```{r calculate total number of aneurysms for specific size criteria 7 mm and less}
 
 dat7 <- sizedata7 %>%
-  mutate(prop_multi = multi_tot / num_tot) %>%
-  mutate(num_multi = prop_multi * num + num) %>%
-  mutate(num_multi_temp = coalesce(num_anr, num_multi)) %>%
-  mutate(total_size_temp = coalesce(num_anr, num)) %>%
-  mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
-  mutate(total_size = round(total_size_temp_2, 0)) %>%
-  mutate(psah_size_temp = psah * prop_multi + psah) %>%
-  mutate(prop_psah = psah_tot / num_tot) %>%
-  mutate(num_anr_psah = prop_psah * total_size) %>%
-  mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
-  mutate(psah_size = round(size_psah_temp, 0)) %>%
+  mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata$country, 
-             "Japanese" = "Japan",
-             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")
-             ))
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+         )
 
 ```
 
@@ -626,6 +635,16 @@ pes.summary.glmm7
 
 
 
+```{r calculate mean FU of included studies of 7 mm and less}
+
+dat7 %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+
 #### Publication quality forest plots for 7mm and less 
 
 ```{r forest for publication for 7 mm using GLMM, fig.height= 10, fig.width = 10}
@@ -634,12 +653,14 @@ forest(pes.summary.glmm7,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
        leftlabs = c("Study", "Ruptures", "Total"),
        rightcols = c("effect", "ci"),
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture Proportion per 100",
+       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 42 months",
        pooled.events = TRUE,
        ) 
 
@@ -658,24 +679,24 @@ sizedata5 <- filter(maindata, size == 5)
 ```{r calculate total number of aneurysms for specific size criteria 5 mm and less}
 
 dat5 <- sizedata5 %>%
-  mutate(prop_multi = multi_tot / num_tot) %>%
-  mutate(num_multi = prop_multi * num + num) %>%
-  mutate(num_multi_temp = coalesce(num_anr, num_multi)) %>%
-  mutate(total_size_temp = coalesce(num_anr, num)) %>%
-  mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
-  mutate(total_size = round(total_size_temp_2, 0)) %>%
-  mutate(psah_size_temp = psah * prop_multi + psah) %>%
-  mutate(prop_psah = psah_tot / num_tot) %>%
-  mutate(num_anr_psah = prop_psah * total_size) %>%
-  mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
-  mutate(psah_size = round(size_psah_temp, 0)) %>%
+  mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata$country, 
-             "Japanese" = "Japan",
-             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")
-             ))
-
-
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+         )
 ```
 
 
@@ -703,6 +724,19 @@ pes.summary.glmm5
 
 ```
 
+
+
+```{r calculate mean FU of included studies of 5 mm and less}
+
+dat5 %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+
+
 #### Publication quality forest plots for 5mm and less 
 
 ```{r forest for publication using GLMM for 5 mm, fig.height= 10, fig.width = 10}
@@ -711,12 +745,14 @@ forest(pes.summary.glmm5,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
        leftlabs = c("Study", "Ruptures", "Total"),
        rightcols = c("effect", "ci"),
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture Proportion per 100",
+       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 42 months",
        pooled.events = TRUE,
        ) 
 
@@ -735,23 +771,24 @@ sizedata3 <- filter(maindata, size == 3)
 ```{r calculate total number of aneurysms for specific size criteria 3 mm and less}
 
 dat3 <- sizedata3 %>%
-  mutate(prop_multi = multi_tot / num_tot) %>%
-  mutate(num_multi = prop_multi * num + num) %>%
-  mutate(num_multi_temp = coalesce(num_anr, num_multi)) %>%
-  mutate(total_size_temp = coalesce(num_anr, num)) %>%
-  mutate(total_size_temp_2 = coalesce(num_multi_temp, total_size_temp)) %>%
-  mutate(total_size = round(total_size_temp_2, 0)) %>%
-  mutate(psah_size_temp = psah * prop_multi + psah) %>%
-  mutate(prop_psah = psah_tot / num_tot) %>%
-  mutate(num_anr_psah = prop_psah * total_size) %>%
-  mutate(size_psah_temp = coalesce(psah_size_temp, num_anr_psah)) %>%
-  mutate(psah_size = round(size_psah_temp, 0)) %>%
+mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata$country, 
-             "Japanese" = "Japan",
-             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")
-             ))
-
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+         )
 
 ```
 
@@ -782,6 +819,15 @@ pes.summary.glmm3
 
 ```
 
+```{r calculate mean FU of included studies of 3 mm and less}
+
+dat3 %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
 #### Publication quality forest plots for 3mm and less 
 
 ```{r forest for publication using GLMM for 3mm, fig.height= 10, fig.width = 10}
@@ -790,12 +836,14 @@ forest(pes.summary.glmm3,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
        leftlabs = c("Study", "Ruptures", "Total"),
        rightcols = c("effect", "ci"),
        rightlabs = c("Ruptures per 100", "95% CI"),
        smlab = " ",
        xlim=c(0,10),
-       xlab = "Rupture Proportion per 100",
+       xlab = "Rupture per 100 aneurysms over mean study-level follow up: 47 months",
        pooled.events = TRUE,
        ) 
 
@@ -824,12 +872,39 @@ pes.summary.glmm.type
 
 There is greater imprecision in the result for prospective studies with higher heterogeniety. Retrospective studies have less heterogeneity and narrower confidence intervals, but are subject to greater degrees of bias.   
 
+
+```{r calculate mean FU of included prospective studies}
+
+dat %>%
+  drop_na(fu) %>%
+  filter(type == "prospective") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+```{r calculate mean FU of included retrospective studies}
+
+dat %>%
+  drop_na(fu) %>%
+  filter(type == "retrospective") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+
+
 ```{r forest for publication using GLMM for subgroup analysis by study type, fig.height= 10, fig.width = 10}
 
 forest(pes.summary.glmm.type,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap.left = "10mm",
+       colgap.forest.left = "10mm",
+       colgap.forest.right = "0mm",
        leftlabs = c("Study", "Ruptures", "Total"),
        rightcols = c("effect", "ci"),
        rightlabs = c("Ruptures per 100", "95% CI"),
@@ -837,9 +912,16 @@ forest(pes.summary.glmm.type,
        xlim=c(0,10),
        xlab = "Rupture Proportion per 100",
        pooled.events = TRUE,
+       test.subgroup.random = TRUE,
+       label.test.effect.subgroup.random = TRUE,
        ) 
 
 ```
+
+
+The test for subgroup differences indicates that there is no statistically significant subgroup effect (p = 0.35), suggesting that study type did not modify the rupture risk. Although it is not biologically plausible that participation in a retrospective or prospective study would modify rupture risk, it is of clinical interest since patients experiencing rupture may die in the community, and case ascertainment methods in prospective studies may be more likely to capture these rupture events compared to retrospective studies. 
+
+Heterogeneity is not much lower in the subgroups compared to all included trials. There remains moderate residual heterogeniety I^2 = 0.0% [0.0%; 39.7%], meaning that this subgroup analysis was not informative in explaining the sources of heterogeneity. While the covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group, the the mean study follow up time is a confounder with the covariate of interest. This is 32 months in the prospective studies, and 46 months in the retrospective studies. There may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide useful findings. 
 
 
 #### Sub-group analysis based on study population - Japanese vs non-Japanese
@@ -862,12 +944,46 @@ pes.summary.glmm.pop
 ```
 
 
+
+```{r calculate mean FU of included studies from Japan}
+
+dat %>%
+  drop_na(fu) %>%
+  filter(pop == "Japanese") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+```{r calculate mean FU of included included studies from outside Japan}
+
+dat %>%
+  drop_na(fu) %>%
+  filter(pop == "Non-Japanese") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (p = 0.001), suggesting that a Japanese source population modified the rupture risk. This is biologically plausible, and is concordant with other published literature with that demonstrates an unexplained higher incidence of aneurysmal subarachnoid haemorrhage from ruptured aneurysms in the Japanese population. 
+
+This covariate also explains some of the heterogeniety, with only mild heterogeneity remaining I^2 = 0.0% [0.0%; 25.0%]. The overall covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group.  
+
+This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher (1.9494 [1.6300; 2.3300]) over a shorter follow up period of 38 months, compared to the sub-group rupture risk in non-Japanese of 1.0665 [0.7710; 1.4735] over a mean study follow up period of 45 months. 
+
+There may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. 
+
+
 ```{r forest for publication using GLMM for subgroup analysis by population, fig.height= 10, fig.width = 10}
 
 forest(pes.summary.glmm.pop,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap.left = "10mm",
+       colgap.forest.left = "10mm",
+       colgap.forest.right = "0mm",
        leftlabs = c("Study", "Ruptures", "Total"),
        rightcols = c("effect", "ci"),
        rightlabs = c("Ruptures per 100", "95% CI"),
@@ -875,6 +991,8 @@ forest(pes.summary.glmm.pop,
        xlim=c(0,10),
        xlab = "Rupture Proportion per 100",
        pooled.events = TRUE,
+       test.subgroup.random = TRUE,
+       label.test.effect.subgroup.random = TRUE,
        ) 
 
 ```
