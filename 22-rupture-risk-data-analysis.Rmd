@@ -873,6 +873,38 @@ The choice of this potential effect modifier is:
 
 Since we are analysing at a study level, and we do not know the aneurysm characteristics of individual patients, this is an exploratory and hypothesis generating analysis. 
 
+
+```{r select 5 mm and less}
+
+sizedata5 <- filter(maindata, size == 5) 
+
+```
+
+
+```{r calculate total number of aneurysms for specific size criteria 5 mm and less}
+
+dat5 <- sizedata5 %>%
+  mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(pop = fct_collapse(sizedata$country, 
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+         )
+```
+
+
 ```{r metaregression data setup for size categorisation at 5 mm at study level - data setup}
 
 dat10.metareg <- dat10 %>%
@@ -881,13 +913,16 @@ dat10.metareg <- dat10 %>%
   select(auth_year, rupt10, total_size10)
 
 dat5.metareg <- dat5 %>%
+  slice(-12) %>%
   rename(total_size5 = total_size) %>%
   rename(rupt5 = rupt) %>%
   select(auth_year, rupt5, total_size5)
 
 dat.size5.metareg <- left_join(dat5.metareg, dat10.metareg) %>%
   mutate(prop_size5 = total_size5 / total_size10) %>%
-  select(auth_year, rupt10, total_size10, prop_size5)
+  select(auth_year, rupt10, total_size10, prop_size5) %>%
+  drop_na(prop_size5)
+
 
 
 
@@ -931,67 +966,8 @@ bubble(size5mm.metareg.result, studlab=dat.size5.metareg$auth_year, xlim=c(0, 1)
 ```
  
  
-The random effects metaregression included participants from 22 studies with a mean study level proportion of 5mm aneurysms of 76.9% (range 24.8 - 100%). There were a total of 144 ruptures and 8 914 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.83), suggesting that the proportion of patients with 5mm and less aneurysms included in the study did not modify the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 43%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. Regardless, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+The random effects metaregression included participants from 25 studies with a mean study level proportion of 5mm aneurysms of 77% (range 24.8 - 100%). There were a total of 174 ruptures and 11 044 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of patients with 5mm and less aneurysms included in the study did not modify the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. Regardless, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
-
-#### Metaregression to explore size categorised at 3mm
-
-```{r data setup for size categorisation at 3 mm at study level}
-
-dat3.metareg <- dat3 %>%
-  rename(total_size3 = total_size) %>%
-  rename(rupt3 = rupt) %>%
-  select(auth_year, rupt3, total_size3)
-
-dat.size3.metareg <- left_join(dat3.metareg, dat10.metareg) %>%
-  mutate(prop_size3 = total_size3 / total_size10) %>%
-  select(auth_year, rupt10, total_size10, prop_size3)
-
-```
-
-
-```{r metaregression for size categorised at 3 mm at study level - execution}
-
-size3.metareg = metaprop(rupt10, total_size10,
-                      data=dat.size3.metareg,
-                      studlab=paste(auth_year),
-                      method="GLMM",
-                      sm="PLOGIT",
-                      method.tau = "ML", 
-                      method.ci = "WS",
-                      pscale = 100
-                      )
-
-size3mm.metareg.result <- metareg(size3.metareg, ~prop_size3)
-
-size3mm.metareg.result
-
-```
-
-
-
-```{r metaregression for 3mm category at study level, all studies - charachteristics}
-
-range(dat.size3.metareg$prop_size3) * 100
-
-mean(dat.size3.metareg$prop_size3) * 100
-
-sum(dat.size3.metareg$rupt10)
-
-sum(dat.size3.metareg$total_size10)
-  
-```
-
-
-
-```{r metaregression - option 2 - bubble plot - size categorised 3mm}
-
-bubble(size3mm.metareg.result, studlab=dat.size3.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for 3mm Aneurysm size")
-
-```
- 
-
-The random effects metaregression included participants from 15 studies with a mean study level proportion of 3mm aneurysms of 44.4% (range 8.2 - 100%). There were a total of 28 ruptures and 2 569 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.55), suggesting that the proportion of patients with 3mm and less aneurysms included in the study did not modify the risk of rupture at the study level. Although there is no unexplained residual heterogeneity (I2 = 0%), there are far less studies, ruptures and numbers of aneurysms included in this analysis, and thus it seems unlikely that this meta-regression analysis can be relied upon to produce valid results. 
 
 #### Metaregression to explore study length of follow up on rupture outcomes, including all studies
 
@@ -1167,40 +1143,6 @@ Sensitivity analysis performed with aneurysms measuring 7 mm and less have a poo
 
 ### Sensitivity analysis - consider decision to utilise 10 mm and less or 5 mm and less for aneurysm size categories
 
-```{r select 5 mm and less}
-
-sizedata5 <- filter(maindata, size == 5) 
-
-```
-
-
-```{r calculate total number of aneurysms for specific size criteria 5 mm and less}
-
-dat5 <- sizedata5 %>%
-  mutate(prop_multi = multi_tot / num_tot,
-         num_multi = prop_multi * num + num,
-         num_multi_temp = coalesce(num_anr, num_multi),
-         total_size_temp = coalesce(num_anr, num),
-         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
-         total_size = round(total_size_temp_2, 0),
-         psah_size_temp = psah * prop_multi + psah,
-         prop_psah = psah_tot / num_tot,
-         num_anr_psah = prop_psah * total_size,
-         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
-         psah_size = round(size_psah_temp, 0),
-         ) %>%
-  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(pop = fct_collapse(sizedata$country, 
-                            "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
-         )
-```
-
-
-
-#### Subgroup meta-analysis of proportions of 5 mm aneurysms and less using GLMM and Wilson CIs
-  
 
 ```{r meta-analysis of proportions using glmm for 5 mm}
 
@@ -1285,21 +1227,55 @@ The impact of including Juvela et al is to reduce the precision of the summary e
 
 #### Sensitivity analysis - consider handling of missing data
 
-4. Post hoc sensitivity analysis to consider the decision to handle missing data with the last observation carry forward method compared to analysis with only complete case data.
- 
+Missing data was handled with imputation using the last observation carry forward method. This decision can also lead to biased estimates, particularly a downward bias in the rupture risk given that it is generally considered that larger sized aneurysms are considered at higher risk for rupture. We can compare our decision to carry forward the number of rupture and number of aneurysms by examining only complete case data.
+
+```{r sensitivity analysis - consider handling of missing data, only include cases where number of 5 mm aneurysms were not carried forward to 10 mm and less}
+
+dat.5locf.sens <- left_join(dat5.metareg, dat10.metareg) %>%
+  filter(total_size5 != total_size10) 
+
+pes.summary.5locf = metaprop(rupt10, total_size10,
+                            data=dat.5locf.sens,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.5locf
+
+```
 
 
- 
 
-### Funnel plots  - exploratory for small study publication bias 
+Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
 
-Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies which are not published are not identified and not integrated into the meta-analysis. This leads to publication bias meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not published. 
+Sensitivity analysis performed without carrying forward number of aneurysms measuring 5 mm and less to the 10 mm and less category, (ie including those with more complete case data for 10 mm and less aneurysms) has a pooled rupture risk estimate of 1.4412 [1.0706; 1.9376], with I^2 = 30%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%. 
+
+#### Sensitivity analysis - consider distributional assumptions
+
+While we have considered that the distribution for statistical analysis is binomial, aneurysm rupture over time is not a true binomial distribution, but in fact a Wallenius type noncentral hypergeometric distribution. 
+
+The hypergeometric distribution is best explained by sampling coloured balls in an urn. Hypergeometric distribution is sampling without replacement compared to a binomial distribution where there is sampling with replacement. If the balls are of different weight or size, ie one has a greater chance of being chosen, this is a noncentral hypergeometric distribution. Wallenius type is the biased urn model, where balls are taken out 1 by 1. 
+
+For large samples with a common outcome, the binomial distribution is a reasonable estimate. However, aneurysms rupture 1 by 1 over time, and have features that make them more prone to rupure ie heavier weighted ball, thus each rupture outcome without replacement influences the probability of rupture in the remaining sample population. Thus the non central hyperegeometric distribution is required. 
+
+*****
+How to do this?
+Necessary?
+*****
+
+### Assessing risk of bias 
+
+#### Non-reporting bias
+
+Non reporting bias leads to bias in the meta-analysis due to missing results. Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies are not reported, are not identified and not integrated into the meta-analysis. This leads to non-reporting bias which meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not reported. 
 
 In addition, large studies are more likely to get published regardless of the effect size. Small studies are at the greatest risk, since they are only generally published if there is a large effect size. 
 
-Thus when assessing for publication bias, conventional assessment is focused on identifying whether small studies with small effect sizes are missing or not. 
-
-This can be performed using a funnel plot, however, we will later discuss why a funnel plot analysis may not be required. 
+Thus when assessing for non-reporting bias, conventional assessment is focused on identifying whether small studies with small effect sizes are missing or not. 
+his can be performed using a funnel plot. 
 
 ```{r funnel plots}
 
@@ -1307,22 +1283,20 @@ funnel(pes.summary.glmm)
 
 ```
 
-Here we can see that the funnel plot is assymetrical with visual assessment. The assymetry is primarily driven by 1 study in the top right corner with a large effect. We can identify the study by labelling the funnel plot. 
-
-
-```{r funnel plots labelled}
-
-funnel(pes.summary.glmm,
-       studlab = TRUE
-       )
-
-```
-
 There are many possible sources of funnel plot assymetry - selection bias from publication and selective outcome reporting bias, poor methodological quality leading to spuriously elevated effecs in small studies, true heterogeniety, statistical modeling artefacts and chance. 
 
-In our case, the most likely explanation for this appearance of the funnel plot is due to the outlier rupture risk in the Juvela study that contributes to true heterogeniety from true differences in rupture proportion.
-
 In general, testing for funnel plot assymetry should always be performed in the context of visual assessment, and while there are many potential statistical tests for funnel plots including Egger 1997, Harbord 2006, Peters 2006 or Rücker 2008, even Cochrane suggests that tests for funnel plot asymmetry should be used in only a minority of meta-analyses (Ioannidis 2007b).
+
+
+Non reporting bias is different to bias in selection of reported results. The latter is where the study authors select certain results for reporting, amongst multiple analysis that they performed.   
+
+### Limitations
+
+SNon-reporting bias due to inclusion of results from published literature only; grey literature excluded. However we did include results from multiple electronic databases and the Cochrane Trials register. 
+
+
+ingle imputation methods for last observation carry forward often lead to down-ward biased estimates and under-estimation of the true variability in the data. 
+
 
 
 ### Study conclusions
