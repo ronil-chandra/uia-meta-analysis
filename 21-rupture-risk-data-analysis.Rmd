@@ -1026,7 +1026,7 @@ The method of meta-regression will be random effects meta-regression since there
 
 To reduce the risk of false positives, and to ensure that there are adequate studies to consider  meta-regression, only one potential effect modifier is considered for metaregression each time. Multivariable meta-regression with up to 2 potential effect modifiers will be considered if for any potential effect modifiers with a p value of less than 0.1, and with lower residual heterogeniety than the overall pooled analysis. 
 
-Regardless, the outcomes of these meta-regression analyses are limited. They are entirely observational, susceptible to confounding bias from other study level characteristics, and are not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data. Since we are analysing at a study level, and we do not know the characteristics of individual patients, this is an exploratory and hypothesis generating analysis.  
+Regardless, the outcomes of these meta-regression analyses are limited. They are entirely observational and susceptible to confounding bias from other study level characteristics. Importantly, they are not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data. This aggregation bias may fail to detect important associatons that may be detected utilising individual patient-data. Since we do not know the characteristics of individual patients, these are exploratory and hypothesis generating analyses, with the purpose to find explanations for heterogeneity in the data.  
 
 ####  Metagression for prior SAH exposure 
 
@@ -1336,10 +1336,9 @@ Sensitivity analysis is used to assess the robustness of the result, and helps s
 
 If sensitivity analyses show that the overall result and conclusions are not affected by the different decisions that could be made during the review process, the results of the review can be regarded with a higher degree of certainty. 
 
-Similarly, if sensitivity analyses show that the overall result and conclusions are affected, the results should be interpreted with caution, and sculd instead be considered hypothesis generating for additional research. 
+Similarly, if sensitivity analyses show that the overall result and conclusions are affected, the results should be interpreted with caution, and could instead be considered hypothesis generating for additional research. 
 
 Sensitivity analysis differs from subgroup analysis in that there is no assessment of the treatment effect in the removed studies, nor is there formal statistical assessment across the included and excluded studies. Instead, there is an informal comparison by recalculating the pooled effect size. 
-
 
 
 Sensitivity analysis
