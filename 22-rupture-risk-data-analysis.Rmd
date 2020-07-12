@@ -1063,10 +1063,12 @@ Sensitivity analysis to consider are determined by the meta-analyst. General apt
 
 The following sensitivity analysis will be perfomed. 
 
-1. Pre-specified 
-2. Post hoc sensitivity analysis to consider the decision to exclude outlier studies. 
+1. Pre-specified sensitivity analysis to consider decision to stratify size criteria at 10 mm or less compared to 7 mm and less
+2. Pre-specified sensitivity analysis to consider decision to stratify size criteria at 10 mm or less compared to 5 mm and less
+4. Post hoc sensitivity analysis to consider the decision to exclude outlier studies. 
 
 
+In the main analysis, we have included participants from studies where the proportion of patients with exposure to prior subarachnoid haemorrhage ranged from 0-50%. We can perform a sensitivity analysis to include only studies where the proportion of patients with no exposure to prior SAH is 95% or more. This is important from a clinical perspective given that majority of aneurysms are discovered incidentally without exposure to prior SAH.
 
 #### Sensitivity analysis - consider decision to exclude outlier studies
 
@@ -1281,10 +1283,47 @@ Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over st
 
 Sensitivity analysis performed with aneurysms measuring 5 mm and less have a pooled rupture risk estimate of 1.0624 [0.8427; 1.3385] over 42 months, with I^2 = 0%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%.  
 
+#### Sensitivity analysis - consider handling of baseline imbalance in exposure to prior SAH
+
+In the main analysis, we have included participants from studies where the proportion of patients with exposure to prior subarachnoid haemorrhage ranged from 0-50%. We can perform a sensitivity analysis to include only studies where the proportion of patients with no exposure to prior SAH is 95% or more. This is important from a clinical perspective given that majority of aneurysms are discovered incidentally without exposure to prior SAH. 
+
+```{r sensitivity analysis - reduce exposure to prior SAH at study level to less than 5%}
+
+dat.psah.sens <- dat10 %>%
+  filter(prop_psah < 0.05)
+
+pes.summary.psah.sens = metaprop(rupt, total_size,
+                            data=dat.psah.sens,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            )
+pes.summary.psah.sens
+
+```
+
+
+```{r calculate mean FU of included studies of prior SAH exposure reduced to less than 5%}
+
+dat.psah.sens %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
+
+Sensitivity analysis performed with aneurysms included in studies where over 95% of study participants did not have exposure to prior SAH has a pooled rupture risk estimate of 0.8459 [0.4149; 1.7171] over 41 months, with I^2 = 75.1%. 
+
+Since the pooled rupture risk remains within 1-2%, this sensitivity analysis does not alter the overall impact from a clinical perspective. However, the inconsistency in the pooled result has increased, which reduces its validity. 
+
 
 #### Sensitivity analysis - consider handling of missing data
 
-In this study, we have handled missing 
+ 
 
 
 
