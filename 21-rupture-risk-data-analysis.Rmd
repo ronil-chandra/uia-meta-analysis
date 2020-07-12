@@ -1332,28 +1332,52 @@ In the previous scenarios we have considered the impact of a single study-level 
 
 ### Sensitivity analysis 
 
-Sensitivity analysis is used to assess the robustness of the result, and helps strengthed or weaken the conclusions that can be drawn from the meta-analysis.
+Sensitivity analysis is used to assess the robustness of the result, and helps strengthed or weaken the conclusions that can be drawn from the meta-analysis. Robustness of the result is the sensitivity of the overall result to various limitations of the data, assumptions, and statistical approaches. This helps answer the question - what if key inputs or assumptions were changed ?
 
-If sensitivity analyses show that the overall result and conclusions are not affected by the different decisions that could be made during the review process, the results of the review can be regarded with a higher degree of certainty. 
+The goal of sensitivity analyses are to repeat the analyses by substituting alternative decisions. When sensitivity analyses show that the meta-analysis results are not altered by alternative decisions made during the systematic review or data synthesis, the results are considered more robust. Similarly, if sensitivity analyses show that the meta-analysis results are affected, then the overall results should be interpreted with caution, and could instead be considered to be hypothesis generating for additional research. 
 
-Similarly, if sensitivity analyses show that the overall result and conclusions are affected, the results should be interpreted with caution, and could instead be considered hypothesis generating for additional research. 
+The difference between sensitivity analysis and subgroup analysis is that there is no assessment of the pooled effect in the removed studies, and there is no formal statistical procedure to compare the included or removed studies. Instead, there is an informal comparison by recalculating the pooled effect size.
 
-Sensitivity analysis differs from subgroup analysis in that there is no assessment of the treatment effect in the removed studies, nor is there formal statistical assessment across the included and excluded studies. Instead, there is an informal comparison by recalculating the pooled effect size. 
+Sensitivity analysis to consider are determined by the meta-analyst. General aptions to consider include including or excluding additional studies based on search strategy, inclusion criteria, study level charachteristics (clinical or methodological), handling of outliers, handling of missing data, statistical procedures, and / or outcome measures.   
 
-
-Sensitivity analysis
-
-1. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with utilisation of a fixed or random effects meta-analysis method. 
-2. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies rated as poor or fair quality using AHRQ thresholds of NOS quality scoring. 
-3. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies with sample sizes of less than 500 aneurysms. 
-4. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studie that are identified as contributing considerably to the overall heterogeneity and having a strong influence on the overall result using a Baujat plot.
-5. Repeat metagression with exlusion of Juvela et al to consider whether proportion of patients with exposure to prior SAH in the study was an important source of heterogeneity. 
-6. Repeat metagression with exlusion of Juvela et al to consider whether duration of follow up in the study analysed as a continuous variable was an important source of heterogeneity
-7. Repeat metagression with exlusion of Juvela et al to consider whether year of last enrollment in the study analysed as a continuous variable was an important source of heterogeneity
-8. Post hoc multivariable metaregression to consider whether inclusion of 2 covariates - proportion of patients with exposure to prior SAH in the study and year of last enrollment in the study - was associated with pooled rupture risk and a source of heterogeniety.  
+The following sensitivity analysis will be perfomed. 
 
 
-#### Sensitivity analysis - consider fixed vs random effects meta-analysis decision
+1. Pre-specified 
+2. Post hoc sensitivity analysis to consider the decision to exclude outlier studies. 1
+
+
+### Sensitivity analysis - consider decision to exclude outlier studies
+
+Juvela et al was identified as an outlier, with this study contributing the most to statistical heterogeneity and influencing the result. 
+
+We can perform a sensitivity analysis including all studies identified, and informally compare by recalculating the pooled effect size.
+
+This has been done above, and is repeated for completeness below. 
+
+```{r sensitivity analysis - including Juvela }
+
+pes.summary.glmm.all
+
+```
+
+
+The pooled rupture risk changes with Juvela et al is 1.2112 [0.7844; 1.8659] 
+
+The pooled rupture risk without Juvela et al is 1.2625 [0.9445; 1.6858]
+
+The impact of including Juvela et al is to reduce the precision of the summary estimate with wider confidence intervals. The inconsistency in the result increases from I2 of 42% to 82% making the result less generalisable. Regardless from a clinical perspective, this sensitivity analysis does not alter the overall impact, since the pooled rupture risk remains within 1-2%.  
+
+
+
+#### Sensitivity analysis - consider handling of missing data
+
+
+In this study, we have handled missing 
+
+
+
+#### Sensitivity analysis - random vs fixed 
 
 If there is heterogeniety, the random effect meta-analysis weights studies more equally. However, if there are marked small study effects, and only 1 high quality study, then this may not be reasonable. To synthesise the data, the author must make a decision whether this is appropriate. This can be done by comparing the results of the random and fixed effects meta-analysis. 
 
@@ -1464,7 +1488,17 @@ Notably, the confidence intervals overlap, and I2 has reduced. Overall, suggests
 
 #### Sensitivity analysis - using Baujat plots to identify which studies contribute most to heterogeniety
 
-These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. *Baujat 2002* 
+T1. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with utilisation of a fixed or random effects meta-analysis method. 
+2. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies rated as poor or fair quality using AHRQ thresholds of NOS quality scoring. 
+3. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies with sample sizes of less than 500 aneurysms. 
+4. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studie that are identified as contributing considerably to the overall heterogeneity and having a strong influence on the overall result using a Baujat plot.
+5. Repeat metagression with exlusion of Juvela et al to consider whether proportion of patients with exposure to prior SAH in the study was an important source of heterogeneity. 
+6. Repeat metagression with exlusion of Juvela et al to consider whether duration of follow up in the study analysed as a continuous variable was an important source of heterogeneity
+7. Repeat metagression with exlusion of Juvela et al to consider whether year of last enrollment in the study analysed as a continuous variable was an important source of heterogeneity
+8. Post hoc multivariable metaregression to consider whether inclusion of 2 covariates - proportion of patients with exposure to prior SAH in the study and year of last enrollment in the study - was associated with pooled rupture risk and a source of heterogeniety. 
+
+
+hese plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. *Baujat 2002* 
 
 ```{r baujat plot}
 
