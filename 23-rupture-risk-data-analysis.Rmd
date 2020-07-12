@@ -563,7 +563,7 @@ Moreover, when reporting results from a sub-group analysis additional important 
 
 Moving forward, we shall choose to pool the data, explore heterogeneity in the synthesised data with sub-group analyses and meta-regression, and accurately report the interpretation of the sub-group analyses and meta-regression with clinical context. 
 
-### Subgroup analysis 
+### Subgroup analysis and Meta-regression
 
 The following sub-group group analyses will be performed. 
 
@@ -583,7 +583,7 @@ Supplemental figures
 ```{r meta-analysis of proportions using glmm by population}
 
 pes.summary.glmm.pop = metaprop(rupt, total_size,
-                            data=dat,
+                            data=dat10,
                             studlab=paste(auth_year),
                             byvar = pop,
                             bylab = "Population",
@@ -601,7 +601,7 @@ pes.summary.glmm.pop
 
 ```{r calculate mean FU of included studies from Japan}
 
-dat %>%
+dat10 %>%
   drop_na(fu) %>%
   filter(pop == "Japanese") %>%
   summarise(mean = mean(fu, na.rm = TRUE))
@@ -611,7 +611,7 @@ dat %>%
 
 ```{r calculate mean FU of included included studies from outside Japan}
 
-dat %>%
+dat10 %>%
   drop_na(fu) %>%
   filter(pop == "Non-Japanese") %>%
   summarise(mean = mean(fu, na.rm = TRUE))
@@ -626,7 +626,7 @@ forest(pes.summary.glmm.pop,
        layout = "meta",
        comb.fixed = FALSE,
        comb.random = TRUE,
-       print.I2.ci = TFALS,
+       print.I2.ci = TRUE,
        colgap.left = "10mm",
        colgap.forest.left = "10mm",
        colgap.forest.right = "0mm",
