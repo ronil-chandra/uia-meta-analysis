@@ -1065,31 +1065,8 @@ The following sensitivity analysis will be perfomed.
 
 1. Pre-specified sensitivity analysis to consider decision to stratify size criteria at 10 mm or less compared to 7 mm and less
 2. Pre-specified sensitivity analysis to consider decision to stratify size criteria at 10 mm or less compared to 5 mm and less
-4. Post hoc sensitivity analysis to consider the decision to exclude outlier studies. 
-
-
-In the main analysis, we have included participants from studies where the proportion of patients with exposure to prior subarachnoid haemorrhage ranged from 0-50%. We can perform a sensitivity analysis to include only studies where the proportion of patients with no exposure to prior SAH is 95% or more. This is important from a clinical perspective given that majority of aneurysms are discovered incidentally without exposure to prior SAH.
-
-#### Sensitivity analysis - consider decision to exclude outlier studies
-
-Juvela et al was identified as an outlier, with this study contributing the most to statistical heterogeneity and influencing the result. 
-
-We can perform a sensitivity analysis including all studies identified, and informally compare by recalculating the pooled effect size.
-
-This has been done above, and is repeated for completeness below. 
-
-```{r sensitivity analysis - including Juvela }
-
-pes.summary.glmm.all
-
-```
-
-
-The pooled rupture risk changes with Juvela et al is 1.2112 [0.7844; 1.8659] 
-
-The pooled rupture risk without Juvela et al is 1.2625 [0.9445; 1.6858]
-
-The impact of including Juvela et al is to reduce the precision of the summary estimate with wider confidence intervals. The inconsistency in the result increases from I2 of 42% to 82% making the result less generalisable. Regardless from a clinical perspective, this sensitivity analysis does not alter the overall impact, since the pooled rupture risk remains within 1-2%.  
+3. Post hoc sensitivity analysis to consider the decision to exclude outlier studies. 
+4. Post hoc sensitivity analysis to consider the decision to handle missing data with the last observation carry forward method compared to analysis with only complete case data. 
 
 
 ### Sensitivity analysis - consider decision to utilise 10 mm and less or 7 mm and less for aneurysm size categories
@@ -1281,234 +1258,38 @@ forest(pes.summary.glmm5,
 
 Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
 
-Sensitivity analysis performed with aneurysms measuring 5 mm and less have a pooled rupture risk estimate of 1.0624 [0.8427; 1.3385] over 42 months, with I^2 = 0%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%.  
+Sensitivity analysis performed with aneurysms measuring 5 mm and less have a pooled rupture risk estimate of 1.0624 [0.8427; 1.3385] over 42 months, with I^2 = 0%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%. 
 
-#### Sensitivity analysis - consider handling of baseline imbalance in exposure to prior SAH
 
-In the main analysis, we have included participants from studies where the proportion of patients with exposure to prior subarachnoid haemorrhage ranged from 0-50%. We can perform a sensitivity analysis to include only studies where the proportion of patients with no exposure to prior SAH is 95% or more. This is important from a clinical perspective given that majority of aneurysms are discovered incidentally without exposure to prior SAH. 
+#### Sensitivity analysis - consider decision to exclude outlier studies
 
-```{r sensitivity analysis - reduce exposure to prior SAH at study level to less than 5%}
+Juvela et al was identified as an outlier, with this study contributing the most to statistical heterogeneity and influencing the result. 
 
-dat.psah.sens <- dat10 %>%
-  filter(prop_psah < 0.05)
+We can perform a sensitivity analysis including all studies identified, and informally compare by recalculating the pooled effect size.
 
-pes.summary.psah.sens = metaprop(rupt, total_size,
-                            data=dat.psah.sens,
-                            studlab=paste(auth_year),
-                            method="GLMM",
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            )
-pes.summary.psah.sens
+This has been done above, and is repeated for completeness below. 
+
+```{r sensitivity analysis - including Juvela }
+
+pes.summary.glmm.all
 
 ```
 
 
-```{r calculate mean FU of included studies of prior SAH exposure reduced to less than 5%}
+The pooled rupture risk changes with Juvela et al is 1.2112 [0.7844; 1.8659] 
 
-dat.psah.sens %>%
-  drop_na(fu) %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+The pooled rupture risk without Juvela et al is 1.2625 [0.9445; 1.6858]
 
-```
-
-Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
-
-Sensitivity analysis performed with aneurysms included in studies where over 95% of study participants did not have exposure to prior SAH has a pooled rupture risk estimate of 0.8459 [0.4149; 1.7171] over 41 months, with I^2 = 75.1%. 
-
-Since the pooled rupture risk remains within 1-2%, this sensitivity analysis does not alter the overall impact from a clinical perspective. However, the inconsistency in the pooled result has increased, which reduces its validity. 
+The impact of including Juvela et al is to reduce the precision of the summary estimate with wider confidence intervals. The inconsistency in the result increases from I2 of 42% to 82% making the result less generalisable. Regardless from a clinical perspective, this sensitivity analysis does not alter the overall impact, since the pooled rupture risk remains within 1-2%.  
 
 
 #### Sensitivity analysis - consider handling of missing data
 
+4. Post hoc sensitivity analysis to consider the decision to handle missing data with the last observation carry forward method compared to analysis with only complete case data.
  
 
 
-
-
-#### Sensitivity analysis - random vs fixed 
-
-If there is heterogeniety, the random effect meta-analysis weights studies more equally. However, if there are marked small study effects, and only 1 high quality study, then this may not be reasonable. To synthesise the data, the author must make a decision whether this is appropriate. This can be done by comparing the results of the random and fixed effects meta-analysis. 
-
-```{r pes summary - fixed vs random effects meta-analysis}
-
-pes.summary.glmm
-
-```
-
-Here the results are not clinically significant with the overall same rupture proportion of 1-2% with either method. Moreover, in our case, a random effects meta-analysis is more appropriate due to existence of clinical and methodological heterogeneity. Regardless, other sources of heterogeneity still need to be explored. 
-
-#### Sensitivity analysis - exclude based on study quality 
-
-Quality assessment was performed using the Newastle Ottowa Scale as recommended by Cochrane; this is also the most commonly utilised for observational studies. 
-
-This can be converted to the The Agency for Healthcare Research and Quality within the United States Department of Health and Human Services (AHRQ) standards using the following thresholds. 
-
-Good quality: 
-3 or 4 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
-
-Fair quality: 
-2 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
-
-Poor quality: 
-0 or 1 star in selection domain OR 0 stars in comparability domain OR 0 or 1 stars in outcome/exposure domain
-
-
-
-```{r sensitivity analyis - good quality studies only 10mm and less - data setup}
-
-dat.sens.nos <- sizedata %>%
-  filter(nos_select == 3 | nos_select == 4 ) %>%
-  filter(nos_compare == 1 | nos_compare == 2) %>%
-  filter(nos_outcome == 2 | nos_outcome == 3) %>%
-  mutate(ahrq = "Good")
-
-dat.sens.nos <- dat.sens.nos %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
-  drop_na(total_size) %>% 
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, rupt, total_size)
-
-```
-
-
-```{r good quality studies only 10mm and less - data setup - implementation}
-
-pes.sens.nos = metaprop(rupt, total_size,
-                        data=dat.sens.nos,
-                        studlab=paste(auth_year),
-                        method="GLMM",
-                        sm="PLOGIT",
-                        method.tau = "ML", 
-                        method.ci = "WS",
-                        pscale = 100
-                        ) 
-pes.sens.nos
-
-```
-
-
-Here we can see the point estimate and the confidence intervals varies from 
-
-All studies           1.2198 [0.7739; 1.9177]
-Good Quality studies  1.9027 [0.8747; 4.0888]
-
-There is even higher heterogeniety, and thus results of the original pooled analysis need to be interpreted with caution. 
-
-
-#### Sensitivity analysis - exclude based on small study samples 
-
-
-```{r sensitivity analyis - sample sizes with more than 500 aneurysms included for 10mm and less - data setup}
-
-dat.sens.samplesize <- sizedata %>%
-  mutate(total_size = coalesce(num_anr,num)) %>%
-  drop_na(total_size) %>% 
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  filter(total_size > 500) %>%
-  select(auth_year, rupt, total_size)
-
-```
-
-
-```{r sensitivity analyis - sample sizes with more than 500 aneurysms included for 10mm and less - implementation}
-
-pes.sens.samplesize = metaprop(rupt, total_size,
-                        data=dat.sens.samplesize,
-                        studlab=paste(auth_year),
-                        method="GLMM",
-                        sm="PLOGIT",
-                        method.tau = "ML", 
-                        method.ci = "WS",
-                        pscale = 100
-                        ) 
-pes.sens.samplesize
-
-```
-
-
-Here we can see the point estimate and the confidence intervals varies from 
-
-All studies                               1.2198 [0.7739; 1.9177]
-Studies with sample size > 500 aneurysms  1.7312 [1.2165; 2.4584]
-
-Notably, the confidence intervals overlap, and I2 has reduced. Overall, suggests that the original pooled result needs to be interpreted with caution. 
-
-
-#### Sensitivity analysis - using Baujat plots to identify which studies contribute most to heterogeniety
-
-1. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with utilisation of a fixed or random effects meta-analysis method. 
-2. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies rated as poor or fair quality using AHRQ thresholds of NOS quality scoring. 
-3. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studies with sample sizes of less than 500 aneurysms. 
-4. Post hoc sensitivity analysis to consider whether the pooled rupture risk varies with exclusion of studie that are identified as contributing considerably to the overall heterogeneity and having a strong influence on the overall result using a Baujat plot.
-5. Repeat metagression with exlusion of Juvela et al to consider whether proportion of patients with exposure to prior SAH in the study was an important source of heterogeneity. 
-6. Repeat metagression with exlusion of Juvela et al to consider whether duration of follow up in the study analysed as a continuous variable was an important source of heterogeneity
-7. Repeat metagression with exlusion of Juvela et al to consider whether year of last enrollment in the study analysed as a continuous variable was an important source of heterogeneity
-8. Post hoc multivariable metaregression to consider whether inclusion of 2 covariates - proportion of patients with exposure to prior SAH in the study and year of last enrollment in the study - was associated with pooled rupture risk and a source of heterogeniety. 
-
-
-These plots shows the contribution of each study to the overall Q-test statistic for heterogeneity on the horizontal axis versus the influence of each study (defined as the standardized squared difference between the overall estimate based on a fixed-effects model with and without the study included in the model) on the vertical axis. *Baujat 2002* 
-
-```{r baujat plot}
-
-baujat(pes.summary.glmm)
-
-```
-
-This shows that Juvela et al is the major source of between study heterogeneity. 
-
-We can use these sources of heterogeniety to assess for moderating variables that may contribute to the heterogeneity.
-
-#### Re-run analysis excluding Juvela - post hoc sensitivity analysis
-
-```{r exclude Juvela from total proportion and redo analysis}
-
-dat.juvela <- slice(dat, -12)
-pes.summary.glmm.juvela = metaprop(rupt, total_size,
-                            data=dat.juvela,
-                            studlab=paste(auth_year),
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            ) 
-pes.summary.glmm.juvela
-```
-
-This exploratory analaysis demonstrates greater homogeniety, with reduced and now moderate I2 and higher Q-statistic. 
-
-The point estimate and confidence intervals have changed slightly, which confirms the influence of the Juvela study. 
-
-Including Juvela - 1.2198 (0.7739; 1.9177)
-Excluding Juvela - 1.2849 (0.9547; 1.7274)
-
-Nonetheless, the change is not significant from a clinical application point of view, with overall rupture risk still 1-2% overall. 
-
-#### Rerun Baujat plots excluing Juvela - exploratory 
-
-```{r baujat plot minus Juvela}
-
-baujat(pes.summary.glmm.juvela, 
-       xlim=c(0,40), 
-       ylim=c(0,40)
-       )
-
-```
-
-Keeping the influence axis the same, the significant improvement in heterogeniety is noted. This can be re-processed with smaller scales to more closely explore the result. 
-
-```{r baujat plot minus Juvela rescaled}
-
-baujat(pes.summary.glmm.juvela, 
-       xlim=c(0,6), 
-       ylim=c(0,6)
-       )
-
-```
-
-Overall, there seems to be an acceptable level of heterogeniety given the samples that are available, and there are no studies that contribute both to heterogeniety and influence on the overall result apart from Juvela. 
+ 
 
 ### Funnel plots  - exploratory for small study publication bias 
 
@@ -1543,126 +1324,12 @@ In our case, the most likely explanation for this appearance of the funnel plot 
 
 In general, testing for funnel plot assymetry should always be performed in the context of visual assessment, and while there are many potential statistical tests for funnel plots including Egger 1997, Harbord 2006, Peters 2006 or Rücker 2008, even Cochrane suggests that tests for funnel plot asymmetry should be used in only a minority of meta-analyses (Ioannidis 2007b).
 
-Sensitiity analysis
 
-
-```{r influence analysis - Forest Plot for the Leave-One-Out Analysis, sorted by Effect Size }
-
-plot(inf.analysis, "es")
-
-```
-
-Here we rank the effect on the pooled rupture proportion using the leave-1-out method
-
-
-### Exploratory analysis 
-
-#### How do we assess the effect of exposure to prior SAH for participants that arise from the same population ?
-
-Consider the data in the form of a 2 x 2 table, prior SAH as the exposure and rupture as the outcome. 
-
-* ai = prior SAH and rupture +ve 
-* bi = prior SAH and rupture -ve
-* ci = no prior SAH and rupture +ve
-* di = no prior SAH, and rupture -ve
-
-* n1i = ai + bi = total aneurysms with prior SAH
-* n2i = ci + di = total aneurysms without prior SAH
-
-Rupture of the aneurysm is considered a rare event ie <1%, and the data are sparse with single 0s or double 0s in the 2 x 2 table. 
-
-This is methodologically challenging, and the choice of meta-analyis method is important. As we discussed The most common methods of MA is the inverse variance method, using the DerSimonian and Laird random effects model. 
-
-The DL method calculates an effect size separately for each study, with the standard error. The effect sizes are then synthesised across studies. However, when one of the cells has a 0 which is common with rare events, the inverse variance cannot be used because the variances become undefined. 
-
-There are 2 options for correction: use of a continuity correction ie adding a fixed value usually 0.5 or using calculating the risk difference. However using a continuity correction leads to excess bias in the effect, and can influence the result and conclusions (Stinjen 2010). Risk differences have poor statistical properties with too wide intervals when events are rare, and are also not recommended (Bradburn 2007)
-
-There are also issues on how to handle double 0 studies, since these may also carry some meaningful data due to their sample size (Keus 2009). 
-
-In summary, there is debate on what is the best model to meta-analyse rare events. Use of Peto's method to estimate the OR is often suggested for rare events, since this includes single zero studies without a continuity correction. Double zero studies are excluded. 
-
-However, to use Peto's method, the following three conditions need to hold true ie a rare event <1%, the exposure / treatment groups are balanced, and the effects are not very large (Cochrane handbook). Unless all three are true, then Peto's method also may give biased results. In our dataset, the groups with and without prior SAH are unbalanced ie >1:3, so Peto's method is not appropriate. 
-
-Alternatively,the Mantel-haenszel without zero cell continuity correction can be used for unbalanced exposure / treatment groups.(Efthimiou 2018) This method provides a fixed effects meta-anlysis so is best used in the absence of heterogeniety and does exclude double zero studies. In our dataset, there is heterogeniety, and thus a random effects meta-analysis is preferred. 
-
-A generalised linear mixed method (GLMM) model can be used for odds-ratio meta-analysis for rare outcomes, specifically by utilising a hypergeometric-normal (HN) model for the meta-analysis of odds ratios (Stinjen 2010). This is appropriate since the event aneurysm rupture is not a true binomial distribution, but in fact a hypergeometric distribution. 
-
-The hypergeometric distribution is best explained by sampling coloured balls in an urn. Hypergeometric distribution is sampling without replacement compared to a binomial distribution where there is sampling with replacement, and the probability of success is required. 
-
-If the balls are of different weight or size, ie one has a greater chance of being chosen, this is a noncentral hypergeometric distribution. The non central hypergeometric distribution can be of the Wallenius type or Fisher type. 
-
-Wallenius type is the biased urn mode, where balls are taken out 1 by 1. Fisher type occurs when the outcome is known, and the number of balls in the urn and their colour need to be calculated. For large samples with a common outcome, the binomial distribution is a reasonable estimate. However in populations that are small, or outcomes that are rare, such as in our dataset where certain aneurysms have features that make them more prone to rupure ie heavier weighted ball, thus each outcome influences the probability of the next event. Thus the non central hyperegeometric distribution is required. 
-
-Recent developments in statistical packages, including in R, make these computationaly intensive methods practical and feasible. The HN model performs well, with minimal bias, and satsifactory coverage of the 95% CIs with rare events. 
-
-Mete-regression can also be included easily by extending the model to include a study level covariate. 
-
-
-#### Using metafor to asess the potential effect modification of prior SAH using a GLMM
-
-Structure the data in this format
-
-Author	This signifies the column for the study label (i.e., the first author)
-
-* ai = prior SAH and rupture +ve 
-* bi = prior SAH and rupture -ve
-* ci = no prior SAH and rupture +ve
-* di = no prior SAH, and rupture -ve 
-
-* n1i = ai + bi = total aneurysms with prior SAH
-* n2i = ci + di = total aneurysms without prior SAH
-
-Assumptions
-
-For num_anr is not known, then num (of patients) is brought forward assuming 1 patient has 1 aneurysm.
-
-For aneurysms in size cohort with prior SAH, this is estimated by using same proportion of patients with prior SAH in the total observed cohort, and applying this to the number of aneurysms in that specific size cohort. 
-
-Use the rma function from metafor to meta-analyse log odds ratio using conditional logistic regression model with random effects meta-analysis. The conditional generalized linear mixed-effects model with exact likelihood (model="CM.EL") avoids having to model study level variability by conditioning on the total numbers of cases/events in each study. For the odds ratio, this leads to a non-central hypergeometric distribution for the data within each study and the corresponding model is then a mixed-effects conditional logistic model.
-
-Only studies that included patients both with and without history of prior SAH are included. 
-
-```{r log OR for prior SAH}
-
-res <- rma.glmm(measure = "OR", 
-                ai = ai, 
-                bi = bi, 
-                ci = ci, 
-                di = di, 
-                data = dat.psahpos,
-                slab = auth_year,
-                model = "CM.EL",
-                method = "ML"
-                )
-res
-
-```
-
-
-View the results as a forest
-
-```{r forest log OR for prior SAH}
-
-forest(res)
-
-```
-
-
+### Study conclusions
 
 Overall, taking into account the limitations of the data, prior SAH may not increase rupture risk in small unruptured aneurysms measuring 10 mm or less. In addition, the overall rupture risk for conservatively managed aneurysms is more uncertain than previously considered with up to 2% risk of rupture.   
 
 These synthesised data analyses are considered exploratory and hypothesis generating, and additional data are required. 
-
-### Exploratory - try and put the size subgroups all on one plot
-
-additional code suggested by Thanh, 
-
-however, unlike retrospective / prospective subgroup analyisis, the subgroups are not mutually exclusive when conidering poportion of patients included with various size categories, ie numbers of 3 mm and less are included in 5 mm and less and so on. Thus I think that individual plots for size subgroup analysis submitted as supplementary files are more appropriate. 
-
-we can do additional subgroup analysis and combined plots for study quality etc. 
-
-
-
 
 
 

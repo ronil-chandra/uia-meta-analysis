@@ -30,6 +30,21 @@ nosdata <- read_csv("data-raw/NOS_LAS.csv")
 
 ### Calculate Quality Scores and convert to AHRQ thresholds
 
+Quality assessment was performed using the Newastle Ottowa Scale as recommended by Cochrane; this is also the most commonly utilised for observational studies. 
+
+This can be converted to the The Agency for Healthcare Research and Quality within the United States Department of Health and Human Services (AHRQ) standards using the following thresholds. 
+
+Good quality: 
+3 or 4 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
+
+Fair quality: 
+2 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
+
+Poor quality: 
+0 or 1 star in selection domain OR 0 stars in comparability domain OR 0 or 1 stars in outcome/exposure domain
+
+
+
 Poor quality 
 
 ```{r calculate quality scoring as per AHRQ thresholds - poor quality}
