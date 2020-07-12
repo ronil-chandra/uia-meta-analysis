@@ -1090,7 +1090,7 @@ The pooled rupture risk without Juvela et al is 1.2625 [0.9445; 1.6858]
 The impact of including Juvela et al is to reduce the precision of the summary estimate with wider confidence intervals. The inconsistency in the result increases from I2 of 42% to 82% making the result less generalisable. Regardless from a clinical perspective, this sensitivity analysis does not alter the overall impact, since the pooled rupture risk remains within 1-2%.  
 
 
-### Sensitivity analysis - aneurysm size categories
+### Sensitivity analysis - consider decision to utilise 10 mm and less or 7 mm and less for aneurysm size categories
 
 ```{r select 7 mm and less}
 
@@ -1156,8 +1156,6 @@ dat7 %>%
 
 ```
 
-
-
 #### Publication quality forest plots for 7mm and less 
 
 ```{r forest for publication for 7 mm using GLMM, fig.height= 10, fig.width = 10}
@@ -1182,7 +1180,13 @@ forest(pes.summary.glmm7,
 ```
 
 
-#### Sensitivity analysis based on aneurysm size 5 mm and less 
+
+Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
+
+Sensitivity analysis performed with aneurysms measuring 7 mm and less have a pooled rupture risk estimate of 1.0580 [0.7710; 1.4503] over 42 months, with I^2 = 37.5%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%.  
+
+
+### Sensitivity analysis - consider decision to utilise 10 mm and less or 5 mm and less for aneurysm size categories
 
 ```{r select 5 mm and less}
 
@@ -1250,8 +1254,6 @@ dat5 %>%
 ```
 
 
-
-
 #### Publication quality forest plots for 5mm and less 
 
 ```{r forest for publication using GLMM for 5 mm, fig.height= 10, fig.width = 10}
@@ -1275,98 +1277,9 @@ forest(pes.summary.glmm5,
 
 ```
 
+Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
 
-#### sub-group analysis based on aneurysm size 3 mm and less 
-
-```{r select 3 mm and less}
-
-sizedata3 <- filter(maindata, size == 3) 
-
-```
-
-
-```{r calculate total number of aneurysms for specific size criteria 3 mm and less}
-
-dat3 <- sizedata3 %>%
-mutate(prop_multi = multi_tot / num_tot,
-         num_multi = prop_multi * num + num,
-         num_multi_temp = coalesce(num_anr, num_multi),
-         total_size_temp = coalesce(num_anr, num),
-         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
-         total_size = round(total_size_temp_2, 0),
-         psah_size_temp = psah * prop_multi + psah,
-         prop_psah = psah_tot / num_tot,
-         num_anr_psah = prop_psah * total_size,
-         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
-         psah_size = round(size_psah_temp, 0),
-         ) %>%
-  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(pop = fct_collapse(sizedata$country, 
-                            "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
-         )
-
-```
-
-
-
-#### subgroup meta-analysis of proportions of 3 mm aneurysms and less using GLMM and Wilson CIs
-  
-
-
-```{r meta-analysis of proportions using glmm for 3mm}
-
-dat3 <- dat3 %>%
-  slice(-12) %>%
-  drop_na(total_size) %>%
-  drop_na(rupt)
-
-pes.summary.glmm3 = metaprop(rupt, total_size,
-                            data=dat3,
-                            studlab=paste(auth_year),
-                            method="GLMM",
-                            control=list(stepadj=0.5,maxiter=1000),
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100
-                            ) 
-pes.summary.glmm3
-
-```
-
-```{r calculate mean FU of included studies of 3 mm and less}
-
-dat3 %>%
-  drop_na(fu) %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
-
-```
-
-
-#### Publication quality forest plots for 3mm and less 
-
-```{r forest for publication using GLMM for 3mm, fig.height= 10, fig.width = 10}
-
-forest(pes.summary.glmm3,
-       layout = "meta",
-       comb.fixed = FALSE,
-       comb.random = TRUE,
-       print.I2.ci = TRUE,
-       colgap = "7mm",
-       leftlabs = c("Study", "Ruptures", "Total"),
-       rightcols = c("effect", "ci"),
-       rightlabs = c("Ruptures per 100", "95% CI"),
-       smlab = " ",
-       xlim=c(0,10),
-       xlab = "Rupture per 100 aneurysms",
-       pooled.events = TRUE,
-       text.addline1 = "Mean study-level follow up: 47 months",
-       JAMA.pval = TRUE,
-       ) 
-
-```
+Sensitivity analysis performed with aneurysms measuring 5 mm and less have a pooled rupture risk estimate of 1.0624 [0.8427; 1.3385] over 42 months, with I^2 = 0%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%.  
 
 
 #### Sensitivity analysis - consider handling of missing data
