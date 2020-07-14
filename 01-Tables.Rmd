@@ -23,7 +23,7 @@ A single excel data file is loaded to carry out all data table creation, with al
 
 ```{r load data, echo = FALSE, include = FALSE}
 
-maindata <- read_csv("data/maindata160620.csv")
+maindata <- read_csv("data/maindata140720.csv")
 ```
 
 
@@ -32,6 +32,7 @@ maindata <- read_csv("data/maindata160620.csv")
 ```{r select total cohort}
 
 sizedata <- filter(maindata, size == 10) %>%
+  slice(-12) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   select(auth_year, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah, nos_total) %>%
   arrange(desc(nos_total), desc(num))
