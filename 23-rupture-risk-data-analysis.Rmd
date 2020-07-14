@@ -1,7 +1,7 @@
 ---
 title: "Rupture Risk Estimate"
 author: "Ronil V. Chandra"
-date: "11/07/2020"
+date: "14/07/2020"
 output: html_document
 ---
 
@@ -51,7 +51,7 @@ A single excel data file is loaded to carry out all data analysis, with all step
 
 ```{r load data, echo=TRUE, include = FALSE}
 
-maindata <- read_csv("data/maindata160620.csv")
+maindata <- read_csv("data/maindata140720.csv")
 
 ```
 
@@ -811,13 +811,10 @@ sum(dat.multi.metareg$total_size)
   
 ```
 
-*****
-Choi 2018 is an outlier with 91% multiplicity - check the data! 
-*****
 
 Interpretation:
 
-The random effects metaregression included participants from 20 studies with a mean study level proportion of aneurysm multiplicity of 30.1% (range 0 - 91.9%). There were a total of 155 ruptures and 9 923 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.83), suggesting that the proportion of patients with multiple aneurysms included in the study did not modify the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+The random effects metaregression included participants from 19 studies with a mean study level proportion of aneurysm multiplicity of 26.9% (range 0 - 51.2%). There were a total of 154 ruptures and 9 750 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.62), suggesting that the proportion of patients with multiple aneurysms included in the study did not modify the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 34%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 
 #### Metaregression to explore study length of follow up on rupture outcomes, including all studies
@@ -945,7 +942,7 @@ forest(pes.summary.glmm.pop,
 
 The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (p = 0.001), suggesting that a Japanese source population modified the rupture risk across the included trials. This is biologically plausible, and is concordant with other published literature with that demonstrates an unexplained higher incidence of aneurysmal subarachnoid haemorrhage from ruptured aneurysms in the Japanese population. 
 
-This potential effect modifier also explains some of the heterogeniety, with only mild heterogeneity remaining I^2 = 0.0% [0.0%; 25.0%]. The overall covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group.
+This potential effect modifier also explains some of the heterogeniety, with only mild heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 25.0%]. The overall covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group.
 
 This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher (1.9494 [1.6300; 2.3300]) over a shorter follow up period of 38 months, compared to the sub-group rupture risk in non-Japanese of 1.0665 [0.7710; 1.4735] over a mean study follow up period of 45 months. 
 
@@ -1200,7 +1197,6 @@ The hypergeometric distribution is best explained by sampling coloured balls in 
 For large samples with a common outcome, the binomial distribution is a reasonable estimate. However, aneurysms rupture 1 by 1 over time, and have features that make them more prone to rupure ie heavier weighted ball, thus each rupture outcome without replacement influences the probability of rupture in the remaining sample population. Thus the non central hyperegeometric distribution is required. 
 
 *****
-How to do this?
 Necessary?
 *****
 
@@ -1231,8 +1227,7 @@ on reporting bias is different to bias in selection of reported results. The lat
 
 Non-reporting bias due to inclusion of results from published literature only; grey literature excluded. However we did include results from multiple electronic databases and the Cochrane Trials register. 
 
-
-Sngle imputation methods for last observation carry forward often lead to down-ward biased estimates and under-estimation of the true variability in the data. 
+Single imputation methods for last observation carry forward often lead to down-ward biased estimates and under-estimation of the true variability in the data. 
 
 The associations derived from these meta-regressions are observational. Since they have not been derived from randmised comparison, they cannot be considered causal, and instead are hypothesis generating. Proportions of patient characteristics have been derived from each study, and utilised as covariates in the meta-regression. This is particularly important when considering categorical factors such as source population. Meta-regression relates to the change in the rupture risk estimate to the change in the proportion of Japanese populations included. This does not apply to the individual patient, and differences in risk estimate may be confounded with unmeasured factors such as prevalence of hypertention and smoking. 
 
@@ -1245,7 +1240,7 @@ The lack of availability of such individual patient data for pooling remains a l
 
 ### Study conclusions
 
-hTis study improves the risk estimate for rupture of SUIAs managed with surveillance. With the limiations of the current data, this is between 1-2% over the next 3-4 years. These findings are important for clinicians to consider when counselling patients between active surveillance or prophylactic treatment of SUIAs.  
+The risk estimate for rupture of SUIAs managed with surveillance is between 1-2% over the next 3-4 years. These findings are important for clinicians to consider when counselling patients between active surveillance or prophylactic treatment of SUIAs.  
 
 
 
