@@ -947,6 +947,78 @@ This result is interesting from a clinical perspective, since the sub-group rupt
 
 However, there may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors such as prevalence of hypertention and smoking. 
 
+#### Meta-regression based on study type - retrospective compared to prospective
+
+
+```{r meta-analysis of proportions using glmm with prospective and retrospective subgroup analysis}
+
+pes.summary.glmm.type = metaprop(rupt, total_size,
+                            data=dat10,
+                            studlab=paste(auth_year),
+                            byvar = type,
+                            bylab = "Study Type",
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.type
+
+```
+
+```{r calculate mean FU of included prospective studies}
+
+dat %>%
+  drop_na(fu) %>%
+  filter(type == "prospective") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+```{r calculate mean FU of included retrospective studies}
+
+dat %>%
+  drop_na(fu) %>%
+  filter(type == "retrospective") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+
+
+```{r forest for publication using GLMM for subgroup analysis by study type, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm.type,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap.left = "10mm",
+       colgap.forest.left = "10mm",
+       colgap.forest.right = "0mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       test.subgroup.random = TRUE,
+       label.test.effect.subgroup.random = TRUE,
+       text.addline1 = "Mean prospective study-level follow up: 62 months",
+       text.addline2 = "Mean retrospective study-level follow up: 47 months",
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+
+The test for subgroup differences (random effects model) indicates that there is no statistically significant subgroup effect (p = 0.35), suggesting that there was no difference in rupture risk between prospective and retrospective studies. In prospective studies, the point estimate was higher 1.5673 [0.9451; 2.5885] with wider confidence intervals over a longer time period of 62 months compared to retrospective studies with point estimate of rupture risk of 1.2286 [0.9571; 1.5759] over 47 months. Although retrospective studies may be at greater tisk of incomplete case follow up due to the case-fatality rate prior to hospital presentation, this sensitivity analysis demonstrates no clinically relevant differences in outcome. 
+
+This covariate does not explain the residual heterogeniety, with moderate heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 40.0%]. There is also some concern regarding the overall covariate distribution given two thirds of the rupture events are in the prospective cohort, and the majority in 2 studies with a Japanese source population. In addition, there may be additional unknown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, but rather is an exploration of the sources of heterogeneity due to methodological differences. 
 
 ### Multivariable meta-regression
 
