@@ -23,7 +23,7 @@ A single excel data file is loaded to carry out all data table creation, with al
 
 ```{r load data, echo = FALSE, include = FALSE}
 
-maindata <- read_csv("data/maindata140720.csv")
+maindata <- read_csv("data/maindata180720_nos.csv")
 ```
 
 
