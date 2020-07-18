@@ -655,6 +655,10 @@ bubble(psah.metareg.result, studlab=dat.psah.metareg$auth_year, xlim=c(0, 1), ma
 
 ```
 
+
+****
+The size of the bubbles can reflected the number of study participants
+****
 Interpretation: 
 
 The random effects metaregression included participants from 27 studies with a mean study level proportion of exposure to prior subarachnoid haemorrhage of 10% (range 0 - 49.8%). There were a total of 167 ruptures and 10 879 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.35), suggesting that the proportion of patients with prior SAH included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 49%), which is higher than across all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis. 
@@ -1366,11 +1370,10 @@ All studies           1.2625 [0.9445; 1.6858] over 43 months.
 Sensitivity analysis performed by including good quality studies only has a pooled rupture risk estimate of 1.8534 [1.5697; 2.1872] over 68 months, with I^2 = 0%. While this result is less biased, it is more imprecise with wider confidence intervals. There is no statistical and could be considered robust given the inclusion of 137 rupture events across a total of 7392 aneurysms. Regardless from a clinical perspective, the pooled ruture risk remains approximately 1-2%. 
 
 
+
 #### Non-reporting bias
 
-Non reporting bias leads to bias in the meta-analysis due to missing results. Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies are not reported, are not identified and not integrated into the meta-analysis. This leads to non-reporting bias which meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not reported. 
-
-In addition, large studies are more likely to get published regardless of the effect size. Small studies are at the greatest risk, since they are only generally published if there is a large effect size. 
+Non reporting bias leads to bias in the meta-analysis due to missing results. Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies are not reported, are not identified and not integrated into the meta-analysis. This leads to non-reporting bias which meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not reported. In addition, there may be bias in the selection of the reported result where study authors choose a particular result for reporting amongst many potential results. 
 
 Thus when assessing for non-reporting bias, conventional assessment is focused on identifying whether small studies with small effect sizes are missing or not. This can be performed using a funnel plot. 
 
@@ -1380,13 +1383,41 @@ funnel(pes.summary.glmm)
 
 ```
 
-There are many possible sources of funnel plot assymetry - selection bias from publication and selective outcome reporting bias, poor methodological quality leading to spuriously elevated effecs in small studies, true heterogeniety, statistical modeling artefacts and chance. 
+```{r egger's test}
+
+eggers.test(pes.summary.glmm)
+
+```
+
+```{r egger's test}
+
+funnel
+
+```
+
+
+There are many possible sources of funnel plot assymetry
+
+1. Non reporting bias - bias from small studies that are not published, and selective outcome reporting bias within studies
+2. Small study effects from poor methodological quality leading to spuriously elevated effecs in small studies
+3. True heterogeniety, statistical modeling artefacts and chance. 
 
 In general, testing for funnel plot assymetry should always be performed in the context of visual assessment, and while there are many potential statistical tests for funnel plots including Egger 1997, Harbord 2006, Peters 2006 or Rücker 2008, even Cochrane suggests that tests for funnel plot asymmetry should be used in only a minority of meta-analyses (Ioannidis 2007b).
 
+Interpretation:
 
-on reporting bias is different to bias in selection of reported results. The latter is where the study authors select certain results for reporting, amongst multiple analysis that they performed.   
+Visual inspection of the funnel plot reveals asymmetry, likely due to non-reporting bias, lsmall study effects and clincial and methodogical heterogeneity.   
 
+### Small study effects 
+
+Small study effects can be assessed with additional sensitivity analysis considering the random vs fixed effect model. In the setting of heterogeneity, the random effects estimate is biased towards the results of the smaller studies. We can investigatieif small study effects 
+cause a clinically relevant change in the point estimate and CIs.
+From the main study plot we see that the outcome from fixed vs random assumption.
+
+Fixed effect model   1.5475 [1.3390; 1.7879]
+Random effects model 1.2625 [0.9445; 1.6858]
+
+Since these estimates are similar, with little clinically relevant difference,s this sensitivity analysis shows that mall-study effects have little effect on the irupture risk estimate. 
 ### Limitations
 
 Non-reporting bias due to inclusion of results from published literature only;  However we did include results from multiple electronic databases and the Cochrane Trials register. 
