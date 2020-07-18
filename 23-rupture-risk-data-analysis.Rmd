@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Objectives:
 
-The purpose of this project is to improve the understanding of the risk estimate for rupture of a brain aneurysm managed with active surveillance. 
+Brain aneurysms managed conservatively with surveillance carry a risk of aneurym rupture. The objectives of this systematic review were to (i) estimate the overall rupture risk of a SIUA managed with surveillance and (ii) examine whether aneurysm size or exposure to prior subarachnoid haemorrhage were associated with rupture risk, and (iii) examine other potential sources of heterogeneity in the overall rupture risk estimate. 
 
 This will help clinicians more accurately convey the uncertainty in the rupture risk estimate utilising the current state of medical knowledge to patients. This is a step in the journey toward personalised and patient centred decision making for patients with brain aneurysms. 
 
@@ -31,6 +31,10 @@ The statistical approaches will be tailored to the source dataset and structure 
 5. The rate of rupture over time does not appear to be constant when biological factors and current published data are considered, thus the risk of rupture will be considered. 
 
 To achieve these aims, the various packages and source dataset in R are loaded, and each part carried out with an explanation of the rationale for the data analysis. Version control is carred out with GitHub. 
+
+The research protocol was pre-specified and published on PROSPERO. When considering the research question, the FINER criteria have been proposed as encapsulating the issues that should be addressed when developing research questions. 
+
+These state that questions should be Feasible, Interesting, Novel, Ethical, and Relevant (Cummings et al 2007).
 
 #### Load required packages
 
@@ -1271,7 +1275,96 @@ For large samples with a common outcome, the binomial distribution is a reasonab
 Necessary?
 *****
 
-### Assessing risk of bias 
+### Sensitivity analysis that includes risk of bias 
+
+Quality assessment was performed using the Newastle Ottowa Scale as recommended by Cochrane; this is also the most commonly utilised for observational studies. 
+
+This can be converted to the The Agency for Healthcare Research and Quality within the United States Department of Health and Human Services (AHRQ) standards using the following thresholds. 
+
+Good quality: 
+3 or 4 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
+
+Fair quality: 
+2 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
+
+Poor quality: 
+0 or 1 star in selection domain OR 0 stars in comparability domain OR 0 or 1 stars in outcome/exposure domain
+
+
+```{r sensitivity analyis - good quality studies only 10mm and less - data setup}
+
+dat.sens.nos <- sizedata10 %>%
+  slice(-12)%>%
+  filter(nos_select == 3 | nos_select == 4 ) %>%
+  filter(nos_compare == 1 | nos_compare == 2) %>%
+  filter(nos_outcome == 2 | nos_outcome == 3) %>%
+  mutate(ahrq = "Good")
+
+dat.sens.nos <- dat.sens.nos %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, fu, rupt, total_size)
+
+```
+
+
+```{r good quality studies only 10mm and less - data setup - implementation}
+
+pes.sens.nos = metaprop(rupt, total_size,
+                        data=dat.sens.nos,
+                        studlab=paste(auth_year),
+                        method="GLMM",
+                        sm="PLOGIT",
+                        method.tau = "ML", 
+                        method.ci = "WS",
+                        pscale = 100
+                        ) 
+pes.sens.nos
+
+```
+
+
+```{r calculate mean FU of good quality studies }
+
+dat.sens.nos %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+
+
+```
+
+
+```{r forest for publication using GLMM for good quality, fig.height= 10, fig.width = 10}
+
+forest(pes.sens.nos,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture per 100 aneurysms",
+       pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 68 months",
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+
+Here we can see the point estimate and the confidence intervals varies from 
+
+Good Quality studies  1.8534 [1.5697; 2.1872] over 68 months 
+All studies           1.2625 [0.9445; 1.6858] over 43 months. 
+
+Sensitivity analysis performed by including good quality studies only has a pooled rupture risk estimate of 1.8534 [1.5697; 2.1872] over 68 months, with I^2 = 0%. While this result is less biased, it is more imprecise with wider confidence intervals. There is no statistical and could be considered robust given the inclusion of 137 rupture events across a total of 7392 aneurysms. Regardless from a clinical perspective, the pooled ruture risk remains approximately 1-2%. 
+
 
 #### Non-reporting bias
 
@@ -1296,9 +1389,11 @@ on reporting bias is different to bias in selection of reported results. The lat
 
 ### Limitations
 
-Non-reporting bias due to inclusion of results from published literature only; grey literature excluded. However we did include results from multiple electronic databases and the Cochrane Trials register. 
+Non-reporting bias due to inclusion of results from published literature only;  However we did include results from multiple electronic databases and the Cochrane Trials register. 
 
-Single imputation methods for last observation carry forward often lead to down-ward biased estimates and under-estimation of the true variability in the data. 
+Risk of bias from studies included in the systematic review given that grey literature, and non-english language studies were excluded. While in general there are no major differences in meta-analytic estimates when restricted to English-language studies compared with those that include non-English studies (Morrison et al 2012, Dechartres et al 2018)7.2.3.2 ., there is a risk of bias given the significant sub-group result in the Japanese population. 
+
+Risk of bias from data synthesis due to non-reporting bias from selective reporting within individual studies, and potential lack of publication of smaller studies without rupture events. Further more single imputation methods for last observation carry forward may have led to down-ward biased rupture risk estimates and under-estimation of the true variability. 
 
 The associations derived from these meta-regressions are observational. Since they have not been derived from randmised comparison, they cannot be considered causal, and instead are hypothesis generating. Proportions of patient characteristics have been derived from each study, and utilised as covariates in the meta-regression. This is particularly important when considering categorical factors such as source population. Meta-regression relates to the change in the rupture risk estimate to the change in the proportion of Japanese populations included. This does not apply to the individual patient, and differences in risk estimate may be confounded with unmeasured factors such as prevalence of hypertention and smoking. 
 
