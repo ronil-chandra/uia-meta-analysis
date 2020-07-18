@@ -1,7 +1,7 @@
 ---
 title: "Rupture Risk Estimate"
 author: "Ronil V. Chandra"
-date: "14/07/2020"
+date: "18/07/2020"
 output: html_document
 ---
 
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Brain aneurysms managed conservatively with surveillance carry a risk of aneurym rupture. The objectives of this systematic review were to (i) estimate the overall rupture risk of a SIUA managed with surveillance and (ii) examine whether aneurysm size or exposure to prior subarachnoid haemorrhage were associated with rupture risk, and (iii) examine other potential sources of heterogeneity in the overall rupture risk estimate. 
 
-This will help clinicians more accurately convey the uncertainty in the rupture risk estimate utilising the current state of medical knowledge to patients. This is a step in the journey toward personalised and patient centred decision making for patients with brain aneurysms. 
+This will help clinicians more accurately convey the uncertainty in the rupture risk estimate utilising the current medical knowledge to patients. 
 
 After performing my systematic review, I have three additional aims:
 
@@ -32,9 +32,6 @@ The statistical approaches will be tailored to the source dataset and structure 
 
 To achieve these aims, the various packages and source dataset in R are loaded, and each part carried out with an explanation of the rationale for the data analysis. Version control is carred out with GitHub. 
 
-The research protocol was pre-specified and published on PROSPERO. When considering the research question, the FINER criteria have been proposed as encapsulating the issues that should be addressed when developing research questions. 
-
-These state that questions should be Feasible, Interesting, Novel, Ethical, and Relevant (Cummings et al 2007).
 
 #### Load required packages
 
@@ -336,12 +333,7 @@ Statitical heterogeneity can also be measured using Cochrane's Q statistic, tau-
 2. tau-squared statistic. Uncommonly reported. An estimate of the between-study variance. When tau-squared is zero this is indicative of no heterogeneity.
 3. I^2 Inconsistency statistic. I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety, and can be classified into the degree of heterogeneity. 
 
-From Cochrane: 
-
-0% to 40%: might not be important
-30% to 60%: may represent moderate heterogeneity
-50% to 90%: may represent substantial heterogeneity
-75% to 100%: considerable heterogeneity
+An I2 value of 0% indicates no observed heterogeneity, up to 25% indicate low heterogeneity, up to 50% indicate moderate heterogeneity, and above 50% indicates high heterogeneity.
 
 95% CIs can also be calculated for the I^2 statistic to demonstrate the uncertainty of the result. 
 
@@ -1383,17 +1375,12 @@ funnel(pes.summary.glmm)
 
 ```
 
-```{r egger's test}
+```{r 2}
 
 eggers.test(pes.summary.glmm)
 
 ```
 
-```{r egger's test}
-
-funnel
-
-```
 
 
 There are many possible sources of funnel plot assymetry
@@ -1406,18 +1393,19 @@ In general, testing for funnel plot assymetry should always be performed in the 
 
 Interpretation:
 
-Visual inspection of the funnel plot reveals asymmetry, likely due to non-reporting bias, lsmall study effects and clincial and methodogical heterogeneity.   
+Visual inspection of the funnel plot reveals asymmetry, likely due to non-reporting bias, small study effects, and clincial and methodogical heterogeneity.   
 
 ### Small study effects 
 
-Small study effects can be assessed with additional sensitivity analysis considering the random vs fixed effect model. In the setting of heterogeneity, the random effects estimate is biased towards the results of the smaller studies. We can investigatieif small study effects 
-cause a clinically relevant change in the point estimate and CIs.
+Small study effects can be assessed with additional sensitivity analysis considering the random vs fixed effect model. In the setting of heterogeneity, the random effects estimate is biased towards the results of the smaller studies. We can investigate if small study effects cause a clinically relevant change in the point estimate and CIs.
+
 From the main study plot we see that the outcome from fixed vs random assumption.
 
 Fixed effect model   1.5475 [1.3390; 1.7879]
 Random effects model 1.2625 [0.9445; 1.6858]
 
-Since these estimates are similar, with little clinically relevant difference,s this sensitivity analysis shows that mall-study effects have little effect on the irupture risk estimate. 
+Since these estimates are similar, with little clinically relevant difference, this sensitivity analysis shows that small-study effects have little effect on the rupture risk estimate. 
+
 ### Limitations
 
 Non-reporting bias due to inclusion of results from published literature only;  However we did include results from multiple electronic databases and the Cochrane Trials register. 
