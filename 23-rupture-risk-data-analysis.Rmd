@@ -52,7 +52,7 @@ A single excel data file is loaded to carry out all data analysis, with all step
 
 ```{r load data, echo=TRUE, include = FALSE}
 
-maindata <- read_csv("data/maindata140720.csv")
+maindata <- read_csv("data/maindata180720_nos.csv")
 
 ```
 
@@ -279,7 +279,7 @@ dat.all %>%
 
 The output from the random effects meta-analysis using the GLMM: 
 
-Summary estimate is 1.2112 [0.7844; 1.8659] over study level mean of 51 months. 
+Summary estimate is 1.2348 [0.8187; 1.8585] over study level mean of 51 months. 
 
 Note that for GLMMs no continuity correction is used. *Meta documentation* Given our rationale for choosing the GLMM, this should produce the least biased result and reasonable coverage probabilities for the 95% CI, as suggested by *Stinjen 2010*. Note CIs are using Wilson score method.
 
@@ -356,7 +356,7 @@ pes.summary.glmm.all
 
 ```
 
-I^2 = 82.7%, which is high, which means that the between study variation due to clinical and methodological variation between studies is high, and greater than that expected by random chance variation within studies. 
+I^2 = 82.5%, which is high, which means that the between study variation due to clinical and methodological variation between studies is high, and greater than that expected by random chance variation within studies. 
 
 This may be explained by co-variates and thus consideration should be made to avoid data-sythesis or explore reasons for heterogeneity. 
 
@@ -406,11 +406,11 @@ find.outliers(pes.summary.glmm.all)
 
 Here using the random effects model, Juvela is identified as the outlier. 
 
-The pooled rupture risk changes with Juvela et al is 1.2112 [0.7844; 1.8659] 
+The pooled rupture risk changes with Juvela et al is 1.2348 [0.8187; 1.8585]
 
-The pooled rupture risk without Juvela et al is 1.2625 [0.9445; 1.6858]. 
+The pooled rupture risk without Juvela et al is 1.2992 [0.9974; 1.6908] 
 
-Although the pooled rupture risk is still between 1-2%, the precision of the estimate has improved, and the I2 has reduced from 82 to 42%, which makes the result more robust and more generalisable. 
+Although the pooled rupture risk is still between 1-2%, the precision of the estimate has improved, and the I2 has reduced from 82 to 37%, which makes the result more robust and more generalisable. 
 
 ### Influence analysis
 
@@ -514,7 +514,7 @@ dat10 %>%
 
 The output from the random effects meta-analysis using the GLMM: 
 
-Summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
+Summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months. 
 
 
 #### Display meta-analysis result using a publication quality forest plot
@@ -659,7 +659,7 @@ The size of the bubbles can reflected the number of study participants
 ****
 Interpretation: 
 
-The random effects metaregression included participants from 27 studies with a mean study level proportion of exposure to prior subarachnoid haemorrhage of 10% (range 0 - 49.8%). There were a total of 167 ruptures and 10 879 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.35), suggesting that the proportion of patients with prior SAH included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 49%), which is higher than across all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis. 
+The random effects metaregression included participants from 28 studies with a mean study level proportion of exposure to prior subarachnoid haemorrhage of 10.9% (range 0 - 49.8%). There were a total of 182 ruptures and 11 928 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.37), suggesting that the proportion of patients with prior SAH included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 45.6%), which is higher than across all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis. 
 
 
 #### Metaregression to explore size categorised at 5mm
@@ -819,7 +819,7 @@ sum(dat.multi.metareg$total_size)
 
 Interpretation:
 
-The random effects metaregression included participants from 19 studies with a mean study level proportion of aneurysm multiplicity of 26.9% (range 0 - 51.2%). There were a total of 154 ruptures and 9 750 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.62), suggesting that the proportion of patients with multiple aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 34%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+The random effects metaregression included participants from 20 studies with a mean study level proportion of aneurysm multiplicity of 27.5% (range 0 - 51.7%). There were a total of 169 ruptures and 10 799 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.55), suggesting that the proportion of patients with multiple aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 29.4%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 
 #### Metaregression to explore study length of follow up on rupture outcomes, including all studies
@@ -875,7 +875,7 @@ bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 10), main=
 
 Interpretation:
 
-The random effects metaregression included participants from 26 studies with a mean study level follow up time of 3.6 years (range 1 - 8.3 years). There were a total of 171 ruptures and 11 331 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of mean study level follow up time was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 43%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+The random effects metaregression included participants from 27 studies with a mean study level follow up time of 3.6 years (range 1 - 8.3 years). There were a total of 186 ruptures and 12 380 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of mean study level follow up time was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38.1%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 
 #### Sub-group analysis based on study population - Japanese vs non-Japanese
@@ -945,11 +945,11 @@ forest(pes.summary.glmm.pop,
 ```
 
 
-The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (p = 0.001), suggesting that a Japanese source population was associated with a higher the rupture risk across the included trials. This is biologically plausible, and is concordant with other published literature with that demonstrates an unexplained higher incidence of aneurysmal subarachnoid haemorrhage from ruptured aneurysms in the Japanese population. 
+The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (p = 0.002), suggesting that a Japanese source population was associated with a higher the rupture risk across the included trials. This is biologically plausible, and is concordant with other published literature with that demonstrates an unexplained higher incidence of aneurysmal subarachnoid haemorrhage from ruptured aneurysms in the Japanese population. 
 
-This covariate also explains some of the heterogeniety, with only mild heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 25.0%]. The overall covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group.
+This covariate also explains some of the heterogeniety, with only mild heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 21.2%]. The overall covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group.
 
-This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher (1.9494 [1.6300; 2.3300]) over a shorter follow up period of 38 months, compared to the sub-group rupture risk in non-Japanese of 1.0665 [0.7710; 1.4735] over a mean study follow up period of 45 months. 
+This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher (1.9494 [1.6300; 2.3300]) over a shorter follow up period of 38 months, compared to the sub-group rupture risk in non-Japanese of 1.1656 [0.9346; 1.4528] over a mean study follow up period of 45 months. 
 
 However, there may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors such as prevalence of hypertention and smoking. 
 
@@ -1022,9 +1022,9 @@ forest(pes.summary.glmm.type,
 ```
 
 
-The test for subgroup differences (random effects model) indicates that there is no statistically significant subgroup effect (p = 0.35), suggesting that there was no difference in rupture risk between prospective and retrospective studies. In prospective studies, the point estimate was higher 1.5673 [0.9451; 2.5885] with wider confidence intervals over a longer time period of 62 months compared to retrospective studies with point estimate of rupture risk of 1.2286 [0.9571; 1.5759] over 47 months. Although retrospective studies may be at greater tisk of incomplete case follow up due to the case-fatality rate prior to hospital presentation, this sensitivity analysis demonstrates no clinically relevant differences in outcome. 
+The test for subgroup differences (random effects model) indicates that there is no statistically significant subgroup effect (p = 0.22), suggesting that there was no difference in rupture risk between prospective and retrospective studies. In prospective studies, the point estimate was higher 1.5944 [1.1092; 2.2868] with wider confidence intervals over a longer time period of 62 months compared to retrospective studies with point estimate of rupture risk of 1.2286 [0.9571; 1.5759] over 47 months. Although retrospective studies may be at greater tisk of incomplete case follow up due to the case-fatality rate prior to hospital presentation, this sensitivity analysis demonstrates no clinically relevant differences in outcome. 
 
-This covariate does not explain the residual heterogeniety, with moderate heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 40.0%]. There is also some concern regarding the overall covariate distribution given two thirds of the rupture events are in the prospective cohort, and the majority in 2 studies with a Japanese source population. In addition, there may be additional unknown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, but rather is an exploration of the sources of heterogeneity due to methodological differences. 
+This covariate does not explain the residual heterogeniety, with moderate heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 39.3%]. There is also some concern regarding the overall covariate distribution given majority of the rupture events are in the prospective cohort, with most rupture events occuring in 2 studies with a Japanese source population. In addition, there may be additional unknown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, but rather is an exploration of the sources of heterogeneity due to methodological differences. 
 
 ### Multivariable meta-regression
 
@@ -1090,7 +1090,8 @@ dat7 <- sizedata7 %>%
 
 dat7 <- dat7 %>%
   slice(-12) %>%
-  drop_na(total_size)
+  drop_na(total_size) %>%
+  drop_na(rupt)
 
 pes.summary.glmm7 = metaprop(rupt, total_size,
                             data=dat7,
