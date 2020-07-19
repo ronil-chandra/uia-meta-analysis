@@ -1141,7 +1141,7 @@ forest(pes.summary.glmm7,
 
 
 
-Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
+Main result summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months 
 
 Sensitivity analysis performed with aneurysms measuring 7 mm and less have a pooled rupture risk estimate of 1.0580 [0.7710; 1.4503] over 42 months, with I^2 = 37.5%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%.  
 
@@ -1203,7 +1203,7 @@ forest(pes.summary.glmm5,
 
 ```
 
-Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
+Main result summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months . 
 
 Sensitivity analysis performed with aneurysms measuring 5 mm and less have a pooled rupture risk estimate of 1.0624 [0.8427; 1.3385] over 42 months, with I^2 = 0%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%. 
 
@@ -1225,9 +1225,10 @@ pes.summary.glmm.all
 
 The pooled rupture risk changes with Juvela et al is 1.2112 [0.7844; 1.8659] 
 
-The pooled rupture risk without Juvela et al is 1.2625 [0.9445; 1.6858]
+The pooled rupture risk without Juvela et al is 1.2992 [0.9974; 1.6908] 
 
-The impact of including Juvela et al is to reduce the precision of the summary estimate with wider confidence intervals. The inconsistency in the result increases from I2 of 42% to 82% making the result less generalisable. Regardless from a clinical perspective, this sensitivity analysis does not alter the overall impact, since the pooled rupture risk remains within 1-2%.  
+The impact of including Juvela et al is to reduce the precision of the summary estimate with wider confidence intervals. The inconsistency in the result increases from I2 of 37% to 82% making the result less generalisable. Regardless from a clinical perspective, this sensitivity analysis does not alter the overall impact, since the pooled rupture risk remains within 1-2%.  
+
 #### Sensitivity analysis - consider handling of missing data
 
 Missing data was handled with imputation using the last observation carry forward method. This decision can also lead to biased estimates, particularly a downward bias in the rupture risk given that it is generally considered that larger sized aneurysms are considered at higher risk for rupture. We can compare our decision to carry forward the number of rupture and number of aneurysms by examining only complete case data.
@@ -1252,7 +1253,7 @@ pes.summary.5locf
 
 
 
-Main result summary estimate is 1.2625 [0.9445; 1.6858] with I2 of 41.8% over study level mean of 43 months. 
+Main result summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months 
 
 Sensitivity analysis performed without carrying forward number of aneurysms measuring 5 mm and less to the 10 mm and less category, (ie including those with more complete case data for 10 mm and less aneurysms) has a pooled rupture risk estimate of 1.4412 [1.0706; 1.9376], with I^2 = 30%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%. 
 
@@ -1363,10 +1364,10 @@ forest(pes.sens.nos,
 
 Here we can see the point estimate and the confidence intervals varies from 
 
-Good Quality studies  1.8534 [1.5697; 2.1872] over 68 months 
-All studies           1.2625 [0.9445; 1.6858] over 43 months. 
+Good Quality studies  1.8007 [1.5379; 2.1075] over 68 months 
+All studies           1.2992 [0.9974; 1.6908] over 43 months. 
 
-Sensitivity analysis performed by including good quality studies only has a pooled rupture risk estimate of 1.8534 [1.5697; 2.1872] over 68 months, with I^2 = 0%. While this result is less biased, it is more imprecise with wider confidence intervals. There is no statistical and could be considered robust given the inclusion of 137 rupture events across a total of 7392 aneurysms. Regardless from a clinical perspective, the pooled ruture risk remains approximately 1-2%. 
+Sensitivity analysis performed by including good quality studies only has a pooled rupture risk estimate of 1.8534 [1.5697; 2.1872] over 68 months, with I^2 = 0%. This could be considered robust given the inclusion of 152 rupture events across a total of 8441 aneurysms. Regardless from a clinical perspective, the pooled ruture risk remains approximately 1-2%. 
 
 
 
@@ -1451,8 +1452,6 @@ sizedata10 %>%
   filter(pub<2010)
 
 sum(sizedata10$num_tot, na.rm = TRUE)
-
-sum(sizedata10$num_anr_tot, na.rm = TRUE)
 
 fem10 <- sizedata10 %>%
   drop_na(fem_tot)
