@@ -81,6 +81,12 @@ glimpse(maindata)
 
 ```
 
+### Describe baseline study charachteristics
+
+
+
+
+
 ### Calculate individual study proportions and use meta-analytical methods to create a pooled summary proportion 
 
 Individual rupture risk at study entry can be calculated by calculating the proportion of patients who ruptured ie pi = xi / ni. 
@@ -1426,6 +1432,46 @@ The lack of availability of such individual patient data for pooling remains a l
 ### Study conclusions
 
 The risk estimate for rupture of SUIAs managed with surveillance is between 1-2% over the next 3-4 years. This is a robust risk estimate, and should be considered when counselling patients between active surveillance or prophylactic treatment of SUIAs.  
+
+
+
+### Baseline study characteristics
+
+```{r  10 mm size}
+sizedata10 <- sizedata10 %>%
+  mutate(fu_tot = coalesce(fu_mean_tot,fu_med_tot),
+         prop_psah = psah_tot / num_tot)
+
+sizedata10 %>%
+  filter(country == "Japan" | country == "United States" | country == "International") %>%
+  filter(type == "prospective")
+
+sizedata10 %>%
+  filter(pub<2010)
+
+sum(sizedata10$num_tot, na.rm = TRUE)
+
+sum(sizedata10$num_anr_tot, na.rm = TRUE)
+
+fem10 <- sizedata10 %>%
+  drop_na(fem_tot)
+sum(fem10$num_tot, na.rm = TRUE)
+sum(fem10$fem_tot, na.rm = TRUE)
+
+mean(sizedata10$age_mean, na.rm = TRUE)
+median(sizedata10$age_med, na.rm = TRUE)
+
+mean(sizedata10$fu_tot, na.rm = TRUE)
+min(sizedata10$fu_tot, na.rm = TRUE)
+max(sizedata10$fu_tot, na.rm = TRUE)
+
+mean(sizedata10$prop_psah, na.rm = TRUE)
+min(sizedata10$prop_psah, na.rm = TRUE)
+max(sizedata10$prop_psah, na.rm = TRUE)
+
+
+
+```
 
 
 
