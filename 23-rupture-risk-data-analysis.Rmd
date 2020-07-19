@@ -1442,7 +1442,9 @@ The risk estimate for rupture of SUIAs managed with surveillance is between 1-2%
 ```{r  10 mm size}
 sizedata10 <- sizedata10 %>%
   mutate(fu_tot = coalesce(fu_mean_tot,fu_med_tot),
-         prop_psah = psah_tot / num_tot)
+         prop_psah = psah_tot / num_tot,
+         mid_year = start + (end - start)/2
+         )
 
 sizedata10 %>%
   filter(country == "Japan" | country == "United States" | country == "International") %>%
@@ -1469,6 +1471,26 @@ mean(sizedata10$prop_psah, na.rm = TRUE)
 min(sizedata10$prop_psah, na.rm = TRUE)
 max(sizedata10$prop_psah, na.rm = TRUE)
 
+sizedata10.juvela <- sizedata10 %>%
+  slice(-12)
+
+mean(sizedata10.juvela$prop_psah, na.rm = TRUE)
+min(sizedata10.juvela$prop_psah, na.rm = TRUE)
+max(sizedata10.juvela$prop_psah, na.rm = TRUE)
+
+mean(sizedata10.juvela$fu_tot, na.rm = TRUE)
+min(sizedata10.juvela$fu_tot, na.rm = TRUE)
+max(sizedata10.juvela$fu_tot, na.rm = TRUE)
+
+
+
+median(sizedata10$mid_year, na.rm = TRUE)
+min(sizedata10$mid_year, na.rm = TRUE)
+max(sizedata10$mid_year, na.rm = TRUE)
+
+median(sizedata10.juvela$mid_year, na.rm = TRUE)
+sizedata10.juvela %>%
+  filter(start<1978)
 
 
 ```
