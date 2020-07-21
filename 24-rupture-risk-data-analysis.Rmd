@@ -1,0 +1,1622 @@
+---
+title: "Rupture Risk Estimate"
+author: "Ronil V. Chandra"
+date: "22/07/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Objectives:
+
+Brain aneurysms managed conservatively with surveillance carry a risk of aneurym rupture. The objectives of this systematic review were to (i) estimate the overall rupture risk of a SIUA managed with surveillance and (ii) examine whether aneurysm size or exposure to prior subarachnoid haemorrhage were associated with rupture risk, and (iii) examine other potential sources of heterogeneity in the overall rupture risk estimate. 
+
+This will help clinicians more accurately convey the uncertainty in the rupture risk estimate utilising the current medical knowledge to patients. 
+
+After performing my systematic review, I have three additional aims:
+
+1. If appropriate, to quantitatively synthesise the data in order to calculate a summary pooled proportion.
+2. To identify and measure heterogeniety across the studies to help consider whether data synthesis is appropriate. 
+3. If data synthesis is appropriate, then to explore the reasons for heterogeneity by considering outliers and influential studies, and both pre-specified and post hoc sub-group analysis and meteregression. 
+
+The statistical approaches will be tailored to the source dataset and structure of the data which is characterised by the following:
+
+1. Rupture of an intracranial aneurysm in a single patient is a rare event, usually estimated at 1% per year or less.
+2. There are a small number of rupture outcome events in the sample populations, with the rupture proportion very close to zero.
+3. While the outcome of rupture is binomial, in a sample population, the distribution of rupture outcomes over time is is better described by the non-central hypergeometric distribution, since some aneurysms are considered at higher risk of rupture.
+4. There are a wide range of size in sample populations identified by the systematic review, with both very small studies and very large studies included.
+5. The rate of rupture over time does not appear to be constant when biological factors and current published data are considered, thus the risk of rupture will be considered. 
+
+To achieve these aims, the various packages and source dataset in R are loaded, and each part carried out with an explanation of the rationale for the data analysis. Version control is carred out with GitHub. 
+
+
+#### Load required packages
+
+The following R packages were loaded: tidyverse, meta, metafor, BiasedUrn and dmetar.
+
+```{r load packages, echo=TRUE, include = FALSE}
+library(tidyverse)
+library(meta)
+library(metafor)
+library(BiasedUrn)
+library(dmetar)
+
+```
+
+#### Load required data
+
+A single excel data file is loaded to carry out all data analysis, with all steps documented below to ensure reproducibility of research.
+
+```{r load data, echo=TRUE, include = FALSE}
+
+maindata <- read_csv("data/maindata180720_nos.csv")
+
+```
+
+#### Correct vector types
+
+Vector types are corrected to integers, factors, doubles as appropriate for analysis in R, and stored as a new tibble. 
+
+```{r correct vectors, echo=TRUE, include = FALSE}
+maindata %>% 
+  mutate(pub = as.integer(pub),
+         start = as.integer(start),
+         end = as.integer(end), 
+         psah = as.double(psah),
+         fu = as.double(fu),
+         nos_select = as.double(nos_select),
+         nos_outcome = as.double(nos_outcome),
+         nos_compare = as.double(nos_compare),
+         nos_outcome = as.double(nos_outcome),
+         country = as.factor(country),
+         type = as.factor(type)
+         )
+```
+
+```{r glimpse new, echo=TRUE, include = FALSE}
+glimpse(maindata)
+
+```
+
+### Describe baseline study charachteristics
+
+
+
+
+
+### Calculate individual study proportions and use meta-analytical methods to create a pooled summary proportion 
+
+Individual rupture risk at study entry can be calculated by calculating the proportion of patients who ruptured ie pi = xi / ni. 
+
+xi = cases ie number of aneurysm ruptures during follow up 
+ni = total ie number of aneurysms at study entry
+pi = raw proportions ie xi / ni 
+
+These can then be combined across studies to consider a meta-analyis of proportions. When considering any meta-analsis, the basic steps are 
+
+* calculate a summary statistic for each individual study, such as rupture proportion in our case
+* calculate the weighting for each individual study 
+* choose a random-effect or fixed effect assumption
+* calculate the pooled summary statistic
+* calculate the p value which communicates the strength of the evidence against the null hypothesis (if there is an intervention group and a control group, but not in our case with a summary proportion)
+* derive the confidence intervals which communicates the level of precision or certainty of the summary estimate
+* display the meta-analysis result as a forest plot
+
+For every dataset, a suitable effect measure must be chosen, and a choice should be made regarding the meta-analytical methods. Most meta-analytical methods weight the individual effect sizes from each study to create a pooled effect size. In this study, we will consider individual study proportions, and create a pooled summary proportion for rupture risk. 
+
+Given unique characteristics of the data that we are synthesising, appropriate statistical methods for meta-analysis and calculation of the confidence intervals must be considered. This is important, because different statistical approaches to synthesising the data can produce different results leading to different conclusions. *Cornell et al AIM 2014*
+
+##### Choice of meta-analytical method
+
+The dataset is sparse, and the overall distribution of rupture events across all studies is highly skewed towards zero.  
+
+The first step is to improve the statistical properties of a skewed dataset in terms of the data distribution and variance prior to synthesis. Variance is the squared difference from the mean. To achieve this, the data is transformed in order to approximate a normal distribution to enhance the validity of the statistical procedures. The most common transformation methods are the logit and the double arcine transformation. 
+
+In the logit transformation, proportions are converted to the natural logarithm of the proportions (i.e., the logit), and assumed to follow the normal distribution. All statistical procedures are performed on the logit proportion, and then the logits converted back to raw proportions for reporting. However, if there are no ruptures and pi = 0, then the logit and variance are undefined. Furthermore, if there is high between-study variablity or small study sample sizes, the logit transformed proportion is underestimated. *Hamza 2008* To overcome this statistical limitation, typically a continuity correction of 0.5 is applied. In our analysis, this creates risk of introducing additional sparse data bias and reducing the validity of the result, especially given that pi is close to 0.
+
+The alternate method of transformation to consider which can better normalises the distribution and variance especially for small sample sizes or rare event rates, is the double arcine transformation of Freeman-Tukey *Freeman and Tukey 1950*. After statistical procedures, the result can be later be backtransformed using the equation derived by Miller *Miller 1978*. However, the Miller back transformation utilises the harmonic mean of the sample sizes. This affects the backtransformed proportion as described by *Schwarzer 2019*, and leads to misleading results. This issue is particularly evident when there is a large range of sample sizes. This issue is of particular concern and can lead to misleading results given that the sample sizes on our dataset vary from 22 to 3323. 
+
+In the classical meta-analytical methods, after transformation and statistical procedures, the results are backtransformed to study level results, and synthesised.
+
+Data synthesis can be carried out using the generic inverse variance method, which calculates the individual study effect size, and creates a pooled estimate after weighing each study by the inverse of the variance of the effect size estimate. This means that larger studies with smaller standard errors are given more weight than smaller studies with larger standard errors. This minimises the imprecision of the pooled effect size resut. 
+
+A variation on the generic inverse variance method incorporates an assumption that there is some variation between studies, ie heterogeneity, while measuring the same effect. This produces a random effects meta-analysis, the most common of which is the the DerSimonian and Laird method *DerSimonian 1986*. This is the most commonly utilised method in medical meta-analysis, and the default method in many statistical packages. However the DL method is known to produces confidence bounds that are too narrow and p values that are too small when the number of studies is small or in the setting of high heterogeneity. In addition, when outcome events are rare, such as in our dataset, these classical meta-analytical methods for data-synthesis also have the potential to contribute to additional sparse data bias and give misleading results. *Bradburn 2007 from Cochrane*
+
+In summary, there are significant statistical limitations of the classical DL meta-analytical methods of transformation and synthesis with our specific dataset and research question. 
+
+To overcome these statistical limitations, we can instead utilise the random intercept logistic regression model for statistical procedures and data synthesis, a type of generalised linear mixed model, as recommended by *Stinjen 2010* and *Schwarzer 2019*. 
+
+Our rationale for choice of a GLMM for statistical procedures and data synthesis is based on the following:
+
+* The GLMM is an exact likelihood model based on the the binomial distribution, and thus accounts for the binomial outcome of aneurysm rupture.*Hamza 2008*  For large samples with a common outcome, the binomial distribution is a reasonable estimate.
+* The GLMM has greater accuracy of the logit proportion and coverage percentages of the corresponding confidence intervals compared to standard normal approximation logit transformation, especially when there are small sample sizes and greater between-study heterogneity. *Hamza 2008*  
+* The sample populations range from 22 to 3323, which creates misleading results when utilising the alternate Freeman-Tukey methods of transformation and backtransformation of Miller. *Schwarzer 2019*
+* The outcome is very rare, with proportions less than 0.05 is almost all studies, and thus generic inverse variance and DL methods for data synthesis can lead to misleadong results *Stinjen 2010*
+* GLMMs can be fitted using the logit transformation, and results backtransformed to the original scale, in our case a proportion.
+* The GLMM does not require a continuity correction even if pi = 0.  *Hamza 2008* 
+* Additional calculations to consider covariates can be performed using noncentral hypergeometric models. 
+
+The limitation of this statistical approach is that individual study weights utilised to pool the individual studies to create the pooled proportion will not be available. 
+
+In the past, utilisation of a GLMM for meta-analysis was not practical due to its computationally intensive nature, and lack of availabilty in standard statistical software packages. However these limitations are now overcome, with statistical modules for GLMMs now available in both SAS and R stastical packages. 
+
+##### Choice of confidence interval
+
+Use of the CI is important, since CIs convey information about magnitude and precision of individual study effect size and the pooled meta-analytical effect size. The choice of the CI should be tailed to the dataset that is present. Options include:
+
+* Wald method or Normal Approximation
+  + this produces CIs that are often centred on the point estimate
+  + thus they are not often suitable with proportions close to the boundaries of 0 and 1, since this method can create CIs that are below 0 and above 1.
+  + for proportions that are often 0 or close to zero, a continuity correction may be applied, but this can lead to additional overshoot
+  
+* Clopper-Pearson or Exact method
+  + Most commonly used, and recommended to avoid approximation by most statistical textbooks. 
+  + Called exact because it is based directly on the binomial distribution and not an approximation. 
+  + Output is usually conservative, and the true coverage is almost always larger than the derived coverage ie closer to a 99% CI than a 95% CI. 
+  + The derived 95% CI does not accurately reflect the true 95% CI unless n is quite large *Agresti 2008*. 
+  + When n is small eg 10, there is severe overcoverage (closer to 99% coverage) with the true CI much larger than the derived 95% CI. 
+  + Even when n is large, the derived 95% CI does not accurately reflect the true 95% CI when p is near 0 because the binomial distribution is highly skewed. *Agresti 1998* 
+  + Needs a very large number of n to be accurate *Brown 2001*
+
+* Wilson method
+  + Is suggested for small n ie 40 or less and/or extreme probabilities *Brown 2001*
+  + The derived CI more accurately reflects the true CI with less variability compared to CP method *Agresti 1998* 
+  + For small n, the Wilson CI’s are shorter and a more accurate derivation than the CP CI’s *Vollset 1993*
+  + Can be used and is recommended for all sample sizes *Newcombe 1998* 
+
+We will choose the Wilson method for CI for the following reasons:
+
+* Rupture of an aneurysm is a rare event with the proportion p very close to zero 
+* The distribution of the outcomes is highly skewed towards zero, and thus Wald confidence intervals cross zero. 
+* There is a wide range of sample sizes, with very small studies and very large studies included
+* More accurate CIs are likely to be generated using the Wilson method given the highly skewed and sparse dataset. 
+
+This is aligned with the recommendations of *Vollset 1993*, *Agresti 1998*, *Newcombe 1998* and *Brown 2001*. 
+
+
+### Analyse total cohort of all aneurysms 10 mm and less 
+
+```{r select total cohort with 10 mm and less aneurysms, include = FALSE}
+
+sizedata10 <- filter(maindata, size == 10)
+
+```
+
+#### Assumptions: 
+
+Consider number of patients vs number of aneurysms at entry 
+
+Some studies report the number of patients at study entry for a size criteria, while others report the number of aneurysms at study entry, and others report both the number of patients and aneurysms at study entry. Typically the proportion of patients with multiple aneurysms is also reported. 
+
+Given that only 1 aneurysm in 1 patient ruptures, which is the outcome, and that the number of aneurysms in that size criteria is most consistently reported, the analysis is performed with the outcome of number of aneurysm ruptures per 100 aneurysms. 
+
+The rationale for this is:
+
+1. Makes biological sense, since aneurysm rupture is considered to be strongly influenced by aneurysm characteristics
+2. One patients may have multiple aneurysms with a large range eg 1 to 8 aneurysms
+3. Conveying a rupture risk per aneurysm is easy to understand from a patient perspective when they harbour multiple aneurysms. 
+
+Thus, if the number of aneurysms for a particular size criteria in the study has been reported, this is the most accurate information, and is utilised for analysis. 
+
+If the number of number of aneuryms is not known for the specific size criteria, and we do know the proportion of patients with multiple aneuryms in the total observation cohort:
+
+1. The assumption is that a patient with multiple aneurysms has 2 aneurysms, and we can calculate the total number of aneurysms for that size criteria.   
+2. This can be caculated using the proportion of patients with multiple aneuryms *variable multi_tot* in the total observation cohort *variable num_tot*. 
+3. This proportion *prop_multi* can be multiplied by the number of patients in that specific size criteria. This is the number of patients that we can assume has 2 aneurysms. 
+4. The total number of aneurysms for that size *variable total_size* is then calculated by adding variable num. 
+5. We have now calculated the total number of aneurysms in that size category, taking into account aneurysm multiplicity. 
+
+If the number of number of aneuryms is not known for the specific size criteria, and we do *NOT* know the proportion of patients with multiple aneuryms in the total observation cohort, but we do know the number of patients in that size category, then 1 patient is assumed to have 1 aneurysm. 
+
+For patients with exposure to prior SAH. The number of aneurysms in patients with prior SAH is unknown ie these patients may have multiple aneurysms.  
+
+1. We can assume that the proportion of patients with multiple aneurysms in the total cohort, is the same as the proportion of patients with multiple aneurysms with prior SAH, and calculate this if we know the number of patients with exposure to prior SAH in the specific size category. 
+2. If the number of patients with exposure to prior SAH in the specific size category is unknown, then we can assume that the proportion of patients with prior SAH in the total observation cohort is the same proportion as those in that size category. Thus if we know the total number of aneurysms in that size category, we can calculate the proportion that have had exposure to prior SAH. 
+
+In addition, when considering aneurysm size strata, not all studies report consistently for each size strata of 3 mm and less, 5 mm and less, 7 mm and less, and 10 mm and less. If there is missing data for a particular size strata, then the prior size strata is carried forward using the last observation carried forward method of imputing missing data. This can introduce additional bias, and a sensitivity analysis will be carried out to examine the effect of this method of single imputation. 
+
+
+```{r calculate total number of aneurysms and prior SAH exposure for specific size criteria 10 mm and less}
+
+dat <- sizedata10 %>%
+  mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(pop = fct_collapse(sizedata10$country, 
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+         )
+        
+```
+
+
+#### Meta-analysis of proportions using GLMM and Wilson CIs with all studies 
+
+Now that we have taken into account the number of aneurysms specific to that size category, we can now perform our statistical procedures on that dataset, starting with a meta-analysis of proportions using the GLMM
+
+
+```{r meta-analysis of proportions using glmm}
+
+dat.all <- dat %>%
+  drop_na(total_size)
+  
+pes.summary.glmm.all = metaprop(rupt, total_size,
+                            data=dat.all,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.all
+
+```
+
+
+
+```{r calculate mean FU of all included studies}
+
+dat.all %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+The output from the random effects meta-analysis using the GLMM: 
+
+Summary estimate is 1.2348 [0.8187; 1.8585] over study level mean of 51 months. 
+
+Note that for GLMMs no continuity correction is used. *Meta documentation* Given our rationale for choosing the GLMM, this should produce the least biased result and reasonable coverage probabilities for the 95% CI, as suggested by *Stinjen 2010*. Note CIs are using Wilson score method.
+
+Remember that the confidence interval from this random-effects meta-analysis describes uncertainty in the location of average proportion across the individual studies. Thus there is likely to be an even higher degree of uncertainty in the true population rupture risk. *Cochrane handbook 10.10.4.2*
+
+#### Display meta-analysis result using a publication quality forest plot
+
+The easiest way to communicate the result of the statistical procedure is via a forest plot. 
+
+```{r forest for publication using GLMM, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm.all,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture per 100 aneurysms",
+       pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 51 months",
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+
+### Heterogeniety 
+
+#### What is heterogeniety 
+
+Heterogeniety refers to all types of variation across studies. Heterogeniety can be considered in terms of 
+
+1. Clinical heterogeneity, which refers to variablity in characteristics of patients, exposures, interventions and outcomes. 
+2. Methodological heterogeneity, which refers to variablity in study designs eg randomization, blinding etc. 
+3. Statistical heterogeneity, which refers to the situation when variation across studies is greater than variation or random error within a study. 
+
+Clinical and methodolocal heterogeniety cannot be calculated. These are both subjectively evaluated by the meta-analyst. If clinical and methodological differences are not significant, then quantative synthesis is considered appropriate. 
+
+If there is substantial clinical and/or methdological heterogeneity, a quantitative synthesis should not be performed to create a pooled effect measure. A qualitative or narrative systematic review should be performed. This is because, the observed effects across studies are greater than what is expected due to random chance alone, which  limits the generalisability of the result. The analogy is that a systematic review brings together apples and oranges, and that combining these in the setting of high heterogeneity yields a meaningless result.
+
+Since statistical heterogeneity is a consequence of clinical and/or methodological heterogeniety, this always occurs in a meta-analysis, statistical heterogeneity is inevitable *Higgins et al 2003*
+
+#### How to identify and measure statistical heterogeniety 
+
+Overall, identification of heterogeniety is critical to assist in interpreting the results of the meta-analyis. This gives the reader confidence that the effect demonstrated is generalisable. It is impossible to completely avoid heterogeneity, however clinical and methodological heterogeneity can be minimised by using strict inclusion criteria during systematic review.   
+
+A simple way to identify heterogeneity is to review the forest plot, and see if the confidence intervals overlap. If there is poor overlap, there is statistical heterogeneity. 
+
+Statitical heterogeneity can also be measured using Cochrane's Q statistic, tau-squared statistic or the Inconsistency measure I^2 statistic. 
+
+1. Cochrane's Q. This test performs poorly for small numbers of studies. If the p value for the Q statistic is below 0.05, then this suggests that there is significant between-study heterogeneity.
+2. tau-squared statistic. Uncommonly reported. An estimate of the between-study variance. When tau-squared is zero this is indicative of no heterogeneity.
+3. I^2 Inconsistency statistic. I^2 represents the proportion of total heterogeniety that can be attributed to the actual between-study heterogeniety, and can be classified into the degree of heterogeneity. 
+
+An I2 value of 0% indicates no observed heterogeneity, up to 25% indicate low heterogeneity, up to 50% indicate moderate heterogeneity, and above 50% indicates high heterogeneity.
+
+95% CIs can also be calculated for the I^2 statistic to demonstrate the uncertainty of the result. 
+
+We will choose the I^2 statistic for the following reasons:
+
+1. This measure is not affected by the number of studies included.
+2. The output offers a percentage that is easily interpreted
+3. This is the standard method of reporting for Cochrane reviews. 
+
+
+```{r heterogeniety}
+
+pes.summary.glmm.all
+
+```
+
+I^2 = 82.5%, which is high, which means that the between study variation due to clinical and methodological variation between studies is high, and greater than that expected by random chance variation within studies. 
+
+This may be explained by co-variates and thus consideration should be made to avoid data-sythesis or explore reasons for heterogeneity. 
+
+For interest, the tau-squared = 0.9098 and the Q-statistic is < 0.0001 which also confirms high between-study heterogeniety. 
+
+We could have identified the heterogeneity by reviewing the overlap between confidence intervals in the forest plot, as we can see that there is a clear outlier - Juvela et al. 
+
+### How to explore and address heterogeneity 
+
+There are various strategies to explore and adddress heterogeneity. 
+
+1. Check for any manual data entry errors. If data has been entered into the statistical software incorrectly, this can result in inaccurate results. By utilising a single excel file as the source of data, with no additional manual data entry, this risk is minimised. 
+
+2. Check that a random-effects meta-analysis was performed. Clinical and methodological heterogeneity is always present in medical studies, and in our case a random-effects model has ben used. 
+
+3. Avoid quantitative data synthesis and pooling studies. If clinical and methodological heterogeneity are substantial, then a quantitative data synthesis shuld not be peformed. A narrative or qualitative review should be performed instead.  
+
+4. Choosing to pool the data, while exploring heterogeneity. Heterogeneity can be explored through metaregression to help identify study-level effect modifiers. This is where the outcome varies in different study-level clinical or methodological characteristics. Such metaregression analyses are best be pre-specified, and regardless they shoud be interpreted with caution and considered hypothesis generating. 
+
+5. Exclude studies. 1 or 2 studies may be outliers or have high influence on the pooled effect size. In general, exclusion of studies should be avoided, since it may introduce bias. However, if there is an obvious reason for the outlying result, then the study can be excluded with confidence. Overall, it is often best to perform the analysis both with and without the outlier / influential study as part of a sensitivity analysis. 
+
+
+### Investigating heterogeneity
+
+The forest plot reveals an outlier with the Juvela et al study. To commence our investigation into heterogeneity, we will first consider outlier and influence analysis.
+
+Outlier studies with extreme effect sizes can cause increased between study heterogenieity. This may arise from small or low quality studies. In addition, overly influential studies can push the pooled effect size higher or lower, which means that the pooled result is less robust since it relies on 1 or a small number of studies. 
+
+There are a number of ways to detect outliers and influential studies. 
+
+### Outlier assessment
+
+One way to identify statistical outliers is to see if the confidence intervals of one study do not overlap with the pooled effect size. This outlier has an extreme effect size, which means that it cannot be included in the total study population pooled to create the pooled effect size. This is because inclusion of the statistical outlier reduces the robustness of the pooled effect size result.  
+
+A common way to detect an outlier are to identify studies where
+
+1. The upper bound of the 95% CI is lower than the lower bound of the pooled effect 95% CI (i.e., extremely small effects)
+2. The lower bound of the 95% CI is higher than the upper bound of the pooled effect CI (i.e., extremely large effects)
+
+The current results reveal that that the pooled rupture risk is 1.2112 [0.7844; 1.8659]. So lets identify studies that are outliers. 
+
+```{r find outliers using 95% CI}
+
+find.outliers(pes.summary.glmm.all)
+
+```
+
+Here using the random effects model, Juvela is identified as the outlier. 
+
+The pooled rupture risk changes with Juvela et al is 1.2348 [0.8187; 1.8585]
+
+The pooled rupture risk without Juvela et al is 1.2992 [0.9974; 1.6908] 
+
+Although the pooled rupture risk is still between 1-2%, the precision of the estimate has improved, and the I2 has reduced from 82 to 37%, which makes the result more robust and more generalisable. 
+
+### Influence analysis
+
+Apart from excluding statistical outliers which reduce the robustness of the pooled result, it is important to identify studies in the meta-analysis that extert high influence on the pooled results. If 1 study very highly influences the pooled effect size result, this also makes the pooled effect size result less robust and less generalisable. 
+
+A common method to identify influential studies is the leave-1-out method, where the results of the meta-analysis are recalculated leaving out 1 study at a time. This helps identify individual studies that may exert very high influence on the result, pushing the pooled effect size higher or lower. 
+
+```{r influence analysis - execution}
+
+inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm.all, 
+                                  random = TRUE,
+                                  subplot.heights = c(30,18),
+                                  subplot.widths = c(30,30),
+                                  forest.lims = c(0,0.03))
+
+```
+
+
+```{r influence analysis - review}
+
+summary(inf.analysis)
+
+```
+
+
+
+```{r influence analysis - plot Baujat Plots}
+
+plot(inf.analysis, "baujat")
+
+```
+
+The Baujat Plot (Baujat et al. 2002) is a diagnostic plot to detect studies overly contributing to the heterogeneity. The study contribution to Cochran’s Q is plotted on the horizontal axis, and the study influence on the pooled effect size on the vertical axis. All studies on the right side of the plot are of interest, since the contribute to heterogeniety. 
+
+Here Juvela et al is identified as both a high contributor to heterogeneity, and high influence on the pooled result. 
+
+
+```{r influence analysis - plot influence characteristics}
+
+plot(inf.analysis, "influence")
+
+```
+
+We can also perform additional plots to assess influence of each study. These plots proposed by Viechtbauer & Cheung (2010) also demonstrate that the Juvela study is not only a statistical outlier, but also an influential study. This is important because this further corroborates that the Juvela study adds statistical heterogeneity, and influences the overall pooled result. 
+
+
+```{r influence analysis - Forest Plot for the Leave-One-Out Analysis, sorted by 𝐼2}
+
+plot(inf.analysis, "i2")
+
+```
+
+In this plot, we can see the impact of the leave 1 out analysis on the pooled effect size. This is ordered by the reduction in statistical heterogeneity as measured by I2. 
+
+We can again see that the precision of the pooled effect size estimate improves with exlcusion of Juvela et al, and that the I2 reduces the most with exclusion of Juvela et al. 
+
+These findings corroborate the findings of the outlier analysis, the Baujat plots, and influence analysis proposed by Viechtbauer and Cheung that Juvela is the main source of heterogeniety. 
+
+### Why Juvela et al excluded. 
+
+The outlier and influence analysis are concordant that Juvela et al is an outlier which influences the pooled effect estimate and reduces the precision of the pooled effect estimate. This is on the basis of statistical heterogeneity, and that the rupture proportion observed in the Juvela et al study varies greater than what is expected due to random chance alone. 
+
+The analogy is that while the remaining studies are different varieties of apples, that Juvela study is an orange, and that combining this study with all other studies will yield much less meaningful result.
+
+Since statistical heterogeneity is a consequence of clinical and/or methodological heterogeniety, we can explore if there are particular clinical or methodogical factors that are likely to be responsible. 
+
+Clinical and methodological factors likely to explain the statistical heterogeneity are are proportion of patients with exposure to prior subarachnoid haemorrhage, patient enrollment period, and length of follow up. 
+
+#### Meta-analysis of proportions using GLMM and Wilson CIs with Juvela excluded 
+
+Since it is reasonable to exclude Juvela, we can re-calculate the main study result. 
+
+```{r meta-analysis of proportions using glmm without Juvela}
+
+dat10 <- dat %>%
+  slice(-12) %>%
+  drop_na(total_size)
+
+pes.summary.glmm = metaprop(rupt, total_size,
+                            data=dat10,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm
+
+```
+
+
+
+```{r calculate mean FU of included studies without Juvela}
+
+dat10 %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+The output from the random effects meta-analysis using the GLMM: 
+
+Summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months. 
+
+
+#### Display meta-analysis result using a publication quality forest plot
+
+The easiest way to communicate the result of the statistical procedure is via a forest plot. 
+
+```{r forest for publication using GLMM with Juvela excluded, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture per 100 aneurysms",
+       pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 43 months",
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+
+### Exploring residual heterogeneity. 
+
+Now we can explore residual heterogeniety through meta-regression. 
+
+Meta-regression allows the effects of multiple continuous and categorical variables to be investigated simultaneously, unlike subgroup analysis which considers one categorical variable only. This generally utilises a random effect model to conduct the analysis in each subgroup, and then considers additional statistical testing to compare the pooled results across the subgroups. Meta-regression should generally not be considered when there are less than ten studies in a meta-analysis. The meta-regression cooeffient obtained describes how the outcome (dependent variable) changes withn unit increase in the potential effect modifier. If the outcome is a ratio measure, the log-transformed value should be used in the regression model. *Cochrane Handbook 10.11.4*
+
+The regression coefficient obtained from a meta-regression will describe how the outcome variable changes with a unit increase in the explanatory variable. The statistical significance of the regression coefficient is a test of whether there is a linear relationship between outcome variable and the explanatory variable. The association that is identified with one trial characteristic may in reality reflect a true association with other correlated characteristics, whether these are known or unknown. It is not be possible to ajust for all potential confounders and thus they can can lead to misleading conclusions. Even if there are a large number of covariates adjusted for, we cannot be certain that all potential confounders have been identified. These analyses cannot prove causality, and at best, they can be considered hypothesis generating. 
+
+This is an important concept, because if metaregression findings are presented as definitive conclusions there is risk of people being denied an effective intervention or treated with an ineffective or harmful intervention. This can also generate misleading recommendations about future research directions, which if followed would waste scarce research resources.
+
+When reporting results from meta-regression additional important factors should be considered:
+
+1. Wheether a statistically significant assocaition was detected
+2. The covariate distribution (i.e. the number of trials and participants contributing to each subgroup)
+3. The plausibility of the association or lack of association
+4. The importance of the association or lack of association
+5. The possibility of confounding
+
+Moving forward, we shall choose to pool the data, explore heterogeneity in the synthesised data with meta-regression, and accurately report the interpretation of the meta-regression with clinical context. 
+
+### Meta-regression
+
+The purpose of meta-regression is to explore whether particular covariates explain the heterogeneity of effects between the studies included.
+
+Meta-regression can be performed with a categorical trial covariate which yeilds subgroup analysis. The important focus is on the test for differences across the subgroups, rather than the effect size in each sub-group. This is because the goal is to explore heterogeneity. Thus residual heterogeneity should be taken into account, and a random-effects meta-regression performed. The amount of residual heterogeneity should also be reported. 
+
+Meta-regression is also performed with continuous trial covariates, which yeilds the typcial meta-regression plots. Visual presentation is helpful, ideally using symbol sizes that refelect the precision of the study level effect estimate. 
+
+Many methods for meta-regression exist to accommodate the varied manners in which data is presented (i.e. study-level summary counts for the cells of 2×2 tables, study-level relative proportions, and the assumed nature of the variability observed across studies (fixed effects vs. random effects meta-regression).
+
+In our case, the most robust data is the study-level relative proportions, and while study-level summary counts for the cells of 2x2 tables could be calculated, this is likely to introduce additional bias due to lack of individual patient level data, sparse data bias, and bias introduced due to assumptions about multiplicity of aneuryms. 
+
+The method of meta-regression will be random effects meta-regression since there is expected to be residual between-study variability due to clinical and methodological variability across the studies. 
+
+To reduce the risk of false positives, and to ensure that there are adequate studies to consider  meta-regression, only one potential covariate is considered for metaregression each time. Multivariable meta-regression with up to 2 covariates will be considered if for any covariates with a p value of less than 0.1, and with lower residual heterogeniety than the overall pooled analysis. 
+
+Regardless, the outcomes of these meta-regression analyses are limited. They are entirely observational and susceptible to confounding bias from other study level characteristics. Importantly, they are not be generalisable since there is aggregation bias due to study-level data being used for analysis and not patient level data. This aggregation bias may fail to detect important associatons that may be detected utilising individual patient-data. 
+
+In our study, we have pre-specified further data analysis with regard to exposure to prior subarachnoid haemorrhage and aneurysm size in our published study protocol. Thus the following meta-regression analyses will be performed. 
+
+1. Prespecified metagression to consider whether proportion of patients with exposure to prior SAH in the studies analysed as a continuous variable was an important source of heterogeneity.
+
+2. Prespecified metagression to consider whether proportion of patients with aneurysms 5mm and less in the studies analysed as a continuous variable was an important source of heterogeneity.
+
+3. Post hoc metagression to consider whether proportion of patients with multiple aneurysms in the studies analysed as a continuous variable was an important source of heterogeneity. 
+
+4. Post hoc metagression to consider whether duration of follow up in the studies analysed as a continuous variable was an important source of heterogeneity. 
+
+5. Post hoc meta-regression to to consider whether study source population from Japan vs non-Japanese popultions analysed as a categorical variable was an important source of heterogeneity.
+
+
+####  Metagression for prior SAH exposure 
+
+We can analyse whether there is a relationship between the proportion of patients with prior SAH included in the study (the exploratory variable) and the the outcome (rupture proportion). 
+
+The choice of this covariate is:
+
+* Pre-specified
+* Biologically plausible
+* Supported by published observational data
+* Relevant to physicians
+
+
+```{r metaregression for prior SAH at study level, data setup}
+
+dat.psah.metareg <- dat %>%
+  slice(-12) %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size, prop_psah) %>%
+  drop_na(total_size) %>%
+  drop_na(prop_psah)
+
+```
+
+
+```{r metaregression for prior SAH at study level, all studies - execution}
+
+psah.metareg = metaprop(rupt, total_size,
+                      data=dat.psah.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+psah.metareg.result <- metareg(psah.metareg, ~prop_psah)
+psah.metareg.result
+```
+
+```{r metaregression for prior SAH at study level, all studies - charachteristics}
+
+range(dat.psah.metareg$prop_psah) * 100
+
+mean(dat.psah.metareg$prop_psah) * 100
+
+sum(dat.psah.metareg$rupt)
+
+sum(dat.psah.metareg$total_size)
+  
+```
+
+
+```{r metaregression - bubble plot, psah}
+
+bubble(psah.metareg.result, studlab=dat.psah.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for prior SAH")
+
+```
+
+
+****
+The size of the bubbles can reflected the number of study participants
+****
+Interpretation: 
+
+The random effects metaregression included participants from 28 studies with a mean study level proportion of exposure to prior subarachnoid haemorrhage of 10.9% (range 0 - 49.8%). There were a total of 182 ruptures and 11 928 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.37), suggesting that the proportion of patients with prior SAH included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 45.6%), which is higher than across all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis. 
+
+
+#### Metaregression to explore size categorised at 5mm
+
+We can analyse whether there is a relationship between the proportion of patients with aneurysms measuring 5mm and less included in the study (the exploratory varable ), and the the outcome (rupture proportion). 
+
+The choice of this covariate is:
+
+* Pre-specified
+* Biologically plausible
+* Supported by published observational data
+* Relevant to physicians
+
+Since we are analysing at a study level, and we do not know the aneurysm characteristics of individual patients, this is an exploratory and hypothesis generating analysis. 
+
+
+```{r select 5 mm and less}
+
+sizedata5 <- filter(maindata, size == 5) 
+
+```
+
+
+```{r calculate total number of aneurysms for specific size criteria 5 mm and less}
+
+dat5 <- sizedata5 %>%
+  mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(pop = fct_collapse(sizedata5$country, 
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+         )
+```
+
+
+```{r metaregression data setup for size categorisation at 5 mm at study level - data setup}
+
+dat10.metareg <- dat10 %>%
+  rename(total_size10 = total_size) %>%
+  rename(rupt10 = rupt) %>%
+  select(auth_year, rupt10, total_size10)
+
+dat5.metareg <- dat5 %>%
+  slice(-12) %>%
+  rename(total_size5 = total_size) %>%
+  rename(rupt5 = rupt) %>%
+  select(auth_year, rupt5, total_size5)
+
+dat.size5.metareg <- left_join(dat5.metareg, dat10.metareg) %>%
+  mutate(prop_size5 = total_size5 / total_size10) %>%
+  select(auth_year, rupt10, total_size10, prop_size5) %>%
+  drop_na(prop_size5)
+
+
+
+
+```
+
+```{r metaregression for size categorised at 5 mm at study level - execution}
+
+size5.metareg = metaprop(rupt10, total_size10,
+                      data=dat.size5.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+size5mm.metareg.result <- metareg(size5.metareg, ~prop_size5)
+
+size5mm.metareg.result
+```
+
+
+```{r metaregression for 5mm category at study level, all studies - charachteristics}
+
+range(dat.size5.metareg$prop_size5) * 100
+
+mean(dat.size5.metareg$prop_size5) * 100
+
+sum(dat.size5.metareg$rupt10)
+
+sum(dat.size5.metareg$total_size10)
+  
+```
+
+
+```{r metaregression - option 2 - bubble plot - size categorised 5mm}
+
+bubble(size5mm.metareg.result, studlab=dat.size5.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for 5mm Aneurysm size")
+
+```
+ 
+Interpretation:
+
+The random effects metaregression included participants from 25 studies with a mean study level proportion of 5mm aneurysms of 77% (range 25 - 100%). There were a total of 174 ruptures and 11 044 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of patients with 5mm and less aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+
+
+#### Metaregression to explore proportion with multiple aneurysms
+
+
+```{r metaregression for multiplicity at study level, data setup}
+
+dat.multi.metareg <- dat %>%
+  slice(-12) %>%
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, rupt, total_size, prop_multi) %>%
+  drop_na(total_size) %>%
+  drop_na(prop_multi)
+
+```
+
+
+
+```{r metaregression for multiplicity at study level, all studies - execution}
+
+multi.metareg = metaprop(rupt, total_size,
+                      data=dat.multi.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+multi.metareg.result <- metareg(multi.metareg, ~prop_multi)
+multi.metareg.result
+```
+
+```{r metaregression for multiplicity at study level, all studies - charachteristics}
+
+range(dat.multi.metareg$prop_multi) * 100
+
+mean(dat.multi.metareg$prop_multi) * 100
+
+sum(dat.multi.metareg$rupt)
+
+sum(dat.multi.metareg$total_size)
+  
+```
+
+
+Interpretation:
+
+The random effects metaregression included participants from 20 studies with a mean study level proportion of aneurysm multiplicity of 27.5% (range 0 - 51.7%). There were a total of 169 ruptures and 10 799 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.55), suggesting that the proportion of patients with multiple aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 29.4%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+
+
+#### Metaregression to explore study length of follow up on rupture outcomes, including all studies
+
+```{r metaregression data setup for length of follow up, including all studies}
+
+dat.fu.metareg <- dat10 %>%
+  drop_na(fu) %>%
+  mutate(fu_year = fu/12) %>%
+  select(auth_year, rupt, total_size, fu_year)
+
+```
+
+
+```{r metaanalysis pf proporations for follow up metareg - option 2, including all studies}
+
+fu.metareg = metaprop(rupt, total_size,
+                      data=dat.fu.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+fu.metareg.result <- metareg(fu.metareg, ~fu_year)
+
+fu.metareg.result
+
+```
+
+
+```{r metaregression for fu at study level, all studies - charachteristics}
+
+range(dat.fu.metareg$fu_year) 
+
+mean(dat.fu.metareg$fu_year)
+
+sum(dat.fu.metareg$rupt)
+
+sum(dat.fu.metareg$total_size)
+
+```
+
+
+
+```{r metaregression - option 2 - bubble plot, including all studies}
+
+bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 10), main="Meta-regression plot for length of FU")
+
+```
+
+Interpretation:
+
+The random effects metaregression included participants from 27 studies with a mean study level follow up time of 3.6 years (range 1 - 8.3 years). There were a total of 186 ruptures and 12 380 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of mean study level follow up time was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38.1%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+
+
+#### Sub-group analysis based on study population - Japanese vs non-Japanese
+
+```{r meta-analysis of proportions using glmm by population}
+
+pes.summary.glmm.pop = metaprop(rupt, total_size,
+                            data=dat10,
+                            studlab=paste(auth_year),
+                            byvar = pop,
+                            bylab = "Population",
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.pop
+
+```
+
+
+
+```{r calculate mean FU of included studies from Japan}
+
+dat10 %>%
+  drop_na(fu) %>%
+  filter(pop == "Japanese") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+```{r calculate mean FU of included included studies from outside Japan}
+
+dat10 %>%
+  drop_na(fu) %>%
+  filter(pop == "Non-Japanese") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+```{r calculate mean age of included included studies from Japan}
+
+dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  filter(pop == "Japanese") %>%
+  drop_na(age) %>%
+  summarise(mean = mean(age, na.rm = TRUE)) 
+
+
+```
+
+
+```{r  mean age of included included studies from outside Japan}
+
+dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  filter(pop == "Non-Japanese") %>%
+  drop_na(age) %>%
+  summarise(mean = mean(age, na.rm = TRUE))
+
+```
+
+
+```{r forest for publication using GLMM for subgroup analysis by population, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm.pop,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap.left = "10mm",
+       colgap.forest.left = "10mm",
+       colgap.forest.right = "0mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       test.subgroup.random = TRUE,
+       label.test.effect.subgroup.random = TRUE,
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+
+The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (p = 0.002), suggesting that a Japanese source population was associated with a higher the rupture risk across the included trials. This is biologically plausible, and is concordant with other published literature with that demonstrates an unexplained higher incidence of aneurysmal subarachnoid haemorrhage from ruptured aneurysms in the Japanese population. 
+
+This covariate also explains some of the heterogeniety, with only mild heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 21.2%]. The overall covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group.
+
+This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher (1.9494 [1.6300; 2.3300]) over a shorter follow up period of 38 months, compared to the sub-group rupture risk in non-Japanese of 1.1656 [0.9346; 1.4528] over a mean study follow up period of 45 months. 
+
+However, there may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors such as prevalence of hypertention and smoking. 
+
+#### Meta-regression based on study type - retrospective compared to prospective
+
+
+```{r meta-analysis of proportions using glmm with prospective and retrospective subgroup analysis}
+
+pes.summary.glmm.type = metaprop(rupt, total_size,
+                            data=dat10,
+                            studlab=paste(auth_year),
+                            byvar = type,
+                            bylab = "Study Type",
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.type
+
+```
+
+```{r calculate mean FU of included prospective studies}
+
+dat %>%
+  drop_na(fu) %>%
+  filter(type == "prospective") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+```{r calculate mean FU of included retrospective studies}
+
+dat %>%
+  drop_na(fu) %>%
+  filter(type == "retrospective") %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+
+
+```{r forest for publication using GLMM for subgroup analysis by study type, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm.type,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap.left = "10mm",
+       colgap.forest.left = "10mm",
+       colgap.forest.right = "0mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       test.subgroup.random = TRUE,
+       label.test.effect.subgroup.random = TRUE,
+       text.addline1 = "Mean prospective study-level follow up: 62 months",
+       text.addline2 = "Mean retrospective study-level follow up: 47 months",
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+
+The test for subgroup differences (random effects model) indicates that there is no statistically significant subgroup effect (p = 0.22), suggesting that there was no difference in rupture risk between prospective and retrospective studies. In prospective studies, the point estimate was higher 1.5944 [1.1092; 2.2868] with wider confidence intervals over a longer time period of 62 months compared to retrospective studies with point estimate of rupture risk of 1.2286 [0.9571; 1.5759] over 47 months. Although retrospective studies may be at greater tisk of incomplete case follow up due to the case-fatality rate prior to hospital presentation, this sensitivity analysis demonstrates no clinically relevant differences in outcome. 
+
+This covariate does not explain the residual heterogeniety, with moderate heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 39.3%]. There is also some concern regarding the overall covariate distribution given majority of the rupture events are in the prospective cohort, with most rupture events occuring in 2 studies with a Japanese source population. In addition, there may be additional unknown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, but rather is an exploration of the sources of heterogeneity due to methodological differences. 
+
+#### Meta-regression based on mean age - as continuous variable
+
+```{r metaregression data setup for age as a continous variable, including all studies}
+
+dat.age.metareg <- dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  drop_na(age) %>%
+  select(auth_year, rupt, total_size, age)
+
+```
+
+```{r metaregression for age as a continous variable, including all studies}
+
+age.metareg = metaprop(rupt, total_size,
+                      data=dat.age.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+age.metareg.result <- metareg(age.metareg, ~age)
+
+age.metareg.result
+
+```
+
+
+```{r metaregression for age at study level, all studies - charachteristics}
+
+range(dat.age.metareg$age) 
+
+mean(dat.age.metareg$age)
+
+sd(dat.age.metareg$age)
+
+sum(dat.age.metareg$rupt)
+
+sum(dat.age.metareg$total_size)
+
+```
+
+```{r metaregression - option 2 - bubble plot, including all studies}
+
+bubble(age.metareg.result, studlab=dat.age.metareg$auth_year, xlim=c(40, 80), main="Meta-regression plot for mean age")
+
+```
+
+
+
+The random effects metaregression included participants from 29 studies with a mean study level patient age of 59.1 +/- 6.8 years (range 47.9 - 72.4 years). There were a total of 191 ruptures and 12 601 aneurysms in studies included in this metaregression analysis. The metaregression result was significant (p=0.005), suggesting that mean age was associated with the risk of rupture at the study level. There was no unexplained residual heterogeneity (I2 = 0%) indicating that this meta-regression analysis was informative in identifying sources of heterogeneity in the meta-analysis result. However, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+
+
+### Multivariable meta-regression
+
+In the previous scenarios we have considered the impact of a single study-level covariate on the outcome of rupture risk. Since apart from the Japanese source population, there are no other covariates with a univariable meta-regression p value of less than 0.1 and with lower residual heterogeniety than the overall pooled analysis, multivariable meta-regression was not performed. 
+
+
+#### Multivariable meta-regression exploring Japan and age
+
+```{r mv metaregression data setup for Japan and age as a continous variable, including all studies}
+
+dat.japan.age.metareg <- dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  drop_na(age) %>%
+  select(auth_year, rupt, total_size, age, pop)
+
+```
+
+```{r mv metaregression for pop + age as a continous variable, including all studies}
+
+japan.age.metareg = metaprop(rupt, total_size,
+                      data=dat.japan.age.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+japan.age.metareg.result1 <- metareg(japan.age.metareg, pop + age) 
+
+japan.age.metareg.result1
+
+```
+
+The previous random effects metaregression identified mean study age as a source of heterogeneity. This multivariate meta-regression model demonstrates that age is no longer associated with increased rupture risk when controlling for the source population from Japan. 
+
+
+```{r mv metaregression for pop * age as a continous variable, including all studies}
+
+japan.age.metareg.result2 <- metareg(japan.age.metareg, age * pop) 
+
+japan.age.metareg.result2
+
+```
+
+Here, we have examined source population and age with an interaction term. This reveals a statistically significant result with p value of 0.02. This means that there is an interaction between source population and age, and this increases the level of uncertainty in the results of the univariable analysis where source population from Japan and mean study age were associated with increased rupture risk. 
+
+
+### Sensitivity analysis 
+
+Sensitivity analysis is used to assess the robustness of the result, and helps strengthen or weaken the conclusions that can be drawn from the meta-analysis. Robustness of the result is the sensitivity of the overall result to various limitations of the data, assumptions, and statistical approaches. This helps answer the question - what if key inputs or assumptions were changed ?
+
+The goal of sensitivity analyses are to repeat the analyses by substituting alternative decisions. When sensitivity analyses show that the meta-analysis results are not altered by alternative decisions made during the systematic review or data synthesis, the results are considered more robust. Similarly, if sensitivity analyses show that the meta-analysis results are affected, then the overall results should be interpreted with caution, and could instead be considered to be hypothesis generating for additional research. 
+
+The difference between sensitivity analysis and subgroup analysis is that there is no assessment of the pooled effect in the removed studies, and there is no formal statistical procedure to compare the included or removed studies. Instead, there is an informal comparison by recalculating the pooled effect size.
+
+Sensitivity analysis to consider are determined by the meta-analyst. General aptions to consider include including or excluding additional studies based on search strategy, inclusion criteria, study level charachteristics (clinical or methodological), handling of outliers, handling of missing data, statistical procedures, and / or outcome measures.   
+
+The following sensitivity analysis will be perfomed. 
+
+1. Pre-specified sensitivity analysis to consider decision to stratify size criteria at 10 mm or less compared to 7 mm and less
+2. Pre-specified sensitivity analysis to consider decision to stratify size criteria at 10 mm or less compared to 5 mm and less
+3. Post hoc sensitivity analysis to consider the decision to exclude outlier studies. 
+4. Post hoc sensitivity analysis to consider the decision to handle missing data with the last observation carry forward method compared to analysis with only complete case data.
+5. Post hoc sensitivity analysis to consider the decision of excluding 1 study at a time to determine the impact on the pooled rupture risk estimate. 
+
+
+### Sensitivity analysis - consider decision to utilise 10 mm and less or 7 mm and less for aneurysm size categories
+
+```{r select 7 mm and less}
+
+sizedata7 <- filter(maindata, size == 7) 
+
+```
+
+
+```{r calculate total number of aneurysms for specific size criteria 7 mm and less}
+
+dat7 <- sizedata7 %>%
+  mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(pop = fct_collapse(sizedata7$country,
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+         )
+
+```
+
+
+#### Meta-analysis of proportions of 7 mm aneurysms and less using GLMM and Wilson CIs
+  
+
+```{r meta-analysis of proportions using glmm for 7mm}
+
+dat7 <- dat7 %>%
+  slice(-12) %>%
+  drop_na(total_size) %>%
+  drop_na(rupt)
+
+pes.summary.glmm7 = metaprop(rupt, total_size,
+                            data=dat7,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm7
+
+```
+
+
+
+```{r calculate mean FU of included studies of 7 mm and less}
+
+dat7 %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+#### Publication quality forest plots for 7mm and less 
+
+```{r forest for publication for 7 mm using GLMM, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm7,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture per 100 aneurysms",
+       pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 42 months",
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+
+
+Main result summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months 
+
+Sensitivity analysis performed with aneurysms measuring 7 mm and less have a pooled rupture risk estimate of 1.0580 [0.7710; 1.4503] over 42 months, with I^2 = 37.5%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%.  
+
+
+### Sensitivity analysis - consider decision to utilise 10 mm and less or 5 mm and less for aneurysm size categories
+
+
+```{r meta-analysis of proportions using glmm for 5 mm}
+
+dat5 <- dat5 %>%
+  slice(-12) %>%
+  drop_na(total_size) %>%
+  drop_na(rupt)
+
+pes.summary.glmm5 = metaprop(rupt, total_size,
+                            data=dat5,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm5
+
+```
+
+
+
+```{r calculate mean FU of included studies of 5 mm and less}
+
+dat5 %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+#### Publication quality forest plots for 5mm and less 
+
+```{r forest for publication using GLMM for 5 mm, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm5,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture per 100 aneurysms",
+       pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 42 months",
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+Main result summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months . 
+
+Sensitivity analysis performed with aneurysms measuring 5 mm and less have a pooled rupture risk estimate of 1.0624 [0.8427; 1.3385] over 42 months, with I^2 = 0%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%. 
+
+
+#### Sensitivity analysis - consider decision to exclude outlier studies
+
+Juvela et al was identified as an outlier, with this study contributing the most to statistical heterogeneity and influencing the result. 
+
+We can perform a sensitivity analysis including all studies identified, and informally compare by recalculating the pooled effect size.
+
+This has been done above, and is repeated for completeness below. 
+
+```{r sensitivity analysis - including Juvela }
+
+pes.summary.glmm.all
+
+```
+
+
+The pooled rupture risk changes with Juvela et al is 1.2112 [0.7844; 1.8659] 
+
+The pooled rupture risk without Juvela et al is 1.2992 [0.9974; 1.6908] 
+
+The impact of including Juvela et al is to reduce the precision of the summary estimate with wider confidence intervals. The inconsistency in the result increases from I2 of 37% to 82% making the result less generalisable. Regardless from a clinical perspective, this sensitivity analysis does not alter the overall impact, since the pooled rupture risk remains within 1-2%.  
+
+#### Sensitivity analysis - consider handling of missing data
+
+Missing data was handled with imputation using the last observation carry forward method. This decision can also lead to biased estimates, particularly a downward bias in the rupture risk given that it is generally considered that larger sized aneurysms are considered at higher risk for rupture. We can compare our decision to carry forward the number of rupture and number of aneurysms by examining only complete case data.
+
+```{r sensitivity analysis - consider handling of missing data, only include cases where number of 5 mm aneurysms were not carried forward to 10 mm and less}
+
+dat.5locf.sens <- left_join(dat5.metareg, dat10.metareg) %>%
+  filter(total_size5 != total_size10) 
+
+pes.summary.5locf = metaprop(rupt10, total_size10,
+                            data=dat.5locf.sens,
+                            studlab=paste(auth_year),
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.5locf
+
+```
+
+
+
+Main result summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months 
+
+Sensitivity analysis performed without carrying forward number of aneurysms measuring 5 mm and less to the 10 mm and less category, (ie including those with more complete case data for 10 mm and less aneurysms) has a pooled rupture risk estimate of 1.4412 [1.0706; 1.9376], with I^2 = 30%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%. 
+
+#### Sensitivity analysis - consider leave-1-out on effect size
+
+```{r sensitivity analysis - consider leave-1-out on effect size}
+
+plot(inf.analysis, "es")
+
+```
+
+Here there is no clinically relevant change in the pooled rupture risk estimate - the 95% CIs remain within 1-2%. 
+
+#### Sensitivity analysis - consider distributional assumptions
+
+While we have considered that the distribution for statistical analysis is binomial, aneurysm rupture over time is not a true binomial distribution, but in fact a Wallenius type noncentral hypergeometric distribution. 
+
+The hypergeometric distribution is best explained by sampling coloured balls in an urn. Hypergeometric distribution is sampling without replacement compared to a binomial distribution where there is sampling with replacement. If the balls are of different weight or size, ie one has a greater chance of being chosen, this is a noncentral hypergeometric distribution. Wallenius type is the biased urn model, where balls are taken out 1 by 1. 
+
+For large samples with a common outcome, the binomial distribution is a reasonable estimate. However, aneurysms rupture 1 by 1 over time, and have features that make them more prone to rupure ie heavier weighted ball, thus each rupture outcome without replacement influences the probability of rupture in the remaining sample population. Thus the non central hyperegeometric distribution is required. 
+
+*****
+Necessary?
+*****
+
+### Sensitivity analysis that includes risk of bias 
+
+Quality assessment was performed using the Newastle Ottowa Scale as recommended by Cochrane; this is also the most commonly utilised for observational studies. 
+
+This can be converted to the The Agency for Healthcare Research and Quality within the United States Department of Health and Human Services (AHRQ) standards using the following thresholds. 
+
+Good quality: 
+3 or 4 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
+
+Fair quality: 
+2 stars in selection domain AND 1 or 2 stars in comparability domain AND 2 or 3 stars in outcome/exposure domain
+
+Poor quality: 
+0 or 1 star in selection domain OR 0 stars in comparability domain OR 0 or 1 stars in outcome/exposure domain
+
+
+```{r sensitivity analyis - good quality studies only 10mm and less - data setup}
+
+dat.sens.nos <- sizedata10 %>%
+  slice(-12)%>%
+  filter(nos_select == 3 | nos_select == 4 ) %>%
+  filter(nos_compare == 1 | nos_compare == 2) %>%
+  filter(nos_outcome == 2 | nos_outcome == 3) %>%
+  mutate(ahrq = "Good")
+
+dat.sens.nos <- dat.sens.nos %>%
+  mutate(total_size = coalesce(num_anr,num)) %>%
+  drop_na(total_size) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  select(auth_year, fu, rupt, total_size)
+
+```
+
+
+```{r good quality studies only 10mm and less - data setup - implementation}
+
+pes.sens.nos = metaprop(rupt, total_size,
+                        data=dat.sens.nos,
+                        studlab=paste(auth_year),
+                        method="GLMM",
+                        sm="PLOGIT",
+                        method.tau = "ML", 
+                        method.ci = "WS",
+                        pscale = 100
+                        ) 
+pes.sens.nos
+
+```
+
+
+```{r calculate mean FU of good quality studies }
+
+dat.sens.nos %>%
+  drop_na(fu) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+
+
+```
+
+
+```{r forest for publication using GLMM for good quality, fig.height= 10, fig.width = 10}
+
+forest(pes.sens.nos,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture per 100 aneurysms",
+       pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 68 months",
+       JAMA.pval = TRUE,
+       ) 
+
+```
+
+
+Here we can see the point estimate and the confidence intervals varies from 
+
+Good Quality studies  1.8007 [1.5379; 2.1075] over 68 months 
+All studies           1.2992 [0.9974; 1.6908] over 43 months. 
+
+Sensitivity analysis performed by including good quality studies only has a pooled rupture risk estimate of 1.8534 [1.5697; 2.1872] over 68 months, with I^2 = 0%. This could be considered robust given the inclusion of 152 rupture events across a total of 8441 aneurysms. Regardless from a clinical perspective, the pooled ruture risk remains approximately 1-2%. 
+
+
+
+#### Non-reporting bias
+
+Non reporting bias leads to bias in the meta-analysis due to missing results. Studies with higher effect sizes are more likely to be published than those with lower effects. These missing studies are not reported, are not identified and not integrated into the meta-analysis. This leads to non-reporting bias which meaning that the calculated effect size might be higher, and the true effect size lower since studies with lower effects were not reported. In addition, there may be bias in the selection of the reported result where study authors choose a particular result for reporting amongst many potential results. 
+
+Thus when assessing for non-reporting bias, conventional assessment is focused on identifying whether small studies with small effect sizes are missing or not. This can be performed using a funnel plot. 
+
+```{r funnel plots}
+
+funnel(pes.summary.glmm)
+
+```
+
+```{r 2}
+
+eggers.test(pes.summary.glmm)
+
+```
+
+
+
+There are many possible sources of funnel plot assymetry
+
+1. Non reporting bias - bias from small studies that are not published, and selective outcome reporting bias within studies
+2. Small study effects from poor methodological quality leading to spuriously elevated effecs in small studies
+3. True heterogeniety, statistical modeling artefacts and chance. 
+
+In general, testing for funnel plot assymetry should always be performed in the context of visual assessment, and while there are many potential statistical tests for funnel plots including Egger 1997, Harbord 2006, Peters 2006 or Rücker 2008, even Cochrane suggests that tests for funnel plot asymmetry should be used in only a minority of meta-analyses (Ioannidis 2007b).
+
+Interpretation:
+
+Visual inspection of the funnel plot reveals asymmetry, likely due to non-reporting bias, small study effects, and clincial and methodogical heterogeneity.   
+
+### Small study effects 
+
+Small study effects can be assessed with additional sensitivity analysis considering the random vs fixed effect model. In the setting of heterogeneity, the random effects estimate is biased towards the results of the smaller studies. We can investigate if small study effects cause a clinically relevant change in the point estimate and CIs.
+
+From the main study plot we see that the outcome from fixed vs random assumption.
+
+Fixed effect model   1.5475 [1.3390; 1.7879]
+Random effects model 1.2625 [0.9445; 1.6858]
+
+Since these estimates are similar, with little clinically relevant difference, this sensitivity analysis shows that small-study effects have little effect on the rupture risk estimate. 
+
+### Limitations
+
+Non-reporting bias due to inclusion of results from published literature only;  However we did include results from multiple electronic databases and the Cochrane Trials register. 
+
+Risk of bias from studies included in the systematic review given that grey literature, and non-english language studies were excluded. While in general there are no major differences in meta-analytic estimates when restricted to English-language studies compared with those that include non-English studies (Morrison et al 2012, Dechartres et al 2018)7.2.3.2 ., there is a risk of bias given the significant sub-group result in the Japanese population. 
+
+Risk of bias from data synthesis due to non-reporting bias from selective reporting within individual studies, and potential lack of publication of smaller studies without rupture events. Further more single imputation methods for last observation carry forward may have led to down-ward biased rupture risk estimates and under-estimation of the true variability. 
+
+The associations derived from these meta-regressions are observational. Since they have not been derived from randmised comparison, they cannot be considered causal, and instead are hypothesis generating. Proportions of patient characteristics have been derived from each study, and utilised as covariates in the meta-regression. This is particularly important when considering categorical factors such as source population. Meta-regression relates to the change in the rupture risk estimate to the change in the proportion of Japanese populations included. This does not apply to the individual patient, and differences in risk estimate may be confounded with unmeasured factors such as prevalence of hypertention and smoking. 
+
+Meta-regression may fail to capture within-study treatment variation across a covariate because some of the between-study averages, such as mean age, have little variation. In addition, not all studies reported all relevant covariates. This can introduce additional bias if information related to a relevant interaction is reported, while factors not considered relevant are not reported. 
+
+In addition, aggregate study-level data meta-regression may fail to identify clinically relevant associations that may could be identified by analysis of patient-level data. *Berlin et al Statist. Med. 2002* However, this is not always the case, and if the same studies are included, study-level analysis and patient-level analysis may produce the same result and is considered more cost-efficient * Olkin et al Biometrics 1998 * In this meta-analysis, thre is moderate heterogeniety in pooled rupture risk, and covariates selected such the study proportion with exposure to prior subarachnoid haemorrhage and aneuerysm size varied across the studies by methodological design. These increase the ability to explore associations by study-level covariates. Moreover, limitations of using aggregate study-level data has been minimised by including 29 trials, 181 rupture events, and >11 000 aneurysms. Furthermore, we considered only one potential covariate at a time, and inclued this in a random effects meta-regression analysis recognising that there will be residual heterogeneity. Regardless, to consider additional detailed sub-group analysis to provide more nuanced risk estimates for additional clinical and radiological factors such as smoking status and anatomcal location, will require additional meta-analysis of patient-level data. 
+
+The lack of availability of such individual patient data for pooling remains a large barrier for advancing knowledge of rupture risk for the individual patient. Initiatives such as the NINDS common data elements, and perhaps requiring all publically funded datasets to become available in a central repository, in the future will help unlock the ability to perform more personalised management for patients who discover that they harbour an unruptured cerebral aneurysm.
+
+
+### Study conclusions
+
+The risk estimate for rupture of SUIAs managed with surveillance is between 1-2% over the next 3-4 years. This is a robust risk estimate, and should be considered when counselling patients between active surveillance or prophylactic treatment of SUIAs.  
+
+
+
+### Baseline study characteristics
+
+```{r  10 mm size}
+sizedata10 <- sizedata10 %>%
+  mutate(fu_tot = coalesce(fu_mean_tot,fu_med_tot),
+         prop_psah = psah_tot / num_tot,
+         mid_year = start + (end - start)/2
+         )
+
+sizedata10 %>%
+  filter(country == "Japan" | country == "United States" | country == "International") %>%
+  filter(type == "prospective")
+
+sizedata10 %>%
+  filter(pub<2010)
+
+sum(sizedata10$num_tot, na.rm = TRUE)
+
+fem10 <- sizedata10 %>%
+  drop_na(fem_tot)
+sum(fem10$num_tot, na.rm = TRUE)
+sum(fem10$fem_tot, na.rm = TRUE)
+
+mean(sizedata10$age_mean, na.rm = TRUE)
+median(sizedata10$age_med, na.rm = TRUE)
+
+mean(sizedata10$fu_tot, na.rm = TRUE)
+min(sizedata10$fu_tot, na.rm = TRUE)
+max(sizedata10$fu_tot, na.rm = TRUE)
+
+mean(sizedata10$prop_psah, na.rm = TRUE)
+min(sizedata10$prop_psah, na.rm = TRUE)
+max(sizedata10$prop_psah, na.rm = TRUE)
+
+sizedata10.juvela <- sizedata10 %>%
+  slice(-12)
+
+mean(sizedata10.juvela$prop_psah, na.rm = TRUE)
+min(sizedata10.juvela$prop_psah, na.rm = TRUE)
+max(sizedata10.juvela$prop_psah, na.rm = TRUE)
+
+mean(sizedata10.juvela$fu_tot, na.rm = TRUE)
+min(sizedata10.juvela$fu_tot, na.rm = TRUE)
+max(sizedata10.juvela$fu_tot, na.rm = TRUE)
+
+
+
+median(sizedata10$mid_year, na.rm = TRUE)
+min(sizedata10$mid_year, na.rm = TRUE)
+max(sizedata10$mid_year, na.rm = TRUE)
+
+median(sizedata10.juvela$mid_year, na.rm = TRUE)
+sizedata10.juvela %>%
+  filter(start<1978)
+
+
+
+
+```
+
+
+
