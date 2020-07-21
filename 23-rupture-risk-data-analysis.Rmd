@@ -919,6 +919,28 @@ dat10 %>%
 ```
 
 
+```{r calculate mean age of included included studies from Japan}
+
+dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  filter(pop == "Japanese") %>%
+  drop_na(age) %>%
+  summarise(mean = mean(age, na.rm = TRUE)) 
+
+
+```
+
+
+```{r  mean age of included included studies from outside Japan}
+
+dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  filter(pop == "Non-Japanese") %>%
+  drop_na(age) %>%
+  summarise(mean = mean(age, na.rm = TRUE))
+
+```
+
 
 ```{r forest for publication using GLMM for subgroup analysis by population, fig.height= 10, fig.width = 10}
 
@@ -1026,9 +1048,108 @@ The test for subgroup differences (random effects model) indicates that there is
 
 This covariate does not explain the residual heterogeniety, with moderate heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 39.3%]. There is also some concern regarding the overall covariate distribution given majority of the rupture events are in the prospective cohort, with most rupture events occuring in 2 studies with a Japanese source population. In addition, there may be additional unknown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, but rather is an exploration of the sources of heterogeneity due to methodological differences. 
 
+#### Meta-regression based on mean age - as continuous variable
+
+```{r metaregression data setup for age as a continous variable, including all studies}
+
+dat.age.metareg <- dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  drop_na(age) %>%
+  select(auth_year, rupt, total_size, age)
+
+```
+
+```{r metaregression for age as a continous variable, including all studies}
+
+age.metareg = metaprop(rupt, total_size,
+                      data=dat.age.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+age.metareg.result <- metareg(age.metareg, ~age)
+
+age.metareg.result
+
+```
+
+
+```{r metaregression for age at study level, all studies - charachteristics}
+
+range(dat.age.metareg$age) 
+
+mean(dat.age.metareg$age)
+
+sd(dat.age.metareg$age)
+
+sum(dat.age.metareg$rupt)
+
+sum(dat.age.metareg$total_size)
+
+```
+
+```{r metaregression - option 2 - bubble plot, including all studies}
+
+bubble(age.metareg.result, studlab=dat.age.metareg$auth_year, xlim=c(40, 80), main="Meta-regression plot for mean age")
+
+```
+
+
+
+The random effects metaregression included participants from 29 studies with a mean study level patient age of 59.1 +/- 6.8 years (range 47.9 - 72.4 years). There were a total of 191 ruptures and 12 601 aneurysms in studies included in this metaregression analysis. The metaregression result was significant (p=0.005), suggesting that mean age was associated with the risk of rupture at the study level. There was no unexplained residual heterogeneity (I2 = 0%) indicating that this meta-regression analysis was informative in identifying sources of heterogeneity in the meta-analysis result. However, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+
+
 ### Multivariable meta-regression
 
 In the previous scenarios we have considered the impact of a single study-level covariate on the outcome of rupture risk. Since apart from the Japanese source population, there are no other covariates with a univariable meta-regression p value of less than 0.1 and with lower residual heterogeniety than the overall pooled analysis, multivariable meta-regression was not performed. 
+
+
+#### Multivariable meta-regression exploring Japan and age
+
+```{r mv metaregression data setup for Japan and age as a continous variable, including all studies}
+
+dat.japan.age.metareg <- dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  drop_na(age) %>%
+  select(auth_year, rupt, total_size, age, pop)
+
+```
+
+```{r mv metaregression for pop + age as a continous variable, including all studies}
+
+japan.age.metareg = metaprop(rupt, total_size,
+                      data=dat.japan.age.metareg,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+japan.age.metareg.result1 <- metareg(japan.age.metareg, pop + age) 
+
+japan.age.metareg.result1
+
+```
+
+The previous random effects metaregression identified mean study age as a source of heterogeneity. This multivariate meta-regression model demonstrates that age is no longer associated with increased rupture risk when controlling for the source population from Japan. 
+
+
+```{r mv metaregression for pop * age as a continous variable, including all studies}
+
+japan.age.metareg.result2 <- metareg(japan.age.metareg, age * pop) 
+
+japan.age.metareg.result2
+
+```
+
+Here, we have examined source population and age with an interaction term. This reveals a statistically significant result with p value of 0.02. This means that there is an interaction between source population and age, and this increases the level of uncertainty in the results of the univariable analysis where source population from Japan and mean study age were associated with increased rupture risk. 
+
 
 ### Sensitivity analysis 
 
@@ -1491,6 +1612,8 @@ max(sizedata10$mid_year, na.rm = TRUE)
 median(sizedata10.juvela$mid_year, na.rm = TRUE)
 sizedata10.juvela %>%
   filter(start<1978)
+
+
 
 
 ```
