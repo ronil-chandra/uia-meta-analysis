@@ -941,6 +941,37 @@ dat10 %>%
 
 ```
 
+```{r  mean diff in age of included included studies from Japan or not}
+
+dat.age.diff <- dat10 %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  drop_na(age) %>%
+  select(pop, age)
+
+t.test(age ~ pop, data = dat.age.diff)
+
+```
+
+
+```{r metaregression japanese population}
+
+pop.metareg = metaprop(rupt, total_size,
+                      data=dat10,
+                      studlab=paste(auth_year),
+                      method="GLMM",
+                      sm="PLOGIT",
+                      method.tau = "ML", 
+                      method.ci = "WS",
+                      pscale = 100
+                      )
+
+pop.metareg.result <- metareg(pop.metareg, ~pop)
+
+pop.metareg.result
+
+```
+
+
 
 ```{r forest for publication using GLMM for subgroup analysis by population, fig.height= 10, fig.width = 10}
 
@@ -1114,12 +1145,12 @@ In the previous scenarios we have considered the impact of a single study-level 
 
 dat.japan.age.metareg <- dat10 %>%
   mutate(age = coalesce(age_mean, age_med)) %>%
-  drop_na(age) %>%
-  select(auth_year, rupt, total_size, age, pop)
+  select(auth_year, rupt, total_size, age, pop, fu, type)
 
 ```
 
-```{r mv metaregression for pop + age as a continous variable, including all studies}
+
+```{r mv metaregression for pop as a continous variable, including all studies}
 
 japan.age.metareg = metaprop(rupt, total_size,
                       data=dat.japan.age.metareg,
@@ -1131,20 +1162,55 @@ japan.age.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-japan.age.metareg.result1 <- metareg(japan.age.metareg, pop + age) 
+japan.age.metareg.result1 <- metareg(japan.age.metareg, pop) 
 
 japan.age.metareg.result1
 
+
 ```
+
+```{r mv metaregression for pop + age as a continous variable, including all studies }
+
+japan.age.metareg.result2 <- metareg(japan.age.metareg, pop + age) 
+
+japan.age.metareg.result2
+
+```
+
+
+```{r mv metaregression for pop + fu as a continous variable, including all studies}
+
+japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + fu) 
+
+japan.age.metareg.result3
+
+```
+
+
+```{r mv metaregression for pop + fu as a continous variable, including all studies}
+
+japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + type) 
+
+japan.age.metareg.result3
+```
+
+
+
 
 The previous random effects metaregression identified mean study age as a source of heterogeneity. This multivariate meta-regression model demonstrates that age is no longer associated with increased rupture risk when controlling for the source population from Japan. 
 
 
 ```{r mv metaregression for pop * age as a continous variable, including all studies}
 
-japan.age.metareg.result2 <- metareg(japan.age.metareg, age * pop) 
+japan.age.metareg.result2 <- metareg(japan.age.metareg, pop * age)
 
 japan.age.metareg.result2
+
+```
+
+```{r metaregression mv - option 2 - bubble plot, including all studies}
+
+bubble(japan.age.metareg.result2, studlab=dat.japan.age.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for mean age")
 
 ```
 
