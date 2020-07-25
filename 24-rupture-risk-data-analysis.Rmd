@@ -235,10 +235,15 @@ dat <- sizedata10 %>%
          psah_size = round(size_psah_temp, 0),
          ) %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  mutate(age_cat = case_when (
+    age < 60 ~ "Age < 60 years",
+    age == 60 | age > 60 ~ "Age 60 years or more"
+    )) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
                             "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")) 
          )
         
 ```
@@ -876,6 +881,41 @@ bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 10), main=
 Interpretation:
 
 The random effects metaregression included participants from 27 studies with a mean study level follow up time of 3.6 years (range 1 - 8.3 years). There were a total of 186 ruptures and 12 380 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of mean study level follow up time was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38.1%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+
+#### Sub-group analysis based on study age - Age < 60 vs Age 60 or greater 
+
+```{r meta-analysis of proportions using glmm by population}
+
+dat10 <- dat10 %>%
+  drop_na(age_cat)
+
+pes.summary.glmm.pop = metaprop(rupt, total_size,
+                            data=dat10,
+                            studlab=paste(auth_year),
+                            byvar = age_cat,
+                            bylab = "Population",
+                            method="GLMM",
+                            sm="PLOGIT",
+                            method.tau = "ML", 
+                            method.ci = "WS",
+                            pscale = 100
+                            ) 
+pes.summary.glmm.pop
+
+```
+
+
+
+```{r calculate mean FU of included studies re age categorised at 60}
+
+dat10 %>%
+  drop_na(age_cat) %>%
+  summarise(mean = mean(fu, na.rm = TRUE))
+
+```
+
+
+
 
 
 #### Sub-group analysis based on study population - Japanese vs non-Japanese
