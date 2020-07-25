@@ -420,7 +420,7 @@ A common method to identify influential studies is the leave-1-out method, where
 
 ```{r influence analysis - execution}
 
-inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm.all, 
+inf.analysis.all <- InfluenceAnalysis(x = pes.summary.glmm.all, 
                                   random = TRUE,
                                   subplot.heights = c(30,18),
                                   subplot.widths = c(30,30),
@@ -431,7 +431,7 @@ inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm.all,
 
 ```{r influence analysis - review}
 
-summary(inf.analysis)
+summary(inf.analysis.all)
 
 ```
 
@@ -439,7 +439,7 @@ summary(inf.analysis)
 
 ```{r influence analysis - plot Baujat Plots}
 
-plot(inf.analysis, "baujat")
+plot(inf.analysis.all, "baujat")
 
 ```
 
@@ -450,7 +450,7 @@ Here Juvela et al is identified as both a high contributor to heterogeneity, and
 
 ```{r influence analysis - plot influence characteristics}
 
-plot(inf.analysis, "influence")
+plot(inf.analysis.all, "influence")
 
 ```
 
@@ -459,7 +459,7 @@ We can also perform additional plots to assess influence of each study. These pl
 
 ```{r influence analysis - Forest Plot for the Leave-One-Out Analysis, sorted by 𝐼2}
 
-plot(inf.analysis, "i2")
+plot(inf.analysis.all, "i2")
 
 ```
 
@@ -1177,6 +1177,14 @@ japan.age.metareg.result2
 
 ```
 
+```{r mv metaregression for age + pop , including all studies }
+
+japan.age.metareg.result5 <- metareg(japan.age.metareg, age + pop) 
+
+japan.age.metareg.result5
+
+```
+
 
 ```{r mv metaregression for pop + fu as a continous variable, including all studies}
 
@@ -1202,7 +1210,7 @@ The previous random effects metaregression identified mean study age as a source
 
 ```{r mv metaregression for pop * age as a continous variable, including all studies}
 
-japan.age.metareg.result2 <- metareg(japan.age.metareg, pop * age)
+japan.age.metareg.result2 <- metareg(japan.age.metareg, age * pop)
 
 japan.age.metareg.result2
 
@@ -1438,6 +1446,32 @@ pes.summary.5locf
 
 ```
 
+`
+
+```{r forest for publication for sensitivity LOCF using GLMM, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.5locf,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture per 100 aneurysms",
+       pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 51 months",
+       JAMA.pval = TRUE,
+       ) 
+```
+
+
+
+
+
 
 
 Main result summary estimate is 1.2992 [0.9974; 1.6908] with I2 of 37.3% over study level mean of 43 months 
@@ -1446,10 +1480,26 @@ Sensitivity analysis performed without carrying forward number of aneurysms meas
 
 #### Sensitivity analysis - consider leave-1-out on effect size
 
-```{r sensitivity analysis - consider leave-1-out on effect size}
+
+```{r sensitivity analysis - consider leave-1-out on effect size - final studies}
+
+
+inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm, 
+                                  random = TRUE,
+                                  subplot.heights = c(30,18),
+                                  subplot.widths = c(30,30),
+                                  forest.lims = c(0,0.03))
+
+```
+
+```{r sensitivity analysis - plot leave-1-out on effect size - final studies}
 
 plot(inf.analysis, "es")
+```
 
+```{r sensitivity analysis - plot leave-1-out on effect size - final studies}
+
+plot(inf.analysis, "i2")
 ```
 
 Here there is no clinically relevant change in the pooled rupture risk estimate - the 95% CIs remain within 1-2%. 
