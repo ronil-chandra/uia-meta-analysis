@@ -635,8 +635,10 @@ psah.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-psah.metareg.result <- metareg(psah.metareg, ~prop_psah)
+psah.metareg.result <- metareg(psah.metareg, ~prop_psah, hakn = TRUE)
+
 psah.metareg.result
+
 ```
 
 ```{r metaregression for prior SAH at study level, all studies - charachteristics}
@@ -747,7 +749,7 @@ size5.metareg = metaprop(rupt10, total_size10,
                       pscale = 100
                       )
 
-size5mm.metareg.result <- metareg(size5.metareg, ~prop_size5)
+size5mm.metareg.result <- metareg(size5.metareg, ~prop_size5, hakn = TRUE)
 
 size5mm.metareg.result
 ```
@@ -805,7 +807,8 @@ multi.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-multi.metareg.result <- metareg(multi.metareg, ~prop_multi)
+multi.metareg.result <- metareg(multi.metareg, ~prop_multi, hakn = TRUE)
+
 multi.metareg.result
 ```
 
@@ -851,7 +854,7 @@ fu.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-fu.metareg.result <- metareg(fu.metareg, ~fu_year)
+fu.metareg.result <- metareg(fu.metareg, ~fu_year, hakn = TRUE)
 
 fu.metareg.result
 
@@ -1005,7 +1008,7 @@ pop.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-pop.metareg.result <- metareg(pop.metareg, ~pop)
+pop.metareg.result <- metareg(pop.metareg, ~pop, hakn = TRUE)
 
 pop.metareg.result
 
@@ -1142,7 +1145,7 @@ age.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-age.metareg.result <- metareg(age.metareg, ~age)
+age.metareg.result <- metareg(age.metareg, ~age, hakn = TRUE)
 
 age.metareg.result
 
@@ -1202,7 +1205,7 @@ japan.age.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-japan.age.metareg.result1 <- metareg(japan.age.metareg, pop) 
+japan.age.metareg.result1 <- metareg(japan.age.metareg, pop, hakn = TRUE) 
 
 japan.age.metareg.result1
 
@@ -1211,7 +1214,7 @@ japan.age.metareg.result1
 
 ```{r mv metaregression for pop + age as a continous variable, including all studies }
 
-japan.age.metareg.result2 <- metareg(japan.age.metareg, pop + age) 
+japan.age.metareg.result2 <- metareg(japan.age.metareg, pop + age, hakn = TRUE) 
 
 japan.age.metareg.result2
 
@@ -1219,7 +1222,7 @@ japan.age.metareg.result2
 
 ```{r mv metaregression for age + pop , including all studies }
 
-japan.age.metareg.result5 <- metareg(japan.age.metareg, age + pop) 
+japan.age.metareg.result5 <- metareg(japan.age.metareg, age + pop, hakn = TRUE) 
 
 japan.age.metareg.result5
 
@@ -1228,7 +1231,7 @@ japan.age.metareg.result5
 
 ```{r mv metaregression for pop + fu as a continous variable, including all studies}
 
-japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + fu) 
+japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + fu), hakn = TRUE 
 
 japan.age.metareg.result3
 
@@ -1237,7 +1240,7 @@ japan.age.metareg.result3
 
 ```{r mv metaregression for pop + fu as a continous variable, including all studies}
 
-japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + type) 
+japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + type), hakn = TRUE 
 
 japan.age.metareg.result3
 ```
@@ -1250,7 +1253,7 @@ The previous random effects metaregression identified mean study age as a source
 
 ```{r mv metaregression for pop * age as a continous variable, including all studies}
 
-japan.age.metareg.result2 <- metareg(japan.age.metareg, age * pop)
+japan.age.metareg.result2 <- metareg(japan.age.metareg, age * pop), hakn = TRUE
 
 japan.age.metareg.result2
 
