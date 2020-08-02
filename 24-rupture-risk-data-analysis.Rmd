@@ -237,8 +237,8 @@ dat <- sizedata10 %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
   mutate(age = coalesce(age_mean, age_med)) %>%
   mutate(age_cat = case_when (
-    age < 60 ~ "Age < 60 years",
-    age == 60 | age > 60 ~ "Age 60 years or more"
+    age == 65 | age < 65 ~ "Age 65 years or less",
+    age > 65 ~ "Age > 65 years or more"
     )) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
@@ -901,7 +901,8 @@ pes.summary.glmm.pop = metaprop(rupt, total_size,
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
-                            pscale = 100
+                            pscale = 100,
+                            hakn = TRUE,
                             ) 
 pes.summary.glmm.pop
 
@@ -934,7 +935,8 @@ pes.summary.glmm.pop = metaprop(rupt, total_size,
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
-                            pscale = 100
+                            pscale = 100,
+                            hakn = TRUE,
                             ) 
 pes.summary.glmm.pop
 
@@ -1231,7 +1233,7 @@ japan.age.metareg.result5
 
 ```{r mv metaregression for pop + fu as a continous variable, including all studies}
 
-japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + fu), hakn = TRUE 
+japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + fu, hakn = TRUE) 
 
 japan.age.metareg.result3
 
@@ -1240,7 +1242,7 @@ japan.age.metareg.result3
 
 ```{r mv metaregression for pop + fu as a continous variable, including all studies}
 
-japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + type), hakn = TRUE 
+japan.age.metareg.result3 <- metareg(japan.age.metareg, pop + type, hakn = TRUE) 
 
 japan.age.metareg.result3
 ```
@@ -1253,7 +1255,7 @@ The previous random effects metaregression identified mean study age as a source
 
 ```{r mv metaregression for pop * age as a continous variable, including all studies}
 
-japan.age.metareg.result2 <- metareg(japan.age.metareg, age * pop), hakn = TRUE
+japan.age.metareg.result2 <- metareg(japan.age.metareg, age * pop, hakn = TRUE)
 
 japan.age.metareg.result2
 
