@@ -278,7 +278,7 @@ pes.summary.glmm.all
 
 dat.all %>%
   drop_na(fu) %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
 
@@ -309,7 +309,7 @@ forest(pes.summary.glmm.all,
        xlim=c(0,10),
        xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
-       text.addline1 = "Mean study-level follow up: 51 months",
+       text.addline1 = "Mean study-level follow up: 4.2 years",
        JAMA.pval = TRUE,
        ) 
 
@@ -513,7 +513,7 @@ pes.summary.glmm
 
 dat10 %>%
   drop_na(fu) %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
 
@@ -541,7 +541,7 @@ forest(pes.summary.glmm,
        xlim=c(0,10),
        xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
-       text.addline1 = "Mean study-level follow up: 43 months",
+       text.addline1 = "Mean study-level follow up: 3.6 years",
        JAMA.pval = TRUE,
        ) 
 
@@ -597,6 +597,8 @@ In our study, we have pre-specified further data analysis with regard to exposur
 4. Post hoc metagression to consider whether duration of follow up in the studies analysed as a continuous variable was an important source of heterogeneity. 
 
 5. Post hoc meta-regression to to consider whether study source population from Japan vs non-Japanese popultions analysed as a categorical variable was an important source of heterogeneity.
+
+
 
 
 ####  Metagression for prior SAH exposure 
@@ -656,7 +658,15 @@ sum(dat.psah.metareg$total_size)
 
 ```{r metaregression - bubble plot, psah}
 
-bubble(psah.metareg.result, studlab=dat.psah.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for prior SAH")
+bubble(psah.metareg.result,
+       xlim=c(0, 0.5),
+       xlab = "Proportion of patients with exposure to prior aSAH",
+       ylab = "Rupture risk estimate logit tranformed proportion",
+       lty = 3,
+       lwd = 2,
+       studlab=dat.psah.metareg$auth_year, 
+       cex.studlab = 0.75
+       )
 
 ```
 
@@ -770,7 +780,15 @@ sum(dat.size5.metareg$total_size10)
 
 ```{r metaregression - option 2 - bubble plot - size categorised 5mm}
 
-bubble(size5mm.metareg.result, studlab=dat.size5.metareg$auth_year, xlim=c(0, 1), main="Meta-regression plot for 5mm Aneurysm size")
+bubble(size5mm.metareg.result, 
+       xlim=c(0, 1),
+       xlab = "Proportion of patients with ≤5mm SIUIAs",
+       ylab = "Rupture risk estimate logit tranformed proportion",
+       lty = 3,
+       lwd = 2,
+       studlab=dat.size5.metareg$auth_year, 
+       cex.studlab = 0.75
+       )
 
 ```
  
@@ -825,27 +843,44 @@ sum(dat.multi.metareg$total_size)
 ```
 
 
+```{r metaregression - option 2 - bubble plot - multiple aneurysms}
+
+bubble(multi.metareg.result, 
+       xlim=c(0, 1.0),
+       xlab = "Proportion of patients with multiple SIUIAs",
+       ylab = "Rupture risk estimate logit tranformed proportion",
+       lty = 3,
+       lwd = 2,
+       studlab=dat.multi.metareg$auth_year, 
+       cex.studlab = 0.75
+       )
+
+```
+```
+
+
 Interpretation:
 
 The random effects metaregression included participants from 20 studies with a mean study level proportion of aneurysm multiplicity of 27.5% (range 0 - 51.7%). There were a total of 169 ruptures and 10 799 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.55), suggesting that the proportion of patients with multiple aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 29.4%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
+#### Meta-regression based on mean age - as continuous variable
 
-#### Metaregression to explore study length of follow up on rupture outcomes, including all studies
+```{r metaregression data setup for age as a continous variable, including all studies}
 
-```{r metaregression data setup for length of follow up, including all studies}
 
-dat.fu.metareg <- dat10 %>%
-  drop_na(fu) %>%
-  mutate(fu_year = fu/12) %>%
-  select(auth_year, rupt, total_size, fu_year)
+
+dat.age.metareg <- dat.all %>%
+  slice(-12) %>%
+  mutate(age = coalesce(age_mean, age_med)) %>%
+  drop_na(age) %>%
+  select(auth_year, rupt, total_size, age)
 
 ```
 
+```{r metaregression for age as a continous variable, including all studies}
 
-```{r metaanalysis pf proporations for follow up metareg - option 2, including all studies}
-
-fu.metareg = metaprop(rupt, total_size,
-                      data=dat.fu.metareg,
+age.metareg = metaprop(rupt, total_size,
+                      data=dat.age.metareg,
                       studlab=paste(auth_year),
                       method="GLMM",
                       sm="PLOGIT",
@@ -854,36 +889,45 @@ fu.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-fu.metareg.result <- metareg(fu.metareg, ~fu_year, hakn = TRUE)
+age.metareg.result <- metareg(age.metareg, ~age, hakn = TRUE)
 
-fu.metareg.result
-
-```
-
-
-```{r metaregression for fu at study level, all studies - charachteristics}
-
-range(dat.fu.metareg$fu_year) 
-
-mean(dat.fu.metareg$fu_year)
-
-sum(dat.fu.metareg$rupt)
-
-sum(dat.fu.metareg$total_size)
+age.metareg.result
 
 ```
 
 
+```{r metaregression for age at study level, all studies - charachteristics}
+
+range(dat.age.metareg$age) 
+
+mean(dat.age.metareg$age)
+
+sd(dat.age.metareg$age)
+
+sum(dat.age.metareg$rupt)
+
+sum(dat.age.metareg$total_size)
+
+```
 
 ```{r metaregression - option 2 - bubble plot, including all studies}
 
-bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 10), main="Meta-regression plot for length of FU")
+bubble(age.metareg.result, 
+       xlim=c(40, 80), 
+       xlab = "Mean study age",
+       ylab = "Rupture risk estimate logit tranformed proportion",
+       lty = 3,
+       lwd = 2,
+       studlab=dat.age.metareg$auth_year,
+       cex.studlab = 0.75,
+       )
 
 ```
 
-Interpretation:
 
-The random effects metaregression included participants from 27 studies with a mean study level follow up time of 3.6 years (range 1 - 8.3 years). There were a total of 186 ruptures and 12 380 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of mean study level follow up time was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38.1%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+
+The random effects metaregression included participants from 29 studies with a mean study level patient age of 59.1 +/- 6.8 years (range 47.9 - 72.4 years). There were a total of 191 ruptures and 12 601 aneurysms in studies included in this metaregression analysis. The metaregression result was significant (p=0.005), suggesting that mean age was associated with the risk of rupture at the study level. There was no unexplained residual heterogeneity (I2 = 0%) indicating that this meta-regression analysis was informative in identifying sources of heterogeneity in the meta-analysis result. However, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+
 
 #### Sub-group analysis based on study age - Age < 60 vs Age 60 or greater 
 
@@ -914,10 +958,9 @@ pes.summary.glmm.pop
 
 dat10 %>%
   drop_na(age_cat) %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
-
 
 
 
@@ -949,7 +992,7 @@ pes.summary.glmm.pop
 dat10 %>%
   drop_na(fu) %>%
   filter(pop == "Japanese") %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
 
@@ -959,7 +1002,7 @@ dat10 %>%
 dat10 %>%
   drop_na(fu) %>%
   filter(pop == "Non-Japanese") %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
 
@@ -1038,6 +1081,8 @@ forest(pes.summary.glmm.pop,
        test.subgroup.random = TRUE,
        label.test.effect.subgroup.random = TRUE,
        JAMA.pval = TRUE,
+       text.addline1 = "Mean Japanese study-level follow up: 3.2 years",
+       text.addline2 = "Mean Non-Japanese study-level follow up: 3.8 years",
        ) 
 
 ```
@@ -1050,6 +1095,7 @@ This covariate also explains some of the heterogeniety, with only mild heterogen
 This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher (1.9494 [1.6300; 2.3300]) over a shorter follow up period of 38 months, compared to the sub-group rupture risk in non-Japanese of 1.1656 [0.9346; 1.4528] over a mean study follow up period of 45 months. 
 
 However, there may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors such as prevalence of hypertention and smoking. 
+
 
 #### Meta-regression based on study type - retrospective compared to prospective
 
@@ -1076,7 +1122,7 @@ pes.summary.glmm.type
 dat %>%
   drop_na(fu) %>%
   filter(type == "prospective") %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
 
@@ -1086,7 +1132,7 @@ dat %>%
 dat %>%
   drop_na(fu) %>%
   filter(type == "retrospective") %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
 
@@ -1112,8 +1158,8 @@ forest(pes.summary.glmm.type,
        pooled.events = TRUE,
        test.subgroup.random = TRUE,
        label.test.effect.subgroup.random = TRUE,
-       text.addline1 = "Mean prospective study-level follow up: 62 months",
-       text.addline2 = "Mean retrospective study-level follow up: 47 months",
+       text.addline1 = "Mean prospective study-level follow up: 5.2 years",
+       text.addline2 = "Mean retrospective study-level follow up: 3.9 years",
        JAMA.pval = TRUE,
        ) 
 
@@ -1124,21 +1170,24 @@ The test for subgroup differences (random effects model) indicates that there is
 
 This covariate does not explain the residual heterogeniety, with moderate heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 39.3%]. There is also some concern regarding the overall covariate distribution given majority of the rupture events are in the prospective cohort, with most rupture events occuring in 2 studies with a Japanese source population. In addition, there may be additional unknown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, but rather is an exploration of the sources of heterogeneity due to methodological differences. 
 
-#### Meta-regression based on mean age - as continuous variable
 
-```{r metaregression data setup for age as a continous variable, including all studies}
 
-dat.age.metareg <- dat10 %>%
-  mutate(age = coalesce(age_mean, age_med)) %>%
-  drop_na(age) %>%
-  select(auth_year, rupt, total_size, age)
+#### Metaregression to explore study length of follow up on rupture outcomes, including all studies
+
+```{r metaregression data setup for length of follow up, including all studies}
+
+dat.fu.metareg <- dat10 %>%
+  drop_na(fu) %>%
+  mutate(fu_year = fu/12) %>%
+  select(auth_year, rupt, total_size, fu_year)
 
 ```
 
-```{r metaregression for age as a continous variable, including all studies}
 
-age.metareg = metaprop(rupt, total_size,
-                      data=dat.age.metareg,
+```{r metaanalysis pf proporations for follow up metareg - option 2, including all studies}
+
+fu.metareg = metaprop(rupt, total_size,
+                      data=dat.fu.metareg,
                       studlab=paste(auth_year),
                       method="GLMM",
                       sm="PLOGIT",
@@ -1147,37 +1196,36 @@ age.metareg = metaprop(rupt, total_size,
                       pscale = 100
                       )
 
-age.metareg.result <- metareg(age.metareg, ~age, hakn = TRUE)
+fu.metareg.result <- metareg(fu.metareg, ~fu_year, hakn = TRUE)
 
-age.metareg.result
+fu.metareg.result
+
+```
+
+
+```{r metaregression for fu at study level, all studies - charachteristics}
+
+range(dat.fu.metareg$fu_year) 
+
+mean(dat.fu.metareg$fu_year)
+
+sum(dat.fu.metareg$rupt)
+
+sum(dat.fu.metareg$total_size)
 
 ```
 
 
-```{r metaregression for age at study level, all studies - charachteristics}
-
-range(dat.age.metareg$age) 
-
-mean(dat.age.metareg$age)
-
-sd(dat.age.metareg$age)
-
-sum(dat.age.metareg$rupt)
-
-sum(dat.age.metareg$total_size)
-
-```
 
 ```{r metaregression - option 2 - bubble plot, including all studies}
 
-bubble(age.metareg.result, studlab=dat.age.metareg$auth_year, xlim=c(40, 80), main="Meta-regression plot for mean age")
+bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 10), main="Meta-regression plot for length of FU")
 
 ```
 
+Interpretation:
 
-
-The random effects metaregression included participants from 29 studies with a mean study level patient age of 59.1 +/- 6.8 years (range 47.9 - 72.4 years). There were a total of 191 ruptures and 12 601 aneurysms in studies included in this metaregression analysis. The metaregression result was significant (p=0.005), suggesting that mean age was associated with the risk of rupture at the study level. There was no unexplained residual heterogeneity (I2 = 0%) indicating that this meta-regression analysis was informative in identifying sources of heterogeneity in the meta-analysis result. However, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
-
+The random effects metaregression included participants from 27 studies with a mean study level follow up time of 3.6 years (range 1 - 8.3 years). There were a total of 186 ruptures and 12 380 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of mean study level follow up time was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38.1%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 ### Multivariable meta-regression
 
@@ -1743,7 +1791,8 @@ sum(fem10$num_tot, na.rm = TRUE)
 sum(fem10$fem_tot, na.rm = TRUE)
 
 mean(sizedata10$age_mean, na.rm = TRUE)
-median(sizedata10$age_med, na.rm = TRUE)
+sd(sizedata10$age_mean, na.rm = TRUE)
+
 
 mean(sizedata10$fu_tot, na.rm = TRUE)
 min(sizedata10$fu_tot, na.rm = TRUE)
@@ -1774,7 +1823,8 @@ median(sizedata10.juvela$mid_year, na.rm = TRUE)
 sizedata10.juvela %>%
   filter(start<1978)
 
-
+sum(dat.all$num_tot, na.rm = TRUE)
+sum(dat.all$num_anr_tot, na.rm = TRUE)
 
 
 ```
