@@ -245,7 +245,6 @@ dat <- sizedata10 %>%
                             "Japanese" = "Japan", 
                             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")) 
          )
-        
 ```
 
 

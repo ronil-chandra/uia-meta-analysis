@@ -131,8 +131,18 @@ nos.final$out_3 <- recode(nos.final$out_3, "1" = "*", "0" = " ")
 nos.final %>%
   
   knitr::kable(
-    caption = "Risk of bias assessment for non-randomized studies", 
-    col.names = c("Study", "Representativeness of the exposed cohort", "Selection of the non-exposed cohort", "Ascertainment of prior subarachnoid haemorrhage", "Demonstration that outcome of interest was not present at start of study", "Comparability of cohorts on the basis of the design or analysis", "Assessment of outcome", "Was follow-up long enough for outcomes to occur?", "Adequacy of follow up of cohorts", "NOS Quality Score", "AHRQ Standards"),
+    caption = "Table 2. Risk of bias assessment", 
+    col.names = c("Study", 
+                  "Representativeness of the exposed cohort", 
+                  "Selection of the non-exposed cohort", 
+                  "Ascertainment of prior subarachnoid haemorrhage", 
+                  "Demonstration that outcome of interest was not present at start of study", 
+                  "Comparability of cohorts on the basis of the design or analysis", 
+                  "Assessment of outcome", 
+                  "Was follow-up long enough for outcomes to occur?", 
+                  "Adequacy of follow up of cohorts", 
+                  "NOS Quality Score", 
+                  "AHRQ Standards"),
     align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c")
     ) %>%
   kableExtra::kable_styling(bootstrap = "striped", 
