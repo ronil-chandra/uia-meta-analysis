@@ -237,8 +237,8 @@ dat <- sizedata10 %>%
   mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
   mutate(age = coalesce(age_mean, age_med)) %>%
   mutate(age_cat = case_when (
-    age == 65 | age < 65 ~ "Age 65 years or less",
-    age > 65 ~ "Age > 65 years or more"
+    age == 65 | age < 65 ~ "≤65-years",
+    age > 65 ~ ">65-years"
     )) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
@@ -856,7 +856,6 @@ bubble(multi.metareg.result,
        )
 
 ```
-```
 
 
 Interpretation:
@@ -865,9 +864,9 @@ The random effects metaregression included participants from 20 studies with a m
 
 #### Meta-regression based on mean age - as continuous variable
 
+
+
 ```{r metaregression data setup for age as a continous variable, including all studies}
-
-
 
 dat.age.metareg <- dat.all %>%
   slice(-12) %>%
@@ -936,11 +935,11 @@ The random effects metaregression included participants from 29 studies with a m
 dat10 <- dat10 %>%
   drop_na(age_cat)
 
-pes.summary.glmm.pop = metaprop(rupt, total_size,
+pes.summary.glmm.age = metaprop(rupt, total_size,
                             data=dat10,
                             studlab=paste(auth_year),
                             byvar = age_cat,
-                            bylab = "Population",
+                            bylab = "Age",
                             method="GLMM",
                             sm="PLOGIT",
                             method.tau = "ML", 
@@ -948,21 +947,55 @@ pes.summary.glmm.pop = metaprop(rupt, total_size,
                             pscale = 100,
                             hakn = TRUE,
                             ) 
-pes.summary.glmm.pop
+pes.summary.glmm.age
 
 ```
 
 
 
-```{r calculate mean FU of included studies re age categorised at 60}
+```{r calculate mean FU of included studies re age categorised at 65}
 
 dat10 %>%
   drop_na(age_cat) %>%
   summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
+dat10 %>%
+  drop_na(age_cat) %>%
+  filter(age <65 | age == 65) %>%
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
+
+dat10 %>%
+  drop_na(age_cat) %>%
+  filter(age >65 ) %>%
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
+
 ```
 
+```{r forest for publication using GLMM for subgroup analysis by age cat, fig.height= 10, fig.width = 10}
 
+forest(pes.summary.glmm.age,
+       layout = "meta",
+       comb.fixed = FALSE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap.left = "10mm",
+       colgap.forest.left = "10mm",
+       colgap.forest.right = "0mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture Proportion per 100",
+       pooled.events = TRUE,
+       test.subgroup.random = TRUE,
+       label.test.effect.subgroup.random = TRUE,
+       JAMA.pval = TRUE,
+       text.addline1 = "Age ≤65 years mean follow up: 3.8 years",
+       text.addline2 = "Age >65 years mean follow up: 2.8 years",
+       ) 
+
+```
 
 
 #### Sub-group analysis based on study population - Japanese vs non-Japanese
@@ -1176,7 +1209,8 @@ This covariate does not explain the residual heterogeniety, with moderate hetero
 
 ```{r metaregression data setup for length of follow up, including all studies}
 
-dat.fu.metareg <- dat10 %>%
+dat.fu.metareg <- dat.all %>%
+  slice(-12) %>%
   drop_na(fu) %>%
   mutate(fu_year = fu/12) %>%
   select(auth_year, rupt, total_size, fu_year)
@@ -1219,8 +1253,16 @@ sum(dat.fu.metareg$total_size)
 
 ```{r metaregression - option 2 - bubble plot, including all studies}
 
-bubble(fu.metareg.result, studlab=dat.fu.metareg$auth_year, xlim=c(0, 10), main="Meta-regression plot for length of FU")
-
+bubble(fu.metareg.result, 
+       xlim=c(0, 10), 
+       xlab = "Mean study follow up (years)",
+       ylab = "Rupture risk estimate logit tranformed proportion",
+       lty = 3,
+       lwd = 2,
+       studlab=dat.fu.metareg$auth_year, 
+       cex.studlab = 0.75
+       )
+       
 ```
 
 Interpretation:
@@ -1400,7 +1442,7 @@ pes.summary.glmm7
 
 dat7 %>%
   drop_na(fu) %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
 
@@ -1421,7 +1463,7 @@ forest(pes.summary.glmm7,
        xlim=c(0,10),
        xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
-       text.addline1 = "Mean study-level follow up: 42 months",
+       text.addline1 = "Mean study-level follow up: 3.5 years",
        JAMA.pval = TRUE,
        ) 
 
@@ -1463,7 +1505,7 @@ pes.summary.glmm5
 
 dat5 %>%
   drop_na(fu) %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
 
@@ -1485,7 +1527,7 @@ forest(pes.summary.glmm5,
        xlim=c(0,10),
        xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
-       text.addline1 = "Mean study-level follow up: 42 months",
+       text.addline1 = "Mean study-level follow up: 3.5-years",
        JAMA.pval = TRUE,
        ) 
 
@@ -1663,7 +1705,7 @@ pes.sens.nos
 
 dat.sens.nos %>%
   drop_na(fu) %>%
-  summarise(mean = mean(fu, na.rm = TRUE))
+  summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 
 
@@ -1685,7 +1727,7 @@ forest(pes.sens.nos,
        xlim=c(0,10),
        xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
-       text.addline1 = "Mean study-level follow up: 68 months",
+       text.addline1 = "Mean study-level follow up: 5.7-years",
        JAMA.pval = TRUE,
        ) 
 
@@ -1709,7 +1751,11 @@ Thus when assessing for non-reporting bias, conventional assessment is focused o
 
 ```{r funnel plots}
 
-funnel(pes.summary.glmm)
+funnel(pes.summary.glmm,
+       studlab = TRUE,
+       cex.studlab = 0.5,
+       pos.studlab = 3,
+       )
 
 ```
 
@@ -1736,6 +1782,31 @@ Visual inspection of the funnel plot reveals asymmetry, likely due to non-report
 ### Small study effects 
 
 Small study effects can be assessed with additional sensitivity analysis considering the random vs fixed effect model. In the setting of heterogeneity, the random effects estimate is biased towards the results of the smaller studies. We can investigate if small study effects cause a clinically relevant change in the point estimate and CIs.
+
+#### Display meta-analysis result using a publication quality forest plot
+
+The easiest way to communicate the result of the statistical procedure is via a forest plot. 
+
+```{r forest for publication using GLMM with Juvela excluded, fig.height= 10, fig.width = 10}
+
+forest(pes.summary.glmm,
+       layout = "meta",
+       comb.fixed = TRUE,
+       comb.random = TRUE,
+       print.I2.ci = TRUE,
+       colgap = "7mm",
+       leftlabs = c("Study", "Ruptures", "Total"),
+       rightcols = c("effect", "ci"),
+       rightlabs = c("Ruptures per 100", "95% CI"),
+       smlab = " ",
+       xlim=c(0,10),
+       xlab = "Rupture per 100 aneurysms",
+       pooled.events = TRUE,
+       text.addline1 = "Mean study-level follow up: 3.6 years",
+       JAMA.pval = TRUE,
+       ) 
+
+```
 
 From the main study plot we see that the outcome from fixed vs random assumption.
 
