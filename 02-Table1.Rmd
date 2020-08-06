@@ -1,7 +1,7 @@
 ---
 title: "02-Table1"
 author: "Ronil V. Chandra"
-date: "13/06/2020"
+date: "6/08/2020"
 output: html_document
 ---
 
@@ -32,24 +32,6 @@ maindata <- read_csv("data/maindata180720_nos.csv")
 ```{r select total cohort}
 
 sizedata <- filter(maindata, size == 10) %>%
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah, nos_total) %>%
-  arrange(desc(nos_total), desc(num))
-
-```
-
-```{r select total cohort}
-
-sizedata <- filter(maindata, size == 10) %>%
-  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  select(auth_year, start, end, country, type, age_mean, age_med, num, num_anr_tot, psah_tot, fu_mean_tot, fu_med_tot, rupt, rupt_psah, nos_total) %>%
-  arrange(desc(nos_total), desc(num))
-
-```
-
-
-```{r}
-dat <- sizedata10 %>%
   mutate(prop_multi = multi_tot / num_tot,
          num_multi = prop_multi * num + num,
          num_multi_temp = coalesce(num_anr, num_multi),
@@ -69,11 +51,36 @@ dat <- sizedata10 %>%
     age > 65 ~ ">65-years"
     )) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(pop = fct_collapse(sizedata10$country, 
+  mutate(pop = fct_collapse(sizedata$country, 
                             "Japanese" = "Japan", 
                             "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")) 
-         )
-        
+         ) 
+
+```
+
+```{r}
+
+tabledata <- sizedata %>%
+  select(auth_year, 
+         start, 
+         end, 
+         country, 
+         type, 
+         age_mean, 
+         age_med, 
+         num_tot, 
+         num_anr_tot, 
+         psah_tot, 
+         multi_tot, 
+         fu_mean_tot, 
+         fu_med_tot, 
+         num, 
+         num_anr, 
+         rupt, 
+         rupt_psah, 
+         nos_total) %>%
+  arrange(desc(nos_total), desc(num))
+
 ```
 
 
@@ -83,11 +90,28 @@ dat <- sizedata10 %>%
 
 ```{r, Table 1, Baseline Characteristics, results = 'asis'}
 
-sizedata %>%
+tabledata %>%
   knitr::kable(
     caption = "Table 1: Baseline Study Characteristics",
-    col.names = c("Study", "Study Year Start", "Study Year End", "Source Population", "Study Type", "Mean Age", "Median Age", "Number of Total Patients Observed", "Number of Total Aneurysms Observed", "Number of Total Patients with prior SAH Observed", "Mean Total Follow up (Months)", "Median Total Follow up (Months)", "Number of Patients with rupture", "Number of Patients with prior SAH and rupture", "NOS Quality Score"),
-    align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
+    col.names = c("Study", 
+                  "Study-year start", 
+                  "Study-year end", 
+                  "Source population", 
+                  "Study type", 
+                  "Mean age", 
+                  "Median age", 
+                  "No. of total patients in follow-up", 
+                  "No. of total aneurysms in follow up", 
+                  "No. of total patients with prior SAH", 
+                  "No. of total patients with multiple aneurysms", 
+                  "Mean follow-up (Months)", 
+                  "Median follow-up (Months)", 
+                  "No. of patients with ≤10mm aneurysms", 
+                  "No. of ≤10mm aneurysms", 
+                  "No. of patients with rupture", 
+                  "No. of patients with prior SAH and rupture", 
+                  "NOS quality score"),
+    align = c("l", "c", "c", "c", "c","c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
     longtable=TRUE,
     digits = 1) %>%
   kableExtra::kable_styling(bootstrap = "striped", 
@@ -102,8 +126,5 @@ sizedata %>%
 
 
 ```
-
-
-## Table 2 Quality Assessment Table
 
 
