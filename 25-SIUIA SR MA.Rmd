@@ -58,7 +58,7 @@ A single excel data file is loaded to carry out all data analysis, with all step
 
 ```{r load data, echo=FALSE, include = FALSE}
 
-maindata <- read_csv("data/final_data_SR_MA.csv")
+maindata <- read_csv("data/final_data_SR_MA_02.csv")
 
 ```
 
@@ -246,8 +246,8 @@ dat <- sizedata10 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
                             "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")) 
-         )
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Poland", "China", "Germany", "United Kingdom", "Finland")) 
+         ) 
 ```
 
 
