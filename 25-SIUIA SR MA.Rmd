@@ -1,7 +1,7 @@
 ---
 title: "Rupture of untreated small intradural unruptured intracranial aneurysms during follow-up: A Systematic Review, Meta-analysis, and Meta-regression"
 author: "Ronil V. Chandra"
-date: "22/07/2020"
+date: "07/08/2020"
 output: html_document
 ---
 
@@ -12,13 +12,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Objectives:
 
-Brain aneurysms managed conservatively with surveillance carry a risk of aneurym rupture. The objectives of this systematic review were to (i) estimate the overall rupture risk of a SIUA managed with surveillance and (ii) examine whether aneurysm size or exposure to prior subarachnoid haemorrhage were associated with rupture risk, and (iii) examine other potential sources of heterogeneity in the overall rupture risk estimate. 
+Brain aneurysms managed conservatively with follow-up carry a risk of aneurym rupture. 
+
+The objectives of this systematic review were to: 
+
+1. Estimate the overall rupture risk of a SIUA managed with surveillance 
+2. Examine whether aneurysm size or exposure to prior subarachnoid haemorrhage were associated with rupture risk
+3. Examine other potential sources of heterogeneity in the overall rupture risk estimate. 
 
 This will help clinicians more accurately convey the uncertainty in the rupture risk estimate utilising the current medical knowledge to patients. 
 
 After performing my systematic review, I have three additional aims:
 
-1. If appropriate, to quantitatively synthesise the data in order to calculate a summary pooled proportion.
+1. If appropriate, to quantitatively synthesise the data in order to calculate a summary pooled risk estimate.
 2. To identify and measure heterogeniety across the studies to help consider whether data synthesis is appropriate. 
 3. If data synthesis is appropriate, then to explore the reasons for heterogeneity by considering outliers and influential studies, and both pre-specified and post hoc sub-group analysis and meteregression. 
 
@@ -27,7 +33,7 @@ The statistical approaches will be tailored to the source dataset and structure 
 1. Rupture of an intracranial aneurysm in a single patient is a rare event, usually estimated at 1% per year or less.
 2. There are a small number of rupture outcome events in the sample populations, with the rupture proportion very close to zero.
 3. While the outcome of rupture is binomial, in a sample population, the distribution of rupture outcomes over time is is better described by the non-central hypergeometric distribution, since some aneurysms are considered at higher risk of rupture.
-4. There are a wide range of size in sample populations identified by the systematic review, with both very small studies and very large studies included.
+4. There are a wide range of populations sample sizes in the literature, with both very small samples and very large samples.
 5. The rate of rupture over time does not appear to be constant when biological factors and current published data are considered, thus the risk of rupture will be considered. 
 
 To achieve these aims, the various packages and source dataset in R are loaded, and each part carried out with an explanation of the rationale for the data analysis. Version control is carred out with GitHub. 
@@ -37,7 +43,7 @@ To achieve these aims, the various packages and source dataset in R are loaded, 
 
 The following R packages were loaded: tidyverse, meta, metafor, BiasedUrn and dmetar.
 
-```{r load packages, echo=TRUE, include = FALSE}
+```{r load packages, echo=FALSE, include = FALSE}
 library(tidyverse)
 library(meta)
 library(metafor)
@@ -50,7 +56,7 @@ library(dmetar)
 
 A single excel data file is loaded to carry out all data analysis, with all steps documented below to ensure reproducibility of research.
 
-```{r load data, echo=TRUE, include = FALSE}
+```{r load data, echo=FALSE, include = FALSE}
 
 maindata <- read_csv("data/maindata180720_nos.csv")
 
@@ -60,7 +66,7 @@ maindata <- read_csv("data/maindata180720_nos.csv")
 
 Vector types are corrected to integers, factors, doubles as appropriate for analysis in R, and stored as a new tibble. 
 
-```{r correct vectors, echo=TRUE, include = FALSE}
+```{r correct vectors, echo = FALSE, include = FALSE}
 maindata %>% 
   mutate(pub = as.integer(pub),
          start = as.integer(start),
@@ -75,17 +81,6 @@ maindata %>%
          type = as.factor(type)
          )
 ```
-
-```{r glimpse new, echo=TRUE, include = FALSE}
-glimpse(maindata)
-
-```
-
-### Describe baseline study charachteristics
-
-
-
-
 
 ### Calculate individual study proportions and use meta-analytical methods to create a pooled summary proportion 
 
@@ -187,37 +182,45 @@ sizedata10 <- filter(maindata, size == 10)
 
 #### Assumptions: 
 
-Consider number of patients vs number of aneurysms at entry 
+Consider number of patients vs number of aneurysms for ≤ 10mm aneurysms
 
-Some studies report the number of patients at study entry for a size criteria, while others report the number of aneurysms at study entry, and others report both the number of patients and aneurysms at study entry. Typically the proportion of patients with multiple aneurysms is also reported. 
+Some studies report the number of patients for ≤ 10mm aneurysms, while others report the number of aneurysms, and others report both the number of patients and aneurysms at study entry. The proportion of patients with multiple aneurysms is also generally reported. 
 
-Given that only 1 aneurysm in 1 patient ruptures, which is the outcome, and that the number of aneurysms in that size criteria is most consistently reported, the analysis is performed with the outcome of number of aneurysm ruptures per 100 aneurysms. 
+Given that only 1 aneurysm in 1 patient ruptures, which is the outcome, and that the number of aneurysms ≤ 10mm aneurysms has total data capture, the analysis is performed with the outcome of number of aneurysm ruptures per 100 aneurysms for ≤10 mm aneurysms. 
 
 The rationale for this is:
 
-1. Makes biological sense, since aneurysm rupture is considered to be strongly influenced by aneurysm characteristics
-2. One patients may have multiple aneurysms with a large range eg 1 to 8 aneurysms
-3. Conveying a rupture risk per aneurysm is easy to understand from a patient perspective when they harbour multiple aneurysms. 
+1. Conveying a rupture risk per aneurysm is easy to understand from a patient perspective when they harbour multiple aneurysms. 
+2. Makes biological sense, since the 1 aneurysm that ruptures is considered to be strongly influenced by aneurysm characteristics
+3. One patients may have multiple aneurysms with a large range eg 1 to 8 aneurysms
 
-Thus, if the number of aneurysms for a particular size criteria in the study has been reported, this is the most accurate information, and is utilised for analysis. 
+Aneurysm multiplicity is taken into account by extracting the total number of aneurysms for that size cohort. 
 
-If the number of number of aneuryms is not known for the specific size criteria, and we do know the proportion of patients with multiple aneuryms in the total observation cohort:
+The heirachy is the following: 
 
-1. The assumption is that a patient with multiple aneurysms has 2 aneurysms, and we can calculate the total number of aneurysms for that size criteria.   
-2. This can be caculated using the proportion of patients with multiple aneuryms *variable multi_tot* in the total observation cohort *variable num_tot*. 
-3. This proportion *prop_multi* can be multiplied by the number of patients in that specific size criteria. This is the number of patients that we can assume has 2 aneurysms. 
-4. The total number of aneurysms for that size *variable total_size* is then calculated by adding variable num. 
-5. We have now calculated the total number of aneurysms in that size category, taking into account aneurysm multiplicity. 
+1. Use the most accurate data ie number of total aneurysms for size cohort. 
+2. If above not reported, then apply same proportion of patients with multiple aneurysms to number of patients for that size cohort. Each patient with multiple aneurysms is assumed to harbour 2 aneurysms. 3. If the multiplicity proportion is not reported, then each person in that size category harbours 1 aneurysm. 
 
-If the number of number of aneuryms is not known for the specific size criteria, and we do *NOT* know the proportion of patients with multiple aneuryms in the total observation cohort, but we do know the number of patients in that size category, then 1 patient is assumed to have 1 aneurysm. 
+For patients with exposure to prior SAH, the number of aneurysms in patients with exposure to prior SAH is unknown ie these patients too may have multiple aneurysms.  
 
-For patients with exposure to prior SAH. The number of aneurysms in patients with prior SAH is unknown ie these patients may have multiple aneurysms.  
+We can utilise the same methodology above ie 
 
-1. We can assume that the proportion of patients with multiple aneurysms in the total cohort, is the same as the proportion of patients with multiple aneurysms with prior SAH, and calculate this if we know the number of patients with exposure to prior SAH in the specific size category. 
-2. If the number of patients with exposure to prior SAH in the specific size category is unknown, then we can assume that the proportion of patients with prior SAH in the total observation cohort is the same proportion as those in that size category. Thus if we know the total number of aneurysms in that size category, we can calculate the proportion that have had exposure to prior SAH. 
+1. Apply same proportion of patients with multiple aneurysms to number of patients for that size cohort with exposure to prior SAH. Each patient with prior SAH and multiple aneurysms is assumed to harbour 2 aneurysms. 
+2. If the multiplicity proportion is not reported, then each person with prior SAH in that size category harbours 1 unruptured aneurysm. 
+3. If the number of patients with exposure to prior SAH in the specific size category is not reported, then we can assume that the proportion of patients with prior SAH in the total observation cohort is the same proportion as those in that size category. Thus if we know the total number of aneurysms in that size category, we can calculate the proportion of aneurysms that have had exposure to prior SAH. 
 
-In addition, when considering aneurysm size strata, not all studies report consistently for each size strata of 3 mm and less, 5 mm and less, 7 mm and less, and 10 mm and less. If there is missing data for a particular size strata, then the prior size strata is carried forward using the last observation carried forward method of imputing missing data. This can introduce additional bias, and a sensitivity analysis will be carried out to examine the effect of this method of single imputation. 
+Size specific data assumptions. 
 
+The primary outcome is for aneurysms measuring ≤10 mm. Thus there is 100% data reporting. However for sensitivity analysis size strata, not all studies report consistently for each size strata ≤3 mm, ≤5mm ≤7 mm and ≤10 mm. Note that an aneurysm ≤3 mm also satisfies the criteria for ≤5, ≤7, and ≤10, however the most accurate data is extracted for that size threshold, and additional unpublished data was sought for size strata analyses. 
+
+This can introduce additional bias, and sensitivity analyses at the various size thresholds will be performed to examine the impact of these decisions. 
+
+#### Data wrangling
+
+The following steps are carried out
+
+1. Calculate total number of aneurysms with new variable *total_size*
+2. Calculate total aneurysms with prior SAH exposure *psah_size*
 
 ```{r calculate total number of aneurysms and prior SAH exposure for specific size criteria 10 mm and less}
 
@@ -929,7 +932,7 @@ The random effects metaregression included participants from 29 studies with a m
 
 #### Sub-group analysis based on study age - Age < 60 vs Age 60 or greater 
 
-```{r meta-analysis of proportions using glmm by population}
+```{r meta-analysis of proportions using glmm by age}
 
 dat10 <- dat10 %>%
   drop_na(age_cat)
