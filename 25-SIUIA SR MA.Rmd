@@ -253,7 +253,16 @@ dat <- sizedata10 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
                             "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Poland", "China", "Germany", "United Kingdom", "Finland")) 
+                            "Non-Japanese" = c("International", 
+                                               "United States", 
+                                               "Switzerland", 
+                                               "Australia", 
+                                               "Korea", 
+                                               "Poland", 
+                                               "China", 
+                                               "Germany", 
+                                               "United Kingdom", 
+                                               "Finland")) 
          ) 
 ```
 
@@ -736,7 +745,16 @@ dat5 <- sizedata5 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata5$country, 
                             "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+                            "Non-Japanese" = c("International", 
+                                               "United States", 
+                                               "Switzerland", 
+                                               "Australia", 
+                                               "Korea", 
+                                               "Poland", 
+                                               "China", 
+                                               "Germany", 
+                                               "United Kingdom", 
+                                               "Finland"))
          )
 ```
 
@@ -1372,7 +1390,16 @@ dat7 <- sizedata7 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata7$country,
                             "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+                            "Non-Japanese" = c("International", 
+                                               "United States", 
+                                               "Switzerland", 
+                                               "Australia", 
+                                               "Korea", 
+                                               "Poland", 
+                                               "China", 
+                                               "Germany", 
+                                               "United Kingdom", 
+                                               "Finland"))
          )
 
 ```
@@ -1535,7 +1562,16 @@ dat3 <- sizedata3 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata7$country,
                             "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+                            "Non-Japanese" = c("International", 
+                                               "United States", 
+                                               "Switzerland", 
+                                               "Australia", 
+                                               "Korea", 
+                                               "Poland", 
+                                               "China", 
+                                               "Germany", 
+                                               "United Kingdom", 
+                                               "Finland"))
          )
 
 ```
@@ -1826,8 +1862,7 @@ pes.summary.glmm.dl = metaprop(rupt, total_size,
                             method="Inverse",
                             sm="PFT",
                             method.tau = "ML", 
-                            method.ci = "WS",
-                            hakn = TRUE,
+                            method.ci = "CP",
                             pscale = 100
                             ) 
 pes.summary.glmm.dl
