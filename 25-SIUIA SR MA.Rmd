@@ -605,26 +605,26 @@ Regardless, the outcomes of these meta-regression analyses are limited. They are
 
 In our study, we have pre-specified further data analysis with regard to exposure to prior subarachnoid haemorrhage and aneurysm size in our published study protocol. Thus the following meta-regression analyses will be performed. 
 
-1. Meta-regression of proportion of patients included with exposure to prior aSAH as a continuous variable on rupture risk estimate per 100 SIUIAs ≤10mm managed with follow up.
+1. Meta-regression of proportion of patients included with exposure to prior aSAH as a continuous variable on rupture risk estimate per 100 SUIAs ≤10mm managed with follow up.
 
-2. Meta-regression of proportion of patients included with ≤5mm aneurysms as a continuous variable on rupture risk estimate per 100 SIUIAs ≤10mm managed with follow up.
+2. Meta-regression of proportion of patients included with ≤5mm aneurysms as a continuous variable on rupture risk estimate per 100 SUIAs ≤10mm managed with follow up.
 
-3. Meta-regression of proportion of patients included with multiple aneurysms as a continuous variable on rupture risk estimate per 100 SIUIAs ≤10mm managed with follow up.
+3. Meta-regression of proportion of patients included with multiple aneurysms as a continuous variable on rupture risk estimate per 100 SUIAs ≤10mm managed with follow up.
 
-4. Meta-regression of age as a continuous variable on rupture risk estimate per 100 SIUIAs ≤10mm managed with follow up.
+4. Meta-regression of age as a continuous variable on rupture risk estimate per 100 SUIAs ≤10mm managed with follow up.
 
-5. Sub-group analysis of pooled rupture risk estimate per 100 SIUIAs ≤10mm managed with follow up with mean age categorised as ≤65-years or >65-years. 
+5. Sub-group analysis of pooled rupture risk estimate per 100 SUIAs ≤10mm managed with follow up with mean age categorised as ≤65-years or >65-years. 
 
-6. Sub-group analysis of pooled rupture risk estimate per 100 SIUIAs ≤10mm managed with follow up with source population categorised as Japanese or non-Japanese. 
+6. Sub-group analysis of pooled rupture risk estimate per 100 SUIAs ≤10mm managed with follow up with source population categorised as Japanese or non-Japanese. 
 
-7. Sub-group analysis of study type per 100 SIUIAs ≤10mm managed with follow up categorised as prospective or retrospective.
+7. Sub-group analysis of study type per 100 SUIAs ≤10mm managed with follow up categorised as prospective or retrospective.
 
-8. Meta-regression of follow up time as a continuous variable on rupture risk estimate per 100 SIUIAs ≤10mm.
+8. Meta-regression of follow up time as a continuous variable on rupture risk estimate per 100 SUIAs ≤10mm.
 
 
 ####  Metagression for prior SAH exposure 
 
-We can analyse whether there is a relationship between the proportion of patients with prior SAH included in the study (the exploratory variable) and the the outcome (rupture proportion). 
+We can analyse whether there is a relationship between the proportion of patients with prior SAH included in the study (the exploratory variable / potential effect modifier) and the the outcome (rupture proportion). 
 
 The choice of this covariate is:
 
@@ -655,6 +655,7 @@ psah.metareg = metaprop(rupt, total_size,
                       sm="PLOGIT",
                       method.tau = "ML", 
                       method.ci = "WS",
+                      hakn = TRUE,
                       pscale = 100
                       )
 
@@ -691,16 +692,12 @@ bubble(psah.metareg.result,
 
 ```
 
-
-****
-The size of the bubbles can reflected the number of study participants
-****
 Interpretation: 
 
-The random effects metaregression included participants from 28 studies with a mean study level proportion of exposure to prior subarachnoid haemorrhage of 10.9% (range 0 - 49.8%). There were a total of 182 ruptures and 11 928 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.37), suggesting that the proportion of patients with prior SAH included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 45.6%), which is higher than across all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis. 
+The random effects metaregression included participants from 27 studies with a mean study level proportion of exposure to prior subarachnoid haemorrhage of 11.3% (range 0 - 49.8%). There were a total of 181 ruptures and 12 187 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (F[1,25)=.3559,P=.5562), suggesting that the proportion of patients with prior SAH included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 48.1%), which is higher than across all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis. 
 
 
-#### Metaregression to explore size categorised at 5mm
+#### Metaregression to explore size of 5mm UIAs included
 
 We can analyse whether there is a relationship between the proportion of patients with aneurysms measuring 5mm and less included in the study (the exploratory varable ), and the the outcome (rupture proportion). 
 
@@ -740,7 +737,7 @@ dat5 <- sizedata5 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata5$country, 
                             "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland"))
+                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Poland", "China", "Germany", "United Kingdom", "Finland"))
          )
 ```
 
@@ -777,6 +774,7 @@ size5.metareg = metaprop(rupt10, total_size10,
                       sm="PLOGIT",
                       method.tau = "ML", 
                       method.ci = "WS",
+                      hakn = TRUE,
                       pscale = 100
                       )
 
@@ -815,7 +813,7 @@ bubble(size5mm.metareg.result,
  
 Interpretation:
 
-The random effects metaregression included participants from 25 studies with a mean study level proportion of 5mm aneurysms of 77% (range 25 - 100%). There were a total of 174 ruptures and 11 044 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of patients with 5mm and less aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+The random effects metaregression included participants from 24 studies with a mean study level proportion of 5mm aneurysms of 77% (range 25 - 100%). There were a total of 173 ruptures and 10 882 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (F(1,22) = 0.0271,P= 0.8707), suggesting that the proportion of patients with 5mm and less aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 
 #### Metaregression to explore proportion with multiple aneurysms
@@ -843,6 +841,7 @@ multi.metareg = metaprop(rupt, total_size,
                       sm="PLOGIT",
                       method.tau = "ML", 
                       method.ci = "WS",
+                      hakn = TRUE,
                       pscale = 100
                       )
 
@@ -881,10 +880,9 @@ bubble(multi.metareg.result,
 
 Interpretation:
 
-The random effects metaregression included participants from 20 studies with a mean study level proportion of aneurysm multiplicity of 27.5% (range 0 - 51.7%). There were a total of 169 ruptures and 10 799 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.55), suggesting that the proportion of patients with multiple aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 29.4%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+The random effects metaregression included participants from 19 studies with a mean study level proportion of aneurysm multiplicity of 28.8% (range 0 - 51.7%). There were a total of 168 ruptures and 11 058 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant F(df1 = 1, df2 = 17) = 0.0006, p-val = 0.9813, suggesting that the proportion of patients with multiple aneurysms included in the study was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 36.6%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 #### Meta-regression based on mean age - as continuous variable
-
 
 
 ```{r metaregression data setup for age as a continous variable, including all studies}
@@ -906,6 +904,7 @@ age.metareg = metaprop(rupt, total_size,
                       sm="PLOGIT",
                       method.tau = "ML", 
                       method.ci = "WS",
+                      hakn = TRUE,
                       pscale = 100
                       )
 
@@ -946,17 +945,17 @@ bubble(age.metareg.result,
 
 
 
-The random effects metaregression included participants from 29 studies with a mean study level patient age of 59.1 +/- 6.8 years (range 47.9 - 72.4 years). There were a total of 191 ruptures and 12 601 aneurysms in studies included in this metaregression analysis. The metaregression result was significant (p=0.005), suggesting that mean age was associated with the risk of rupture at the study level. There was no unexplained residual heterogeneity (I2 = 0%) indicating that this meta-regression analysis was informative in identifying sources of heterogeneity in the meta-analysis result. However, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+The random effects metaregression included participants from 28 studies with a mean study level patient age of 58.6 +/- 6.4 years (range 47.9 - 72.4 years). There were a total of 190 ruptures and 12 860 aneurysms in studies included in this metaregression analysis. The metaregression result was significant F(df1 = 1, df2 = 26) = 12.9125, p-val = 0.0013, suggesting that mean age was associated with the risk of rupture at the study level. There was no unexplained residual heterogeneity (I2 = 0%) indicating that this meta-regression analysis was informative in identifying sources of heterogeneity in the meta-analysis result. However, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 
-#### Sub-group analysis based on study age - Age < 60 vs Age 60 or greater 
+#### Sub-group analysis based on study age - Age <≤65vs A>05 years
 
 ```{r meta-analysis of proportions using glmm by age}
 
 dat10 <- dat10 %>%
   drop_na(age_cat)
 
-pes.summary.glmm.age = metaprop(rupt, total_size,
+pes.summary.glmm.age = metaprop((upt, total_size,
                             data=dat10,
                             studlab=paste(auth_year),
                             byvar = age_cat,
@@ -965,10 +964,10 @@ pes.summary.glmm.age = metaprop(rupt, total_size,
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
-                            pscale = 100,
-                            hakn = TRUE,
-                            ) 
-pes.summary.glmm.age
+                            phakn = TRUE,
+                            scale = 100,
+                             p
+es.summary.glmm.age
 
 ```
 
