@@ -507,8 +507,7 @@ Since it is reasonable to exclude Juvela, we can re-calculate the main study res
 ```{r meta-analysis of proportions using glmm without Juvela}
 
 dat10 <- dat %>%
-  slice(-12) %>%
-  drop_na(total_size)
+  slice(-12) 
 
 pes.summary.glmm = metaprop(rupt, total_size,
                             data=dat10,
@@ -744,7 +743,8 @@ dat5 <- sizedata5 %>%
 
 ```{r metaregression data setup for size categorisation at 5 mm at study level - data setup}
 
-dat10.metareg <- dat10 %>%
+dat10.metareg <- dat %>%
+  slice(-12) %>%
   rename(total_size10 = total_size) %>%
   rename(rupt10 = rupt) %>%
   select(auth_year, rupt10, total_size10)
@@ -887,7 +887,7 @@ The random effects metaregression included participants from 19 studies with a m
 
 ```{r metaregression data setup for age as a continous variable, including all studies}
 
-dat.age.metareg <- dat.all %>%
+dat.age.metareg <- dat %>%
   slice(-12) %>%
   mutate(age = coalesce(age_mean, age_med)) %>%
   drop_na(age) %>%
@@ -948,15 +948,16 @@ bubble(age.metareg.result,
 The random effects metaregression included participants from 28 studies with a mean study level patient age of 58.6 +/- 6.4 years (range 47.9 - 72.4 years). There were a total of 190 ruptures and 12 860 aneurysms in studies included in this metaregression analysis. The metaregression result was significant F(df1 = 1, df2 = 26) = 12.9125, p-val = 0.0013, suggesting that mean age was associated with the risk of rupture at the study level. There was no unexplained residual heterogeneity (I2 = 0%) indicating that this meta-regression analysis was informative in identifying sources of heterogeneity in the meta-analysis result. However, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 
-#### Sub-group analysis based on study age - Age <≤65vs A>05 years
+#### Sub-group analysis based on study age - Age <≤65vs >65 years
 
 ```{r meta-analysis of proportions using glmm by age}
 
-dat10 <- dat10 %>%
+dat.age.cat <- dat %>%
+  slice(-12) %>%
   drop_na(age_cat)
 
-pes.summary.glmm.age = metaprop((upt, total_size,
-                            data=dat10,
+pes.summary.glmm.age = metaprop(rupt, total_size,
+                            data=dat.age.cat,
                             studlab=paste(auth_year),
                             byvar = age_cat,
                             bylab = "Age",
@@ -964,9 +965,11 @@ pes.summary.glmm.age = metaprop((upt, total_size,
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
-                            phakn = TRUE,
-                            scale = 100, p
-es.summary.glmm.age
+                            hakn = TRUE,
+                            pscale = 100
+                            )
+                            
+pes.summary.glmm.age
 
 ```
 
@@ -1011,18 +1014,25 @@ forest(pes.summary.glmm.age,
        label.test.effect.subgroup.random = TRUE,
        JAMA.pval = TRUE,
        text.addline1 = "Age ≤65 years mean follow up: 3.8 years",
-       text.addline2 = "Age >65 years mean follow up: 2.8 years",
+       text.addline2 = "Age >65 years mean follow up: 3.4 years",
        ) 
 
 ```
+
+The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (p = 0.0006, suggesting that age > 65 years was associated with a higher the rupture risk compared to mean study age <65 years across the included trials.
+
+However, the overall covariate distribution is concerning with few rupture events and SUIAs in the > 65 year old cohort. There may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors. 
 
 
 #### Sub-group analysis based on study population - Japanese vs non-Japanese
 
 ```{r meta-analysis of proportions using glmm by population}
 
+dat.pop <- dat %>%
+  slice(-12)
+
 pes.summary.glmm.pop = metaprop(rupt, total_size,
-                            data=dat10,
+                            data=dat.pop,
                             studlab=paste(auth_year),
                             byvar = pop,
                             bylab = "Population",
@@ -1041,7 +1051,7 @@ pes.summary.glmm.pop
 
 ```{r calculate mean FU of included studies from Japan}
 
-dat10 %>%
+dat.pop %>%
   drop_na(fu) %>%
   filter(pop == "Japanese") %>%
   summarise(mean = mean(fu, na.rm = TRUE) / 12)
@@ -1051,7 +1061,7 @@ dat10 %>%
 
 ```{r calculate mean FU of included included studies from outside Japan}
 
-dat10 %>%
+dat.pop %>%
   drop_na(fu) %>%
   filter(pop == "Non-Japanese") %>%
   summarise(mean = mean(fu, na.rm = TRUE) / 12)
@@ -1061,7 +1071,7 @@ dat10 %>%
 
 ```{r calculate mean age of included included studies from Japan}
 
-dat10 %>%
+dat.pop %>%
   mutate(age = coalesce(age_mean, age_med)) %>%
   filter(pop == "Japanese") %>%
   drop_na(age) %>%
@@ -1073,7 +1083,7 @@ dat10 %>%
 
 ```{r  mean age of included included studies from outside Japan}
 
-dat10 %>%
+dat.pop %>%
   mutate(age = coalesce(age_mean, age_med)) %>%
   filter(pop == "Non-Japanese") %>%
   drop_na(age) %>%
@@ -1083,31 +1093,12 @@ dat10 %>%
 
 ```{r  mean diff in age of included included studies from Japan or not}
 
-dat.age.diff <- dat10 %>%
+dat.age.diff <- dat.pop %>%
   mutate(age = coalesce(age_mean, age_med)) %>%
   drop_na(age) %>%
   select(pop, age)
 
 t.test(age ~ pop, data = dat.age.diff)
-
-```
-
-
-```{r metaregression japanese population}
-
-pop.metareg = metaprop(rupt, total_size,
-                      data=dat10,
-                      studlab=paste(auth_year),
-                      method="GLMM",
-                      sm="PLOGIT",
-                      method.tau = "ML", 
-                      method.ci = "WS",
-                      pscale = 100
-                      )
-
-pop.metareg.result <- metareg(pop.metareg, ~pop, hakn = TRUE)
-
-pop.metareg.result
 
 ```
 
@@ -1134,19 +1125,21 @@ forest(pes.summary.glmm.pop,
        label.test.effect.subgroup.random = TRUE,
        JAMA.pval = TRUE,
        text.addline1 = "Mean Japanese study-level follow up: 3.2 years",
-       text.addline2 = "Mean Non-Japanese study-level follow up: 3.8 years",
+       text.addline2 = "Mean Non-Japanese study-level follow up: 3.9 years",
        ) 
 
 ```
 
 
-The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (p = 0.002), suggesting that a Japanese source population was associated with a higher the rupture risk across the included trials. This is biologically plausible, and is concordant with other published literature with that demonstrates an unexplained higher incidence of aneurysmal subarachnoid haemorrhage from ruptured aneurysms in the Japanese population. 
+The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (p < 0.0001), suggesting that a Japanese source population was associated with a higher the rupture risk across the included trials. 
 
-This covariate also explains some of the heterogeniety, with only mild heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 21.2%]. The overall covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group.
+This covariate also explains some of the heterogeniety, with only minimal heterogeneity remaining  I^2 = 0.0% [0.0%; 26.7%]. The overall covariate distribution is not concerning with the total number of studies and participants with aneurysms in each sub-group.
 
-This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher (1.9494 [1.6300; 2.3300]) over a shorter follow up period of 38 months, compared to the sub-group rupture risk in non-Japanese of 1.1656 [0.9346; 1.4528] over a mean study follow up period of 45 months. 
+This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher 1.9494 [1.6300; 2.3300] over a shorter follow up period of 3.2 years, compared to the sub-group rupture risk in non-Japanese of1.0577 [0.8280; 1.3503]  over a mean study follow up period of 3.9 years. 
 
-However, there may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors such as prevalence of hypertention and smoking. 
+Notably, this may be attributable to the older mean age in the Japanese samples with mean age of 64.5 from Japan compared to 56.7 years, p-value = 0.0004846
+
+Note that there may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors such as prevalence of hypertention and smoking. 
 
 
 #### Meta-regression based on study type - retrospective compared to prospective
@@ -1154,8 +1147,11 @@ However, there may be additional unkown confounders also influencing the results
 
 ```{r meta-analysis of proportions using glmm with prospective and retrospective subgroup analysis}
 
+dat.type <- dat %>%
+  slice(-12)
+
 pes.summary.glmm.type = metaprop(rupt, total_size,
-                            data=dat10,
+                            data=dat.type,
                             studlab=paste(auth_year),
                             byvar = type,
                             bylab = "Study Type",
@@ -1163,6 +1159,7 @@ pes.summary.glmm.type = metaprop(rupt, total_size,
                             sm="PLOGIT",
                             method.tau = "ML", 
                             method.ci = "WS",
+                            hakn = TRUE,
                             pscale = 100
                             ) 
 pes.summary.glmm.type
@@ -1211,16 +1208,16 @@ forest(pes.summary.glmm.type,
        test.subgroup.random = TRUE,
        label.test.effect.subgroup.random = TRUE,
        text.addline1 = "Mean prospective study-level follow up: 5.2 years",
-       text.addline2 = "Mean retrospective study-level follow up: 3.9 years",
+       text.addline2 = "Mean retrospective study-level follow up: 4.0 years",
        JAMA.pval = TRUE,
        ) 
 
 ```
 
 
-The test for subgroup differences (random effects model) indicates that there is no statistically significant subgroup effect (p = 0.22), suggesting that there was no difference in rupture risk between prospective and retrospective studies. In prospective studies, the point estimate was higher 1.5944 [1.1092; 2.2868] with wider confidence intervals over a longer time period of 62 months compared to retrospective studies with point estimate of rupture risk of 1.2286 [0.9571; 1.5759] over 47 months. Although retrospective studies may be at greater tisk of incomplete case follow up due to the case-fatality rate prior to hospital presentation, this sensitivity analysis demonstrates no clinically relevant differences in outcome. 
+The test for subgroup differences (random effects model) indicates that there is no statistically significant subgroup effect ( p=  0.5647), suggesting that there was no difference in rupture risk between prospective and retrospective studies. In prospective studies, the point estimate was higher 1.3859 [0.8845; 2.1652] with wider confidence intervals over a longer time period of 5.2 years compared to retrospective studies with point estimate of rupture risk of 1.1920 [0.8172; 1.7356] over 4.0 years. Although retrospective studies may be at greater tisk of incomplete case follow up due to the case-fatality rate prior to hospital presentation, this exploratory meta-regresion shows no association
 
-This covariate does not explain the residual heterogeniety, with moderate heterogeneity remaining I^2 = 0.0% with 95% CI [0.0%; 39.3%]. There is also some concern regarding the overall covariate distribution given majority of the rupture events are in the prospective cohort, with most rupture events occuring in 2 studies with a Japanese source population. In addition, there may be additional unknown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, but rather is an exploration of the sources of heterogeneity due to methodological differences. 
+This covariate does not explain the residual heterogeniety, with moderate heterogeneity remaining 10.7% [0.0%; 42.9%]. There is also some concern regarding the overall covariate distribution given majority of the rupture events are in the prospective cohort, with most rupture events occuring in 2 studies with a Japanese source population. In addition, there may be additional unknown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, but rather is an exploration of the sources of heterogeneity due to methodological differences. 
 
 
 
@@ -1228,7 +1225,7 @@ This covariate does not explain the residual heterogeniety, with moderate hetero
 
 ```{r metaregression data setup for length of follow up, including all studies}
 
-dat.fu.metareg <- dat.all %>%
+dat.fu.metareg <- dat %>%
   slice(-12) %>%
   drop_na(fu) %>%
   mutate(fu_year = fu/12) %>%
@@ -1246,6 +1243,7 @@ fu.metareg = metaprop(rupt, total_size,
                       sm="PLOGIT",
                       method.tau = "ML", 
                       method.ci = "WS",
+                      hakn = TRUE,
                       pscale = 100
                       )
 
@@ -1286,11 +1284,11 @@ bubble(fu.metareg.result,
 
 Interpretation:
 
-The random effects metaregression included participants from 27 studies with a mean study level follow up time of 3.6 years (range 1 - 8.3 years). There were a total of 186 ruptures and 12 380 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant (p=0.95), suggesting that the proportion of mean study level follow up time was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 38.1%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
+The random effects metaregression included participants from 26 studies with a mean study level follow up time of 3.7 years (range 1.4 - 8.3 years). There were a total of 185 ruptures and 12 639 aneurysms in studies included in this metaregression analysis. The metaregression result was not significant F(df1 = 1, df2 = 24) = 0.0192, p-val = 0.8910, suggesting that the proportion of mean study level follow up time was not associated with the risk of rupture at the study level. However, there is moderate unexplained residual heterogeneity (I2 = 40.4%), which similar to all included studies, indicating that this meta-regression analysis was not informative in identifying sources of heterogeneity in the meta-analysis result. In addition, this random effects metaregression analysis is susceptible to confounding bias from other study level characteristics, and is not generalisable to an individual patient, since there is aggregation bias due to study-level data being used for analysis.
 
 ### Multivariable meta-regression
 
-In the previous scenarios we have considered the impact of a single study-level covariate on the outcome of rupture risk. Since apart from the Japanese source population, there are no other covariates with a univariable meta-regression p value of less than 0.1 and with lower residual heterogeniety than the overall pooled analysis, multivariable meta-regression was not performed. 
+In the previous scenarios we have considered the impact of a single study-level covariate on the outcome of rupture risk. Multivariable meta-regression was not performed due to risk for introducing false positive results. 
 
 
 #### Multivariable meta-regression exploring Japan and age
