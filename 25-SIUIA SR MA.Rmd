@@ -965,8 +965,7 @@ pes.summary.glmm.age = metaprop((upt, total_size,
                             method.tau = "ML", 
                             method.ci = "WS",
                             phakn = TRUE,
-                            scale = 100,
-                             p
+                            scale = 100, p
 es.summary.glmm.age
 
 ```
