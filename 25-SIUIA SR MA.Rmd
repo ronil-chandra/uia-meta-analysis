@@ -1319,7 +1319,7 @@ The following sensitivity analysis will be perfomed.
 #### Sensitivity analysis - consider leave-1-out on effect size
 
 
-```{r sensitivity analysis - consider leave-1-out  - final studies}
+```{r sensitivity analysis - leave-1-out  - final studies}
 
 
 inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm, 
@@ -1335,7 +1335,7 @@ inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm,
 plot(inf.analysis, "es")
 ```
 
-```{r sensitivity analysis - plot leave-1-out on effect size - final studies}
+```{r sensitivity analysis - plot leave-1-out on effect size by I2- final studies}
 
 plot(inf.analysis, "i2")
 ```
