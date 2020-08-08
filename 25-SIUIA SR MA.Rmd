@@ -929,7 +929,7 @@ sum(dat.age.metareg$total_size)
 
 ```
 
-```{r metaregression - option 2 - bubble plot, including all studies}
+```{r metaregression - option 2 - bubble plot, age including all studies}
 
 bubble(age.metareg.result, 
        xlim=c(40, 80), 
@@ -950,7 +950,7 @@ The random effects metaregression included participants from 28 studies with a m
 
 #### Sub-group analysis based on study age - Age <≤65vs >65 years
 
-```{r meta-analysis of proportions using glmm by age}
+```{r meta-analysis of proportions using glmm by age cat}
 
 dat.age.cat <- dat %>%
   slice(-12) %>%
@@ -1234,7 +1234,7 @@ dat.fu.metareg <- dat %>%
 ```
 
 
-```{r metaanalysis pf proporations for follow up metareg - option 2, including all studies}
+```{r metaanalysis of proporations for follow up metareg - option 2, including all studies}
 
 fu.metareg = metaprop(rupt, total_size,
                       data=dat.fu.metareg,
@@ -1268,7 +1268,7 @@ sum(dat.fu.metareg$total_size)
 
 
 
-```{r metaregression - option 2 - bubble plot, including all studies}
+```{r metaregression - option 2 - bubble plot, fu including all studies}
 
 bubble(fu.metareg.result, 
        xlim=c(0, 10), 
@@ -1319,7 +1319,7 @@ The following sensitivity analysis will be perfomed.
 #### Sensitivity analysis - consider leave-1-out on effect size
 
 
-```{r sensitivity analysis - consider leave-1-out on effect size - final studies}
+```{r sensitivity analysis - consider leave-1-out  - final studies}
 
 
 inf.analysis <- InfluenceAnalysis(x = pes.summary.glmm, 
@@ -1516,7 +1516,7 @@ sizedata3 <- filter(maindata, size == 3)
 
 ```
 
-```{r calculate total number of aneurysms for specific size criteria 7 mm and less}
+```{r calculate total number of aneurysms for specific size criteria 3 mm and less}
 
 dat3 <- sizedata3 %>%
   mutate(prop_multi = multi_tot / num_tot,
@@ -1839,7 +1839,7 @@ While the published literature does have various recommendations on the use of t
 
 ### Baseline study characteristics
 
-```{r  10 mm size}
+```{r  10 mm size baseline info}
 sizedata10 <- sizedata10 %>%
   mutate(fu_tot = coalesce(fu_mean_tot,fu_med_tot),
          prop_psah = psah_tot / num_tot,
