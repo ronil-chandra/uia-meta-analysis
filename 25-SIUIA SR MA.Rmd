@@ -1889,19 +1889,22 @@ sizedata10 %>%
   filter(pub<2010)
 
 sum(sizedata10$num_tot, na.rm = TRUE)
+sum(sizedata10$num_anr_tot, na.rm = TRUE)
 
 fem10 <- sizedata10 %>%
   drop_na(fem_tot)
-sum(fem10$num_tot, na.rm = TRUE)
-sum(fem10$fem_tot, na.rm = TRUE)
+
+sum(fem10$fem_tot, na.rm = TRUE) / sum(fem10$num_tot, na.rm = TRUE) 
 
 mean(sizedata10$age_mean, na.rm = TRUE)
 sd(sizedata10$age_mean, na.rm = TRUE)
 
+sum(dat$total_size)
 
-mean(sizedata10$fu_tot, na.rm = TRUE)
-min(sizedata10$fu_tot, na.rm = TRUE)
-max(sizedata10$fu_tot, na.rm = TRUE)
+
+mean(sizedata10$fu_tot, na.rm = TRUE) / 12
+min(sizedata10$fu_tot, na.rm = TRUE) / 12
+max(sizedata10$fu_tot, na.rm = TRUE) / 12
 
 mean(sizedata10$prop_psah, na.rm = TRUE)
 min(sizedata10$prop_psah, na.rm = TRUE)
