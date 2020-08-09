@@ -1410,13 +1410,13 @@ dat7 <- sizedata7 %>%
 
 ```{r meta-analysis of proportions using glmm for 7mm}
 
-dat7 <- dat7 %>%
+dat7.glmm <- dat7 %>%
   slice(-12) %>%
   drop_na(total_size) %>%
   drop_na(rupt)
 
 pes.summary.glmm7 = metaprop(rupt, total_size,
-                            data=dat7,
+                            data=dat7.glmm,
                             studlab=paste(auth_year),
                             method="GLMM",
                             sm="PLOGIT",
@@ -1433,7 +1433,7 @@ pes.summary.glmm7
 
 ```{r calculate mean FU of included studies of 7 mm and less}
 
-dat7 %>%
+dat7.glmm %>%
   drop_na(fu) %>%
   summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
@@ -1474,15 +1474,57 @@ This sensitivity analysis does not alter the overall impact from a clinical pers
 ### Sensitivity analysis - consider decision to utilise 10 mm and less or 5 mm and less for aneurysm size categories
 
 
+```{r select 5 mm and less}
+
+sizedata5 <- filter(maindata, size == 5) 
+
+```
+
+
+```{r calculate total number of aneurysms for specific size criteria 5 mm and less}
+
+dat5 <- sizedata5 %>%
+  mutate(prop_multi = multi_tot / num_tot,
+         num_multi = prop_multi * num + num,
+         num_multi_temp = coalesce(num_anr, num_multi),
+         total_size_temp = coalesce(num_anr, num),
+         total_size_temp_2 = coalesce(num_multi_temp, total_size_temp),
+         total_size = round(total_size_temp_2, 0),
+         psah_size_temp = psah * prop_multi + psah,
+         prop_psah = psah_tot / num_tot,
+         num_anr_psah = prop_psah * total_size,
+         size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
+         psah_size = round(size_psah_temp, 0),
+         ) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
+  unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
+  mutate(pop = fct_collapse(sizedata7$country,
+                            "Japanese" = "Japan", 
+                            "Non-Japanese" = c("International", 
+                                               "United States", 
+                                               "Switzerland", 
+                                               "Australia", 
+                                               "Korea", 
+                                               "Poland", 
+                                               "China", 
+                                               "Germany", 
+                                               "United Kingdom", 
+                                               "Finland"))
+         )
+
+```
+
+
+
 ```{r meta-analysis of proportions using glmm for 5 mm}
 
-dat5 <- dat5 %>%
+dat5.glmm <- dat5 %>%
   slice(-12) %>%
   drop_na(total_size) %>%
   drop_na(rupt)
 
 pes.summary.glmm5 = metaprop(rupt, total_size,
-                            data=dat5,
+                            data=dat5.glmm,
                             studlab=paste(auth_year),
                             method="GLMM",
                             sm="PLOGIT",
@@ -1499,7 +1541,7 @@ pes.summary.glmm5
 
 ```{r calculate mean FU of included studies of 5 mm and less}
 
-dat5 %>%
+dat5.glmm %>%
   drop_na(fu) %>%
   summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
@@ -1531,7 +1573,7 @@ forest(pes.summary.glmm5,
 
 Main result summary estimate is 1.2681 [0.9741; 1.6495] with I2 of 41.3% over study level mean of 3.7 years.
 
-Sensitivity analysis performed with aneurysms measuring 5 mm and less have a pooled rupture risk estimate of 1.0580 [0.7982; 1.4011] over 3.7 years, with I^2 = 0%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%.
+Sensitivity analysis performed with aneurysms measuring 5 mm and less have a pooled rupture risk estimate of 1.0861 [0.8616; 1.3684] over 3.7 years, with I^2 = 0%. This sensitivity analysis does not alter the overall impact from a clinical perspective, since the pooled rupture risk remains within 1-2%.
 
 
 #### Sensitivity analysis for ≤3mm aneurysms
@@ -1578,13 +1620,13 @@ dat3 <- sizedata3 %>%
 
 ```{r meta-analysis of proportions using glmm for 3mm}
 
-dat3 <- dat3 %>%
+dat3.glmm <- dat3 %>%
   slice(-12) %>%
   drop_na(total_size) %>%
   drop_na(rupt)
 
 pes.summary.glmm3 = metaprop(rupt, total_size,
-                            data=dat3,
+                            data=dat3.glmm,
                             studlab=paste(auth_year),
                             method="GLMM",
                             sm="PLOGIT",
@@ -1601,7 +1643,7 @@ pes.summary.glmm3
 
 ```{r calculate mean FU of included studies of 3 mm and less}
 
-dat3 %>%
+dat3.glmm %>%
   drop_na(fu) %>%
   summarise(mean = mean(fu, na.rm = TRUE) / 12)
 

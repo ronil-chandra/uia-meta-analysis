@@ -1,7 +1,7 @@
 ---
 title: "02-Table1"
 author: "Ronil V. Chandra"
-date: "6/08/2020"
+date: "9/08/2020"
 output: html_document
 ---
 
@@ -23,15 +23,22 @@ A single excel data file is loaded to carry out all data table creation, with al
 
 ```{r load data, echo = FALSE, include = FALSE}
 
-maindata <- read_csv("data/maindata180720_nos.csv")
+maindata <- read_csv("data/final_data_SR_MA_02.csv")
 ```
 
 
 ### Analyse total cohort of all aneurysms 10 mm and less 
 
-```{r select total cohort}
+```{r select 10 mm and less}
 
-sizedata <- filter(maindata, size == 10) %>%
+sizedata10 <- filter(maindata, size == 10) 
+
+```
+
+
+```{r create data for table}
+
+tabledata <- sizedata10 %>%
   mutate(prop_multi = multi_tot / num_tot,
          num_multi = prop_multi * num + num,
          num_multi_temp = coalesce(num_anr, num_multi),
@@ -44,23 +51,34 @@ sizedata <- filter(maindata, size == 10) %>%
          size_psah_temp = coalesce(psah_size_temp, num_anr_psah),
          psah_size = round(size_psah_temp, 0),
          ) %>%
-  mutate(fu = coalesce(fu_mean_tot,fu_med_tot)) %>% 
+  mutate(fu_mean_year = fu_mean_tot / 12) %>%
+  mutate(fu_med_year = fu_med_tot / 12) %>%
+  mutate(fu = coalesce(fu_mean_tot,fu_med_tot) / 12) %>%
   mutate(age = coalesce(age_mean, age_med)) %>%
   mutate(age_cat = case_when (
     age == 65 | age < 65 ~ "≤65-years",
     age > 65 ~ ">65-years"
     )) %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
-  mutate(pop = fct_collapse(sizedata$country, 
+  mutate(pop = fct_collapse(sizedata10$country, 
                             "Japanese" = "Japan", 
-                            "Non-Japanese" = c("International", "United States", "Switzerland", "Australia", "Korea", "Singapore", "Poland", "China", "Germany", "United Kingdom", "Finland")) 
+                            "Non-Japanese" = c("International", 
+                                               "United States", 
+                                               "Switzerland", 
+                                               "Australia", 
+                                               "Korea", 
+                                               "Poland", 
+                                               "China", 
+                                               "Germany", 
+                                               "United Kingdom", 
+                                               "Finland")) 
          ) 
 
 ```
 
-```{r}
+```{r select columns for table}
 
-tabledata <- sizedata %>%
+tabledata.final <- tabledata %>%
   select(auth_year, 
          start, 
          end, 
@@ -72,8 +90,8 @@ tabledata <- sizedata %>%
          num_anr_tot, 
          psah_tot, 
          multi_tot, 
-         fu_mean_tot, 
-         fu_med_tot, 
+         fu_mean_year, 
+         fu_med_year, 
          num, 
          num_anr, 
          rupt, 
@@ -90,7 +108,7 @@ tabledata <- sizedata %>%
 
 ```{r, Table 1, Baseline Characteristics, results = 'asis'}
 
-tabledata %>%
+tabledata.final %>%
   knitr::kable(
     caption = "Table 1: Baseline Study Characteristics",
     col.names = c("Study", 
@@ -104,8 +122,8 @@ tabledata %>%
                   "No. of total aneurysms in follow up", 
                   "No. of total patients with prior SAH", 
                   "No. of total patients with multiple aneurysms", 
-                  "Mean follow-up (Months)", 
-                  "Median follow-up (Months)", 
+                  "Mean follow-up (Years)", 
+                  "Median follow-up (Years)", 
                   "No. of patients with ≤10mm aneurysms", 
                   "No. of ≤10mm aneurysms", 
                   "No. of patients with rupture", 
