@@ -1,0 +1,121 @@
+auth,pub,start,end,country,type,num_tot,fem_tot,fam_tot,multi_tot,age_mean,age_med,num_anr_tot,psah_tot,smoke_tot,fu_mean_tot,fu_med_tot,size,num,num_anr,psah,fu,rupt,rupt_psah,rupt_fatal,nos_select,nos_compare,nos_outcome,nos_total
+Bor,2015,NA,NA,International,prospective,363,280,72,163,55,NA,468,98,131,33.6,25.2,3,NA,33,NA,NA,1,NA,NA,4,1,0,5
+Bor,2015,NA,NA,International,prospective,363,280,72,163,55,NA,468,98,131,33.6,25.2,5,NA,269,NA,NA,2,NA,NA,4,1,0,5
+Bor,2015,NA,NA,International,prospective,363,280,72,163,55,NA,468,98,131,33.6,25.2,7,NA,403,NA,NA,2,NA,NA,4,1,0,5
+Bor,2015,NA,NA,International,prospective,363,280,72,163,55,NA,468,98,131,33.6,25.2,10,NA,403,NA,NA,3,NA,NA,4,1,0,5
+Broderick,2009,NA,NA,International,prospective,113,75,113,NA,51.4,NA,148,0,94,NA,NA,3,72,NA,NA,NA,1,0,0,2,2,1,5
+Broderick,2009,NA,NA,International,prospective,113,75,113,NA,51.4,NA,148,0,94,NA,NA,5,72,NA,NA,NA,1,0,0,2,2,1,5
+Broderick,2009,NA,NA,International,prospective,113,75,113,NA,51.4,NA,148,0,94,NA,NA,7,108,NA,NA,NA,2,0,0,2,2,1,5
+Broderick,2009,NA,NA,International,prospective,113,75,113,NA,51.4,NA,148,0,94,NA,NA,10,108,NA,NA,NA,2,0,0,2,2,1,5
+Burns,2009,1987,2006,United States,retrospective,165,120,20,46,64,NA,191,12,91,NA,47,3,NA,NA,NA,NA,NA,NA,NA,4,2,1,7
+Burns,2009,1987,2006,United States,retrospective,165,120,20,46,64,NA,191,12,91,NA,47,5,NA,NA,NA,NA,NA,NA,NA,4,2,1,7
+Burns,2009,1987,2006,United States,retrospective,165,120,20,46,64,NA,191,12,91,NA,47,7,NA,NA,NA,NA,NA,NA,NA,4,2,1,7
+Burns,2009,1987,2006,United States,retrospective,165,120,20,46,64,NA,191,12,91,NA,47,10,NA,173,NA,NA,1,NA,NA,4,2,1,7
+Byoun,2016,2000,2008,Korea,retrospective,NA,NA,NA,NA,63.1,NA,654,NA,103,NA,19.2,3,NA,NA,NA,NA,NA,NA,NA,4,2,1,7
+Byoun,2016,2000,2008,Korea,retrospective,NA,NA,NA,NA,63.1,NA,654,NA,103,NA,19.2,5,NA,525,NA,NA,NA,NA,NA,4,2,1,7
+Byoun,2016,2000,2008,Korea,retrospective,NA,NA,NA,NA,63.1,NA,654,NA,103,NA,19.2,7,NA,591,23,NA,11,3,NA,4,2,1,7
+Byoun,2016,2000,2008,Korea,retrospective,NA,NA,NA,NA,63.1,NA,654,NA,103,NA,19.2,10,NA,624,NA,NA,11,3,NA,4,2,1,7
+Choi,2018,2007,2010,Korea,retrospective,135,110,NA,NA,57.4,NA,173,21,18,73.1,72,3,NA,NA,NA,NA,NA,NA,NA,4,1,1,6
+Choi,2018,2007,2010,Korea,retrospective,135,110,NA,NA,57.4,NA,173,21,18,73.1,72,5,NA,160,NA,NA,NA,NA,NA,4,1,1,6
+Choi,2018,2007,2010,Korea,retrospective,135,110,NA,NA,57.4,NA,173,21,18,73.1,72,7,135,173,21,73.1,1,NA,NA,4,1,1,6
+Choi,2018,2007,2010,Korea,retrospective,135,110,NA,NA,57.4,NA,173,21,18,73.1,72,10,135,173,21,73.1,1,NA,NA,4,1,1,6
+Gibbs,2004,1989,2002,United States,retrospective,21,14,14,1,47.9,NA,22,0,9,92,NA,3,11,12,0,92,0,0,0,1,2,1,4
+Gibbs,2004,1989,2002,United States,retrospective,21,14,14,1,47.9,NA,22,0,9,92,NA,5,18,19,0,85.6,0,0,0,1,2,1,4
+Gibbs,2004,1989,2002,United States,retrospective,21,14,14,1,47.9,NA,22,0,9,92,NA,7,21,22,0,92,0,0,0,1,2,1,4
+Gibbs,2004,1989,2002,United States,retrospective,21,14,14,1,47.9,NA,22,0,9,92,NA,10,21,22,0,92,0,0,0,1,2,1,4
+Gondar,2016,2006,2014,Switzerland,prospective,292,225,38,93,55.1,NA,368,17,154,38.4,NA,3,NA,186,NA,NA,1,0,NA,3,2,1,6
+Gondar,2016,2006,2014,Switzerland,prospective,292,225,38,93,55.1,NA,368,17,154,38.4,NA,5,NA,330,NA,NA,3,1,NA,3,2,1,6
+Gondar,2016,2006,2014,Switzerland,prospective,292,225,38,93,55.1,NA,368,17,154,38.4,NA,7,NA,368,NA,NA,3,1,1,3,2,1,6
+Gondar,2016,2006,2014,Switzerland,prospective,292,225,38,93,55.1,NA,368,17,154,38.4,NA,10,NA,368,NA,NA,3,1,1,3,2,1,6
+Guresir,2013,1999,2012,Germany,retrospective,263,204,8,136,55,NA,384,0,151,48.5,NA,3,NA,125,0,NA,2,0,NA,4,2,1,7
+Guresir,2013,1999,2012,Germany,retrospective,263,204,8,136,55,NA,384,0,151,48.5,NA,5,NA,284,0,NA,3,0,NA,4,2,1,7
+Guresir,2013,1999,2012,Germany,retrospective,263,204,8,136,55,NA,384,0,151,48.5,NA,7,263,384,0,48.5,3,0,0,4,2,1,7
+Guresir,2013,1999,2012,Germany,retrospective,263,204,8,136,55,NA,384,0,151,48.5,NA,10,263,384,0,48.5,3,0,0,4,2,1,7
+Irazabal,2011,1989,2009,United States,retrospective,38,23,19,6,NA,49,45,0,17,94.8,NA,3,NA,21,0,NA,0,0,0,3,2,2,7
+Irazabal,2011,1989,2009,United States,retrospective,38,23,19,6,NA,49,45,0,17,94.8,NA,5,NA,34,0,NA,0,0,0,3,2,2,7
+Irazabal,2011,1989,2009,United States,retrospective,38,23,19,6,NA,49,45,0,17,94.8,NA,7,NA,43,0,NA,0,0,0,3,2,2,7
+Irazabal,2011,1989,2009,United States,retrospective,38,23,19,6,NA,49,45,0,17,94.8,NA,10,38,45,0,94.8,0,0,0,3,2,2,7
+Jeon,2014,2001,2011,Korea,retrospective,524,NA,NA,NA,59.4,NA,568,0,60,35.4,NA,3,NA,NA,NA,NA,NA,NA,NA,2,2,2,6
+Jeon,2014,2001,2011,Korea,retrospective,524,NA,NA,NA,59.4,NA,568,0,60,35.4,NA,5,524,568,0,35.4,2,0,NA,2,2,2,6
+Jeon,2014,2001,2011,Korea,retrospective,524,NA,NA,NA,59.4,NA,568,0,60,35.4,NA,7,524,568,0,35.4,2,0,NA,2,2,2,6
+Jeon,2014,2001,2011,Korea,retrospective,524,NA,NA,NA,59.4,NA,568,0,60,35.4,NA,10,524,568,0,35.4,2,0,NA,2,2,2,6
+Jiang,2013,2007,2012,China,retrospective,40,21,NA,NA,52.3,NA,50,0,NA,36,NA,3,NA,19,0,NA,0,0,NA,2,2,1,6
+Jiang,2013,2007,2012,China,retrospective,40,21,NA,NA,52.3,NA,50,0,NA,36,NA,5,NA,19,0,NA,0,0,NA,2,2,1,6
+Jiang,2013,2007,2012,China,retrospective,40,21,NA,NA,52.3,NA,50,0,NA,36,NA,7,NA,40,0,NA,0,0,NA,2,2,1,6
+Jiang,2013,2007,2012,China,retrospective,40,21,NA,NA,52.3,NA,50,0,NA,36,NA,10,40,50,0,36,0,0,0,2,2,1,6
+Juvela,2013,1956,1978,Finland,prospective,142,76,9,33,41.8,NA,181,131,86,NA,252,3,51,NA,51,NA,15,15,NA,4,2,3,9
+Juvela,2013,1956,1978,Finland,prospective,142,76,9,33,41.8,NA,181,131,86,NA,252,5,107,NA,104,NA,22,22,NA,4,2,3,9
+Juvela,2013,1956,1978,Finland,prospective,142,76,9,33,41.8,NA,181,131,86,NA,252,7,121,NA,117,NA,25,24,NA,4,2,3,9
+Juvela,2013,1956,1978,Finland,prospective,142,76,9,33,41.8,NA,181,131,86,NA,252,10,135,NA,129,NA,31,30,NA,4,2,3,9
+Loumiotis,2011,2008,2011,United States,prospective,125,92,NA,22,64.4,NA,160,0,NA,16.7,15.1,3,NA,NA,NA,NA,NA,NA,NA,1,2,1,4
+Loumiotis,2011,2008,2011,United States,prospective,125,92,NA,22,64.4,NA,160,0,NA,16.7,15.1,5,NA,NA,NA,NA,NA,NA,NA,1,2,1,4
+Loumiotis,2011,2008,2011,United States,prospective,125,92,NA,22,64.4,NA,160,0,NA,16.7,15.1,7,NA,NA,NA,NA,NA,NA,NA,1,2,1,4
+Loumiotis,2011,2008,2011,United States,prospective,125,92,NA,22,64.4,NA,160,0,NA,16.7,15.1,10,125,160,0,16.7,0,0,0,1,2,1,4
+Matsubara,2004,NA,NA,Japan,retrospective,140,94,32,51,62.8,NA,166,5,20,17.7,NA,3,NA,NA,NA,NA,NA,NA,NA,3,2,0,4
+Matsubara,2004,NA,NA,Japan,retrospective,140,94,32,51,62.8,NA,166,5,20,17.7,NA,5,NA,125,NA,NA,0,0,0,3,2,0,4
+Matsubara,2004,NA,NA,Japan,retrospective,140,94,32,51,62.8,NA,166,5,20,17.7,NA,7,NA,125,NA,NA,0,0,0,3,2,0,4
+Matsubara,2004,NA,NA,Japan,retrospective,140,94,32,51,62.8,NA,166,5,20,17.7,NA,10,NA,158,NA,NA,0,0,0,3,2,0,4
+Matsumoto,2013,1996,2008,Japan,retrospective,111,70,NA,29,65,NA,136,8,17,NA,NA,3,NA,79,NA,NA,0,0,0,3,2,3,8
+Matsumoto,2013,1996,2008,Japan,retrospective,111,70,NA,29,65,NA,136,8,17,NA,NA,5,NA,79,NA,NA,1,NA,NA,3,2,3,8
+Matsumoto,2013,1996,2008,Japan,retrospective,111,70,NA,29,65,NA,136,8,17,NA,NA,7,NA,113,NA,NA,1,NA,NA,3,2,3,8
+Matsumoto,2013,1996,2008,Japan,retrospective,111,70,NA,29,65,NA,136,8,17,NA,NA,10,NA,113,NA,NA,3,NA,NA,3,2,3,8
+Mizoi,1995,1984,1993,Japan,retrospective,49,NA,NA,NA,NA,60,67,5,NA,51.6,NA,3,15,21,NA,NA,0,0,0,4,2,3,8
+Mizoi,1995,1984,1993,Japan,retrospective,49,NA,NA,NA,NA,60,67,5,NA,51.6,NA,5,15,21,NA,NA,0,0,0,4,2,3,8
+Mizoi,1995,1984,1993,Japan,retrospective,49,NA,NA,NA,NA,60,67,5,NA,51.6,NA,7,15,21,NA,NA,0,0,0,4,2,3,8
+Mizoi,1995,1984,1993,Japan,retrospective,49,NA,NA,NA,NA,60,67,5,NA,51.6,NA,10,15,21,NA,NA,0,0,0,4,2,3,8
+Morita,2012,2001,2004,Japan,prospective,2998,1994,342,824,65,NA,3647,99,453,20,NA,3,NA,NA,NA,NA,NA,NA,NA,4,2,2,8
+Morita,2012,2001,2004,Japan,prospective,2998,1994,342,824,65,NA,3647,99,453,20,NA,5,NA,2000,NA,NA,23,NA,NA,4,2,2,8
+Morita,2012,2001,2004,Japan,prospective,2998,1994,342,824,65,NA,3647,99,453,20,NA,7,NA,2861,NA,NA,37,NA,NA,4,2,2,8
+Morita,2012,2001,2004,Japan,prospective,2998,1994,342,824,65,NA,3647,99,453,20,NA,10,NA,3323,NA,NA,62,NA,NA,4,2,2,8
+Murayama,2016,2003,2012,Japan,prospective,1556,1060,205,707,66,NA,1960,44,503,45.23,NA,3,NA,NA,NA,NA,NA,NA,NA,4,2,2,8
+Murayama,2016,2003,2012,Japan,prospective,1556,1060,205,707,66,NA,1960,44,503,45.23,NA,5,NA,1717,NA,NA,22,NA,4,4,2,2,8
+Murayama,2016,2003,2012,Japan,prospective,1556,1060,205,707,66,NA,1960,44,503,45.23,NA,7,NA,1886,NA,NA,39,NA,NA,4,2,2,8
+Murayama,2016,2003,2012,Japan,prospective,1556,1060,205,707,66,NA,1960,44,503,45.23,NA,10,NA,1921,NA,NA,43,NA,NA,4,2,2,8
+Oh,2013,2007,2008,Korea,retrospective,19,13,NA,0,72.2,NA,19,0,7,24,NA,3,NA,3,0,NA,0,0,0,1,0,2,3
+Oh,2013,2007,2008,Korea,retrospective,19,13,NA,0,72.2,NA,19,0,7,24,NA,5,13,13,NA,NA,0,0,0,1,0,2,3
+Oh,2013,2007,2008,Korea,retrospective,19,13,NA,0,72.2,NA,19,0,7,24,NA,7,14,14,NA,NA,0,0,0,1,0,2,3
+Oh,2013,2007,2008,Korea,retrospective,19,13,NA,0,72.2,NA,19,0,7,24,NA,10,19,19,NA,NA,0,0,0,1,0,2,3
+Serrone,2016,2001,2012,United States,retrospective,192,152,20,73,61.1,NA,234,2,115,38.4,NA,3,NA,48,NA,NA,0,0,0,4,2,2,8
+Serrone,2016,2001,2012,United States,retrospective,192,152,20,73,61.1,NA,234,2,115,38.4,NA,5,NA,48,NA,NA,0,0,0,4,2,2,8
+Serrone,2016,2001,2012,United States,retrospective,192,152,20,73,61.1,NA,234,2,115,38.4,NA,7,NA,194,NA,NA,0,0,0,4,2,2,8
+Serrone,2016,2001,2012,United States,retrospective,192,152,20,73,61.1,NA,234,2,115,38.4,NA,10,NA,194,NA,NA,1,0,0,4,2,2,8
+So,2010,1997,2006,Australia,retrospective,208,154,5,58,51.1,NA,285,63,61,21.8,NA,3,NA,61,NA,NA,1,NA,NA,4,2,2,8
+So,2010,1997,2006,Australia,retrospective,208,154,5,58,51.1,NA,285,63,61,21.8,NA,5,NA,213,NA,NA,1,NA,NA,4,2,2,8
+So,2010,1997,2006,Australia,retrospective,208,154,5,58,51.1,NA,285,63,61,21.8,NA,7,NA,213,NA,NA,1,NA,NA,4,2,2,8
+So,2010,1997,2006,Australia,retrospective,208,154,5,58,51.1,NA,285,63,61,21.8,NA,10,NA,262,NA,NA,3,NA,NA,4,2,2,8
+Sonobe,2010,2000,2004,Japan,prospective,374,238,31,124,61.9,62,448,36,32,41,NA,3,NA,124,NA,NA,2,NA,NA,4,2,2,8
+Sonobe,2010,2000,2004,Japan,prospective,374,238,31,124,61.9,62,448,36,32,41,NA,5,374,448,36,41,7,1,NA,4,2,2,8
+Sonobe,2010,2000,2004,Japan,prospective,374,238,31,124,61.9,62,448,36,32,41,NA,7,374,448,36,41,7,1,NA,4,2,2,8
+Sonobe,2010,2000,2004,Japan,prospective,374,238,31,124,61.9,62,448,36,32,41,NA,10,374,448,36,41,7,1,NA,4,2,2,8
+Teo,2016,NA,NA,United Kingdom,retrospective,94,74,NA,NA,53,NA,152,30,48,40.8,NA,3,NA,NA,NA,NA,NA,NA,NA,4,2,1,7
+Teo,2016,NA,NA,United Kingdom,retrospective,94,74,NA,NA,53,NA,152,30,48,40.8,NA,5,NA,NA,NA,NA,NA,NA,NA,4,2,1,7
+Teo,2016,NA,NA,United Kingdom,retrospective,94,74,NA,NA,53,NA,152,30,48,40.8,NA,7,NA,126,42,NA,3,0,1,4,2,1,7
+Teo,2016,NA,NA,United Kingdom,retrospective,94,74,NA,NA,53,NA,152,30,48,40.8,NA,10,NA,126,42,NA,3,0,1,4,2,1,7
+Tsukahara,2005,1999,2001,International,retrospective,181,NA,NA,NA,NA,NA,209,38,NA,NA,NA,3,NA,NA,NA,NA,NA,NA,NA,3,2,0,5
+Tsukahara,2005,1999,2001,International,retrospective,181,NA,NA,NA,NA,NA,209,38,NA,NA,NA,5,NA,107,NA,NA,2,0,NA,3,2,0,5
+Tsukahara,2005,1999,2001,International,retrospective,181,NA,NA,NA,NA,NA,209,38,NA,NA,NA,7,NA,107,NA,NA,2,0,NA,3,2,0,5
+Tsukahara,2005,1999,2001,International,retrospective,181,NA,NA,NA,NA,NA,209,38,NA,NA,NA,10,NA,144,NA,NA,5,0,NA,3,2,0,5
+Tsutsumi,2000,1976,1997,Japan,retrospective,62,33,NA,14,70.8,NA,83,0,NA,51.6,NA,3,NA,NA,NA,NA,NA,NA,NA,2,1,2,5
+Tsutsumi,2000,1976,1997,Japan,retrospective,62,33,NA,14,70.8,NA,83,0,NA,51.6,NA,5,49,NA,0,NA,2,0,NA,2,1,2,5
+Tsutsumi,2000,1976,1997,Japan,retrospective,62,33,NA,14,70.8,NA,83,0,NA,51.6,NA,7,49,NA,0,NA,2,0,NA,2,1,2,5
+Tsutsumi,2000,1976,1997,Japan,retrospective,62,33,NA,14,70.8,NA,83,0,NA,51.6,NA,10,56,NA,NA,NA,3,0,NA,2,1,2,5
+Villablanca,2013,1999,2009,United States,retrospective,165,132,NA,50,60.9,NA,258,NA,NA,27,NA,3,NA,NA,NA,NA,NA,NA,NA,4,2,1,7
+Villablanca,2013,1999,2009,United States,retrospective,165,132,NA,50,60.9,NA,258,NA,NA,27,NA,5,NA,NA,NA,NA,NA,NA,NA,4,2,1,7
+Villablanca,2013,1999,2009,United States,retrospective,165,132,NA,50,60.9,NA,258,NA,NA,27,NA,7,NA,193,NA,NA,3,NA,NA,4,2,1,7
+Villablanca,2013,1999,2009,United States,retrospective,165,132,NA,50,60.9,NA,258,NA,NA,27,NA,10,NA,193,NA,NA,3,NA,NA,4,2,1,7
+Wiebers-R,1998,1970,1991,International,retrospective,1449,1052,NA,364,52.71,NA,1937,722,791,99.6,NA,3,NA,NA,NA,NA,NA,NA,NA,4,2,2,8
+Wiebers-R,1998,1970,1991,International,retrospective,1449,1052,NA,364,52.71,NA,1937,722,791,99.6,NA,5,680,NA,442,NA,NA,NA,NA,4,2,2,8
+Wiebers-R,1998,1970,1991,International,retrospective,1449,1052,NA,364,52.71,NA,1937,722,791,99.6,NA,7,680,NA,NA,NA,NA,NA,NA,4,2,2,8
+Wiebers-R,1998,1970,1991,International,retrospective,1449,1052,NA,364,52.71,NA,1937,722,791,99.6,NA,10,1065,NA,641,NA,18,17,NA,4,2,2,8
+Wiebers-P,2003,1991,1998,International,prospective,1692,1261,276,679,55.2,NA,2686,615,1295,49.2,NA,3,NA,NA,NA,NA,NA,NA,NA,4,2,2,8
+Wiebers-P,2003,1991,1998,International,prospective,1692,1261,276,679,55.2,NA,2686,615,1295,49.2,NA,5,NA,NA,NA,NA,NA,NA,NA,4,2,2,8
+Wiebers-P,2003,1991,1998,International,prospective,1692,1261,276,679,55.2,NA,2686,615,1295,49.2,NA,7,1049,NA,NA,NA,9,7,NA,4,2,2,8
+Wiebers-P,2003,1991,1998,International,prospective,1692,1261,276,679,55.2,NA,2686,615,1295,49.2,NA,10,1049,NA,NA,NA,15,8,NA,4,2,2,8
+Wilkinson,2018,2000,2016,United States,retrospective,17,NA,3,NA,52,NA,22,2,8,NA,63.6,3,NA,18,NA,NA,0,0,0,0,2,1,3
+Wilkinson,2018,2000,2016,United States,retrospective,17,NA,3,NA,52,NA,22,2,8,NA,63.6,5,NA,19,NA,NA,0,0,0,0,2,1,3
+Wilkinson,2018,2000,2016,United States,retrospective,17,NA,3,NA,52,NA,22,2,8,NA,63.6,7,NA,20,NA,NA,0,0,0,0,2,1,3
+Wilkinson,2018,2000,2016,United States,retrospective,17,NA,3,NA,52,NA,22,2,8,NA,63.6,10,17,22,3,63.6,0,0,0,0,2,1,3
+Zylkowski,2015,2006,2013,Poland,retrospective,70,55,1,NA,57.8,NA,110,22,10,35.9,NA,3,NA,29,NA,NA,0,0,0,4,2,1,7
+Zylkowski,2015,2006,2013,Poland,retrospective,70,55,1,NA,57.8,NA,110,22,10,35.9,NA,5,NA,92,NA,NA,2,1,NA,4,2,1,7
+Zylkowski,2015,2006,2013,Poland,retrospective,70,55,1,NA,57.8,NA,110,22,10,35.9,NA,7,70,110,22,35.9,3,1,NA,4,2,1,7
+Zylkowski,2015,2006,2013,Poland,retrospective,70,55,1,NA,57.8,NA,110,22,10,35.9,NA,10,70,110,22,35.9,3,1,NA,4,2,1,7
