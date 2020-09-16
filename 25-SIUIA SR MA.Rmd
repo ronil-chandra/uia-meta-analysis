@@ -58,7 +58,7 @@ A single excel data file is loaded to carry out all data analysis, with all step
 
 ```{r load data, echo=FALSE, include = FALSE}
 
-maindata <- read_csv("data/clean_data_SR_MA_final_excChien.csv")
+maindata <- read_csv("data/clean_data_SR_MA_final_excChienincVill.csv")
 
 ```
 
@@ -313,7 +313,7 @@ dat.all %>%
 
 The output from the random effects meta-analysis using the GLMM: 
 
-Summary estimate is 1.0459 [0.6530; 1.6714] over study level mean of 4.337292	 years. 
+Summary estimate is 1.0695 [0.6819; 1.6738] over study level mean of 4.265316	 years. 
 
 Note that for GLMMs no continuity correction is used. *Meta documentation* Given our rationale for choosing the GLMM, this should produce the least biased result and reasonable coverage probabilities for the 95% CI, as suggested by *Stinjen 2010*. Note CIs are using Wilson score method.
 
@@ -338,7 +338,7 @@ forest(pes.summary.glmm.all,
        xlim=c(0,10),
        xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
-       text.addline1 = "Mean study-level follow up: 4.4 years",
+       text.addline1 = "Mean study-level follow up: 4.2 years",
        JAMA.pval = TRUE,
        ) 
 
@@ -1181,7 +1181,14 @@ dat.smoke.non <- dat.pop %>%
 mean(dat.smoke.non$smoke_prop)
 
 
-```
+dat.smoke.diff <- dat.pop %>%
+  drop_na(smoke_tot) %>%
+  mutate(smoke_prop = smoke_tot / num_tot) %>%
+  drop_na(smoke_prop)
+
+t.test(smoke_prop ~ pop, data = dat.smoke.diff)
+
+``
 
 
 #### Meta-regression based on study type - retrospective compared to prospective
