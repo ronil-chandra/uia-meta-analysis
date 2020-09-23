@@ -150,8 +150,8 @@ nos.final %>%
                             font_size = 10,
                             ) %>%
   pack_rows("AHRQ Good Standard", 1, 11) %>%
-  pack_rows("AHRQ Fair Standard", 12, 13) %>%
-  pack_rows("AHRQ Poor Standard", 14, 30) %>%
+  pack_rows("AHRQ Fair Standard", 12, 15) %>%
+  pack_rows("AHRQ Poor Standard", 16, 32) %>%
   
   add_header_above(c(" " = 1, "Selection" = 4, "Comparability" = 1, "Outcome" = 3, "Total Scores" = 2 )) %>%
   footnote(
