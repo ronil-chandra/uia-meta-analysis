@@ -1852,7 +1852,7 @@ forest(pes.summary.glmm,
        xlim=c(0,10),
        xlab = "Rupture per 100 aneurysms",
        pooled.events = TRUE,
-       text.addline1 = "Mean study-level follow up: 3.67years",
+       text.addline1 = "Mean study-level follow up: 3.6years",
        JAMA.pval = TRUE,
        ) 
 
