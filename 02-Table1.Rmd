@@ -1,7 +1,7 @@
 ---
 title: "02-Table1"
 author: "Ronil V. Chandra"
-date: "9/08/2020"
+date: "3/10/2020"
 output: html_document
 ---
 
@@ -23,7 +23,7 @@ A single excel data file is loaded to carry out all data table creation, with al
 
 ```{r load data, echo = FALSE, include = FALSE}
 
-maindata <- read_csv("data/clean_data_SR_MA_final_excChienincVill.csv")
+maindata <- read_csv("data/clean_data_SR_MA_final_2-10-20.csv")
 ```
 
 
