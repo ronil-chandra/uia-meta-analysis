@@ -1,7 +1,7 @@
 ---
 title: "NOS Table"
 author: "Ronil V. Chandra"
-date: "16/06/2020"
+date: "3/10/2020"
 output: html_document
 ---
 
@@ -23,7 +23,7 @@ A single excel data file is loaded to carry out all data table creation, with al
 
 ```{r load data, echo = FALSE, include = FALSE}
 
-nosdata <- read_csv("data-raw/NOS_final.csv")
+nosdata <- read_csv("data-raw/NOS_final_3_10_20.csv")
 
 ```
 
@@ -149,9 +149,9 @@ nos.final %>%
                             full_width = FALSE,
                             font_size = 10,
                             ) %>%
-  pack_rows("AHRQ Good Standard", 1, 11) %>%
-  pack_rows("AHRQ Fair Standard", 12, 15) %>%
-  pack_rows("AHRQ Poor Standard", 16, 32) %>%
+  pack_rows("AHRQ Good Standard", 1, 12) %>%
+  pack_rows("AHRQ Fair Standard", 13, 16) %>%
+  pack_rows("AHRQ Poor Standard", 17, 32) %>%
   
   add_header_above(c(" " = 1, "Selection" = 4, "Comparability" = 1, "Outcome" = 3, "Total Scores" = 2 )) %>%
   footnote(
