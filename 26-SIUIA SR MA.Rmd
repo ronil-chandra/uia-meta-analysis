@@ -253,11 +253,11 @@ dat <- sizedata10 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
                             "Japanese" = "Japan", 
+                            "Korean" = "Korea",
                             "Non-Japanese" = c("International", 
                                                "United States", 
                                                "Switzerland", 
-                                               "Australia", 
-                                               "Korea", 
+                                               "Australia",
                                                "Poland", 
                                                "China", 
                                                "Germany", 
@@ -1037,7 +1037,7 @@ forest(pes.summary.glmm.age,
 
 The test for subgroup differences (random effects model) indicates that there is no statistically significant subgroup effect, (P=.93), suggesting that age > 65 years was not associated with a higher rupture proportion. However, the overall covariate distribution is not well balanced with the small total number of rupture events and SUIAs in the age >65-years sub-group, reducing the precision and validity of the result. In addition, this sub-group analysis is susceptible to greater bias compared to the analysis with study-age as a continuous variable, in addition to aggregation bias and confounding bias from other study level characteristics.
 
-##### Sub-group analysis based on study population - Korean vs non-Korean
+#### Sub-group analysis based on study population - Korean vs non-Korean
 
 
 
@@ -1155,7 +1155,7 @@ Note that there may be additional unkown confounders also influencing the result
 
 
 
-### Sub-group analysis based on study population - Japanese vs non-Japanese
+#### Sub-group analysis based on study population - Japanese vs non-Japanese
 
 ```{r meta-analysis of proportions using glmm by population}
 
