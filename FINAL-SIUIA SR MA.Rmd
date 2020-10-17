@@ -1,7 +1,7 @@
 ---
 title: "Rupture of untreated small intradural unruptured intracranial aneurysms during follow-up: A Systematic Review, Meta-analysis, and Meta-regression"
 author: "Ronil V. Chandra"
-date: "2/10/2020"
+date: "18/10/2020"
 output: html_document
 ---
 
@@ -253,10 +253,10 @@ dat <- sizedata10 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
                             "Japanese" = "Japan", 
-                            "Korean" = "Korea",
                             "Other" = c("International", 
                                                "United States", 
                                                "Switzerland", 
+                                              "Korea",    
                                                "Australia", 
                                                "Poland", 
                                                "China", 
@@ -1081,17 +1081,7 @@ dat.pop %>%
 
 dat.pop %>%
   drop_na(fu) %>%
-  filter(pop == "Other") %>%
-  summarise(mean = mean(fu, na.rm = TRUE) / 12)
-
-```
-
-
-```{r calculate mean FU of included included studies from Korea}
-
-dat.pop %>%
-  drop_na(fu) %>%
-  filter(pop == "Korean") %>%
+  filter(pop == "Non-Japanese") %>%
   summarise(mean = mean(fu, na.rm = TRUE) / 12)
 
 ```
@@ -1113,7 +1103,7 @@ dat.pop %>%
 
 dat.pop %>%
   mutate(age = coalesce(age_mean, age_med)) %>%
-  filter(pop !!="JJapanese) %>%
+  filter(pop == "Non-Japanese") %>%
   drop_na(age) %>%
   summarise(mean = mean(age, na.rm = TRUE))
 
@@ -2091,9 +2081,10 @@ mean(sizedata10.juvela$prop_psah, na.rm = TRUE)
 min(sizedata10.juvela$prop_psah, na.rm = TRUE)
 max(sizedata10.juvela$prop_psah, na.rm = TRUE)
 
-mean(sizedata10.juvela$fu_tot, na.rm = TRUE)
-min(sizedata10.juvela$fu_tot, na.rm = TRUE)
-max(sizedata10.juvela$fu_tot, na.rm = TRUE)
+mean(sizedata10.juvela$fu_tot, na.rm = TRUE) / 12
+min(sizedata10.juvela$fu_tot, na.rm = TRUE) / 12 
+max(sizedata10.juvela$fu_tot, na.rm = TRUE) / 12
+summary(sizedata10.juvela$fu_tot, na.rm = TRUE) /12
 
 
 

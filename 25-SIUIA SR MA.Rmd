@@ -253,10 +253,10 @@ dat <- sizedata10 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
                             "Japanese" = "Japan", 
-                            "Korean" = "Korea",
                             "Other" = c("International", 
                                                "United States", 
                                                "Switzerland", 
+                                              "Korea",    
                                                "Australia", 
                                                "Poland", 
                                                "China", 
@@ -2081,9 +2081,10 @@ mean(sizedata10.juvela$prop_psah, na.rm = TRUE)
 min(sizedata10.juvela$prop_psah, na.rm = TRUE)
 max(sizedata10.juvela$prop_psah, na.rm = TRUE)
 
-mean(sizedata10.juvela$fu_tot, na.rm = TRUE)
-min(sizedata10.juvela$fu_tot, na.rm = TRUE)
-max(sizedata10.juvela$fu_tot, na.rm = TRUE)
+mean(sizedata10.juvela$fu_tot, na.rm = TRUE) / 12
+min(sizedata10.juvela$fu_tot, na.rm = TRUE) / 12 
+max(sizedata10.juvela$fu_tot, na.rm = TRUE) / 12
+summary(sizedata10.juvela$fu_tot, na.rm = TRUE) /12
 
 
 
