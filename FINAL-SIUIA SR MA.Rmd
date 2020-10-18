@@ -253,7 +253,7 @@ dat <- sizedata10 %>%
   unite(auth_year, c(auth, pub), sep = " ", remove = FALSE) %>%
   mutate(pop = fct_collapse(sizedata10$country, 
                             "Japanese" = "Japan", 
-                            "Other" = c("International", 
+                            "Non-Japanese" = c("International", 
                                                "United States", 
                                                "Switzerland", 
                                               "Korea",    
@@ -685,7 +685,7 @@ sum(dat.psah.metareg$total_size)
 
 bubble(psah.metareg.result,
        xlim=c(0, 0.5),
-       xlab = "Proportion of patients with exposure to prior aSAH",
+       xlab = "Proportion of patients with exposure to prior aAH",
        ylab = "Logit tranformed rupture proportion",
        lty = 3,
        lwd = 2,
@@ -1037,125 +1037,6 @@ forest(pes.summary.glmm.age,
 
 The test for subgroup differences (random effects model) indicates that there is no statistically significant subgroup effect, (P=.93), suggesting that age > 65 years was not associated with a higher rupture proportion. However, the overall covariate distribution is not well balanced with the small total number of rupture events and SUIAs in the age >65-years sub-group, reducing the precision and validity of the result. In addition, this sub-group analysis is susceptible to greater bias compared to the analysis with study-age as a continuous variable, in addition to aggregation bias and confounding bias from other study level characteristics.
 
-##### Sub-group analysis based on study population - Korean vs non-Korean
-
-```{r organise data for korean population}
-
-```
-
-
-```{r meta-analysis of proportions using glmm by population}
-
-dat.pop <- dat %>%
-  slice(-14)
-
-pes.summary.glmm.pop = metaprop(rupt, total_size,
-                            data=dat.pop,
-                            studlab=paste(auth_year),
-                            byvar = pop,
-                            bylab = "Population",
-                            method="GLMM",
-                            sm="PLOGIT",
-                            method.tau = "ML", 
-                            method.ci = "WS",
-                            pscale = 100,
-                            hakn = TRUE,
-                            ) 
-pes.summary.glmm.pop
-
-```
-
-
-
-```{r calculate mean FU of included studies from Japan}
-
-dat.pop %>%
-  drop_na(fu) %>%
-  filter(pop == "Japanese") %>%
-  summarise(mean = mean(fu, na.rm = TRUE) / 12)
-
-```
-
-
-```{r calculate mean FU of included included studies from outside Japan}
-
-dat.pop %>%
-  drop_na(fu) %>%
-  filter(pop == "Non-Japanese") %>%
-  summarise(mean = mean(fu, na.rm = TRUE) / 12)
-
-```
-
-
-```{r calculate mean age of included included studies from Japan}
-
-dat.pop %>%
-  mutate(age = coalesce(age_mean, age_med)) %>%
-  filter(pop == "Japanese") %>%
-  drop_na(age) %>%
-  summarise(mean = mean(age, na.rm = TRUE)) 
-
-
-```
-
-
-```{r  mean age of included included studies from outside Japan}
-
-dat.pop %>%
-  mutate(age = coalesce(age_mean, age_med)) %>%
-  filter(pop == "Non-Japanese") %>%
-  drop_na(age) %>%
-  summarise(mean = mean(age, na.rm = TRUE))
-
-```
-
-```{r  mean diff in age of included included studies from Japan or not}
-
-dat.age.diff <- dat.pop %>%
-  mutate(age = coalesce(age_mean, age_med)) %>%
-  drop_na(age) %>%
-  select(pop, age)
-
-t.test(age ~ pop, data = dat.age.diff)
-
-```
-
-
-
-```{r forest for publication using GLMM for subgroup analysis by population, fig.height= 10, fig.width = 10}
-
-forest(pes.summary.glmm.pop,
-       layout = "meta",
-       comb.fixed = FALSE,
-       comb.random = TRUE,
-       print.I2.ci = TRUE,
-       colgap.left = "10mm",
-       colgap.forest.left = "10mm",
-       colgap.forest.right = "0mm",
-       leftlabs = c("Study", "Ruptures", "Total"),
-       rightcols = c("effect", "ci"),
-       rightlabs = c("Ruptures per 100", "95% CI"),
-       smlab = " ",
-       xlim=c(0,10),
-       xlab = "Rupture Proportion per 100",
-       pooled.events = TRUE,
-       test.subgroup.random = TRUE,
-       label.test.effect.subgroup.random = TRUE,
-       JAMA.pval = TRUE,
-       text.addline1 = "Mean Japanese study-level follow up: 3.2 years",
-       text.addline2 = "Mean Non-Japanese study-level follow up: 3.8years",
-       ) 
-
-```
-
-
-The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (P=.0002), suggesting that a Japanese source population was associated with a higher rupture proportion across the included studies. This covariate also explains some of the heterogeneity, with only mild heterogeneity remaining I2 = 0.0% [0.0%; 19.4%]. The overall covariate distribution is balanced with the total number of rupture events and SIUIAs in each sub-group. However, this sub-group analysis is susceptible to aggregation bias and confounding bias from other study level characteristics. 
-This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher 1ver a shorter follow up period o compared to the sub-group rupture risk in non-Japanese  
-
-Notably, this may be attributable to the older mean age in the Japanese samples with mean age of 64.5 from Japan compared to 57.2 years, p-value = 0.001
-
-Note that there may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors such as prevalence of hypertention and smoking. 
-
 
 
 ### Sub-group analysis based on study population - Japanese vs non-Japanese
@@ -1268,7 +1149,7 @@ forest(pes.summary.glmm.pop,
 The test for subgroup differences (random effects model) indicates that there is a statistically significant subgroup effect (P=.0002), suggesting that a Japanese source population was associated with a higher rupture proportion across the included studies. This covariate also explains some of the heterogeneity, with only mild heterogeneity remaining I2 = 0.0% [0.0%; 19.4%]. The overall covariate distribution is balanced with the total number of rupture events and SIUIAs in each sub-group. However, this sub-group analysis is susceptible to aggregation bias and confounding bias from other study level characteristics. 
 This result is interesting from a clinical perspective, since the sub-group rupture risk in the Japanese population was higher 1ver a shorter follow up period o compared to the sub-group rupture risk in non-Japanese  
 
-Notably, this may be attributable to the older mean age in the Japanese samples with mean age of 64.5 from Japan compared to 57.2 years, p-value = 0.001
+Notably, this may be attributable to the older mean age in the Japanese samples with mean age of 64.5 from Japan compared to 57.24years, p-value = 0.001
 
 Note that there may be additional unkown confounders also influencing the results of the subgroup analysis, and further reducing the ability to provide additional useful findings. Moreover, this does not apply to the individual patient, since differences in risk estimates may be confounded with unmeasured or unreported factors such as prevalence of hypertention and smoking. 
 
